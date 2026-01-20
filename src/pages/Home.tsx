@@ -1,6 +1,5 @@
 // src/pages/Home.tsx
 import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
-import React from "react";
 
 const Home = () => {
     return (
