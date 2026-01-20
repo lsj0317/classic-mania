@@ -1,13 +1,14 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Board from "./pages/Board";
 import Login from "./pages/Login"; // 추가
 import SignUp from "./pages/SignUp"; // 추가
 
+import { HashRouter as Router, Routes, Route } from "react-router-dom"; // HashRouter로 변경
+
 function App() {
     return (
-        <BrowserRouter>
+        <Router> {/* HashRouter 적용 */}
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
@@ -16,7 +17,7 @@ function App() {
                     <Route path="signup" element={<SignUp />} />
                 </Route>
             </Routes>
-        </BrowserRouter>
+        </Router>
     );
 }
 
