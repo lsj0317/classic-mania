@@ -6,9 +6,6 @@ import {
     CardBody,
     CardFooter,
     Input,
-    Tabs,
-    TabsHeader,
-    Tab,
 } from "@material-tailwind/react";
 import { posts, currentUser } from "../../data/mockData.ts";
 import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -157,9 +154,13 @@ const Board = () => {
                         </thead>
                         <tbody>
                         {currentPosts.length > 0 ? (
-                            currentPosts.map(({ id, category, title, authorName, createdAt, views, images }, index) => {
+                            // [수정] authorId를 추가로 받아옵니다. [cite: 2026-01-21]
+                            currentPosts.map(({ id, category, title, authorName, authorId, createdAt, views, images }, index) => {
                                 const isLast = index === currentPosts.length - 1;
-                                const classes = isLast ? "p-4" : "p-4 border-b border-gray-50";
+                                const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+                                // [수정] 이름이 아닌 고유 ID로 본인 여부를 확인합니다. [cite: 2026-01-25]
+                                const isMine = authorId === currentUser.userId;
+
                                 return (
                                     <tr key={id} className="hover:bg-gray-50 transition-colors">
                                         <td className={classes}>
@@ -177,7 +178,11 @@ const Board = () => {
                                             </div>
                                         </td>
                                         <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600">{authorName}</Typography>
+                                            <Typography variant="small" className="text-gray-600">
+                                                {authorName}
+                                                {/* [수정] 본인일 경우 (나) 표시 [cite: 2026-01-25] */}
+                                                {isMine && <span className="ml-1 text-black font-bold text-[11px]">(나)</span>}
+                                            </Typography>
                                         </td>
                                         <td className={classes}>
                                             <Typography variant="small" className="text-gray-400 text-xs">{createdAt}</Typography>

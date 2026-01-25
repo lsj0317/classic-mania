@@ -37,7 +37,7 @@ const PostDetail = () => {
                     <div className="flex items-center justify-between mb-6">
                         <Chip
                             value={post.category}
-                            className="rounded-full bg-blue-50 text-blue-700 font-bold"
+                            className="rounded-full bg-blue-50 text-black-700 font-bold"
                             variant="ghost"
                         />
                         <Typography variant="small" className="text-gray-400">
@@ -57,7 +57,7 @@ const PostDetail = () => {
                         </div>
                         <div>
                             <Typography variant="small" color="blue-gray" className="font-bold">
-                                {post.authorName} {isAuthor && <span className="text-blue-500 text-xs ml-1">(작성자)</span>}
+                                {post.authorName} {isAuthor && <span className="text-black-500 text-xs ml-1">(작성자)</span>}
                             </Typography>
                             <Typography variant="small" className="text-gray-500 text-xs">
                                 조회수 {post.views}
@@ -103,7 +103,7 @@ const PostDetail = () => {
                         <div className="flex items-center gap-3">
                             <Button
                                 variant="text"
-                                color="blue-gray"
+                                color="black"
                                 size="sm"
                                 className="font-bold underline"
                                 onClick={() => navigate(`/board/edit/${post.id}`)}
@@ -112,9 +112,9 @@ const PostDetail = () => {
                             </Button>
                             <Button
                                 variant="gradient"
-                                color="red"
+                                color="black"
                                 size="sm"
-                                className="rounded-lg shadow-none hover:shadow-red-200"
+                                className="rounded-lg shadow-none"
                                 onClick={handleDelete}
                             >
                                 삭제하기

@@ -11,6 +11,7 @@ import {
 } from "@material-tailwind/react";
 import { posts, currentUser } from "../../data/mockData.ts";
 import type {Post} from "../../types";
+import {PhotoIcon} from "@heroicons/react/16/solid";
 
 const PostWrite = () => {
     const navigate = useNavigate();
@@ -105,37 +106,65 @@ const PostWrite = () => {
                         />
 
                         {/* 이미지 업로드 영역 */}
-                        <div>
-                            <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                        <div className="mt-4">
+                            <Typography variant="small" color="blue-gray" className="mb-3 font-bold">
                                 이미지 첨부 (최대 4장)
                             </Typography>
-                            <input
-                                type="file"
-                                multiple
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            />
 
-                            {/* 이미지 미리보기 */}
-                            <div className="grid grid-cols-4 gap-2 mt-4">
+                            <div className="grid grid-cols-4 gap-4">
+                                {/* 이미지가 있는 경우 미리보기 표시 */}
                                 {previewImages.map((src, index) => (
-                                    <img
-                                        key={index}
-                                        src={src}
-                                        alt="미리보기"
-                                        className="h-20 w-20 object-cover rounded-lg border"
-                                    />
+                                    <div key={index} className="relative aspect-square group">
+                                        <img
+                                            src={src}
+                                            alt={`첨부이미지 ${index + 1}`}
+                                            className="h-full w-full object-cover border border-gray-200 rounded-none grayscale group-hover:grayscale-0 transition-all"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewImages(prev => prev.filter((_, i) => i !== index))}
+                                            className="absolute -top-2 -right-2 bg-black text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center shadow-lg"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {/* 4장 미만일 때만 업로드 버튼 표시 */}
+                                {previewImages.length < 4 && (
+                                    <label className="cursor-pointer aspect-square border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors group">
+                                        <PhotoIcon className="h-8 w-8 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                                        <Typography className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-tighter">
+                                            Upload
+                                        </Typography>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
+
+                                {/* 빈 칸 유지 (4장 구성을 위한 Placeholder) */}
+                                {Array.from({ length: Math.max(0, 3 - previewImages.length) }).map((_, i) => (
+                                    <div key={`empty-${i}`} className="aspect-square bg-gray-50/50 border border-gray-100 flex items-center justify-center">
+                                        <PhotoIcon className="h-6 w-6 text-gray-100" />
+                                    </div>
                                 ))}
                             </div>
+                            <Typography variant="small" className="mt-3 text-gray-400 text-[11px]">
+                                * 권장 사이즈: 정사각형 (1:1), 최대 5MB 이하
+                            </Typography>
                         </div>
                     </div>
 
                     <div className="flex gap-4 mt-4">
-                        <Button variant="outlined" fullWidth onClick={() => navigate("/board")}>
+                        <Button variant="outlined" className="rounded-none" fullWidth onClick={() => navigate("/board")}>
                             취소
                         </Button>
-                        <Button type="submit" color="blue" fullWidth>
+                        <Button type="submit" color="black" className="rounded-none" fullWidth>
                             등록하기
                         </Button>
                     </div>
