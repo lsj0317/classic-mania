@@ -1,4 +1,3 @@
-// src/pages/Board.tsx
 import {
     Card,
     Typography,

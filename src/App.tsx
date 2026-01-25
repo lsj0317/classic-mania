@@ -9,6 +9,8 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import PostEdit from "./pages/board/PostEdit.tsx";
 import MyPage from "./pages/user/MyPage";
 import PolicyDetail from "./pages/policy/Terms.tsx";
+import PerformanceMain from "./pages/performance/PerformanceMain.tsx";
+import PerformanceMap from "./pages/performance/PerformanceMap.tsx";
 
 function App() {
     return (
@@ -25,6 +27,8 @@ function App() {
                     <Route path="mypage" element={<MyPage />} />
                     <Route path="/terms" element={<PolicyDetail title="이용약관" />} />
                     <Route path="/privacy" element={<PolicyDetail title="개인정보처리방침" />} />
+                    <Route path="/performance" element={<PerformanceMain />} />
+                    <Route path="/performance/map" element={<PerformanceMap />} />
                 </Route>
             </Routes>
         </Router>

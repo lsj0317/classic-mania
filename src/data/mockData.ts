@@ -1,5 +1,3 @@
-// src/data/mockData.ts
-// src/data/mockData.ts
 import type {User, Post} from "../types";
 
 // 현재 로그인한 사용자 (테스트용)
