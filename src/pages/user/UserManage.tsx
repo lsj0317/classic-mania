@@ -1,8 +1,9 @@
 // src/pages/user/UserManage.tsx
 import React, { useState } from "react";
-import { Card, Typography, Input, Button } from "@material-tailwind/react";
+import {Card, Typography, Input, Button, Avatar} from "@material-tailwind/react";
 import { currentUser } from "../../data/mockData";
 import { useNavigate } from "react-router-dom";
+import {PencilSquareIcon} from "@heroicons/react/24/outline";
 
 const UserManage = () => {
     const navigate = useNavigate();
@@ -25,7 +26,24 @@ const UserManage = () => {
         window.location.reload(); // 헤더 반영을 위한 새로고침
     };
 
-    // 회원 탈퇴 핸들러 [cite: 2026-01-25]
+    // 1. 이미지 미리보기를 위한 상태 추가
+    const [profilePreview, setProfilePreview] = useState(currentUser.profileImage);
+
+    // 2. 파일 선택 시 실행될 핸들러 함수
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setProfilePreview(result); // 화면에 미리보기 표시
+                currentUser.profileImage = result; // 목업 데이터에 임시 저장
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // 회원 탈퇴 핸들러
     const handleWithdrawal = () => {
         const confirmFirst = window.confirm("정말로 탈퇴하시겠습니까?");
         if (confirmFirst) {
@@ -69,6 +87,37 @@ const UserManage = () => {
                     </Typography>
                 </div>
 
+                <div>
+                    <Typography variant="small" color="blue-gray" className="mb-2 font-bold">
+                        프로필 이미지
+                    </Typography>
+                    <div className="relative group">
+                        <Avatar
+                            src={profilePreview || "https://docs.material-tailwind.com/img/face-2.jpg"}
+                            alt="Profile Preview"
+                            size="xl"
+                            variant="circular"
+                            className="border-4 border-gray-100 shadow-xl object-cover"
+                        />
+                        <label
+                            htmlFor="profile-upload"
+                            className="absolute bottom-0 right-0 bg-black p-2 rounded-full cursor-pointer hover:bg-gray-800 transition-colors shadow-lg"
+                        >
+                            <PencilSquareIcon className="h-4 w-4 text-white" />
+                            <input
+                                id="profile-upload"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleImageChange}
+                            />
+                        </label>
+                    </div>
+                    <Typography variant="small" className="text-gray-500 font-medium">
+                        우측 버튼을 눌러서 이미지를 변경하세요.
+                    </Typography>
+                </div>
+
                 {/* 닉네임 수정 */}
                 <div>
                     <Typography variant="small" color="blue-gray" className="mb-2 font-bold">
@@ -103,7 +152,7 @@ const UserManage = () => {
                 </div>
 
                 <div className="flex gap-4 mt-4">
-                    <Button type="submit" color="blue" fullWidth>
+                    <Button type="submit" color="black" fullWidth>
                         변경사항 저장
                     </Button>
                 </div>
@@ -115,14 +164,14 @@ const UserManage = () => {
             <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 border border-red-100">
                 <div>
                     <Typography variant="h6" color="red" className="font-bold">
-                        회원 탈퇴
+                        회원탈퇴
                     </Typography>
-                    <Typography variant="small" className="text-red-300">
-                        계정을 삭제하면 모든 활동 내역이 즉시 소멸됩니다.
+                    <Typography variant="small" className="text-black-300">
+                        회원탈퇴를 하시면 모든 정보가 삭제됩니다 정말로 탈퇴 하시겠습니까?
                     </Typography>
                 </div>
-                <Button variant="text" color="red" className="font-bold" onClick={handleWithdrawal}>
-                    탈퇴하기
+                <Button variant="text" color="black" className="font-bold" onClick={handleWithdrawal}>
+                    예(탈퇴하기)
                 </Button>
             </div>
         </Card>

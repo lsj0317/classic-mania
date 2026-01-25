@@ -96,11 +96,11 @@ const Header = () => {
                                 </MenuHandler>
                                 <MenuList className="p-1 border-none shadow-xl bg-white text-blue-gray-900">
                                     <MenuItem className="flex items-center gap-2 rounded" onClick={() => navigate("/mypage")}>
-                                        <UserCircleIcon className="h-4 w-4 text-blue-500" />
+                                        <UserCircleIcon className="h-4 w-4 text-black-500" />
                                         <Typography variant="small" className="font-normal">마이페이지</Typography>
                                     </MenuItem>
                                     <hr className="my-2 border-blue-gray-50" />
-                                    <MenuItem className="flex items-center gap-2 rounded text-red-500" onClick={() => window.location.reload()}>
+                                    <MenuItem className="flex items-center gap-2 rounded text-black-500" onClick={() => window.location.reload()}>
                                         <PowerIcon className="h-4 w-4" />
                                         <Typography variant="small" className="font-normal">로그아웃</Typography>
                                     </MenuItem>

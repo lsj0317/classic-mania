@@ -30,7 +30,7 @@ const PostManage = () => {
                         <td className="py-4"><Typography variant="small" className="font-medium">{post.title}</Typography></td>
                         <td className="py-4 flex justify-center gap-2">
                             <Button size="sm" variant="outlined" onClick={() => navigate(`/board/edit/${post.id}`)}>수정</Button>
-                            <Button size="sm" color="red" onClick={() => handleDelete(post.id)}>삭제</Button>
+                            <Button size="sm" color="black" onClick={() => handleDelete(post.id)}>삭제</Button>
                         </td>
                     </tr>
                 ))}

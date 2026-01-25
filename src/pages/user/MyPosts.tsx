@@ -15,7 +15,7 @@ const MyPosts = () => {
         <Card className="p-6 shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-6">
                 <Typography variant="h6" color="blue-gray" className="font-bold">
-                    내 게시글 현황 <span className="text-blue-500 ml-2">{myPosts.length}개</span>
+                    내 게시글 현황 <span className="text-black-500 ml-2">{myPosts.length}개</span>
                 </Typography>
                 <Tabs value={sortType} className="w-72">
                     <TabsHeader>

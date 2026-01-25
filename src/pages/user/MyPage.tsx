@@ -18,7 +18,7 @@ const MyPage = () => {
                     <ListItem
                         selected={activeTab === "posts"}
                         onClick={() => setActiveTab("posts")}
-                        className={activeTab === "posts" ? "bg-blue-50 text-blue-700" : ""}
+                        className={activeTab === "posts" ? "bg-blue-50 text-black-700" : ""}
                     >
                         <ListItemPrefix><DocumentTextIcon className="h-5 w-5" /></ListItemPrefix>
                         내 게시글 현황
@@ -26,7 +26,7 @@ const MyPage = () => {
                     <ListItem
                         selected={activeTab === "manage"}
                         onClick={() => setActiveTab("manage")}
-                        className={activeTab === "manage" ? "bg-blue-50 text-blue-700" : ""}
+                        className={activeTab === "manage" ? "bg-blue-50 text-black-700" : ""}
                     >
                         <ListItemPrefix><PencilSquareIcon className="h-5 w-5" /></ListItemPrefix>
                         작성글 관리
@@ -34,7 +34,7 @@ const MyPage = () => {
                     <ListItem
                         selected={activeTab === "user"}
                         onClick={() => setActiveTab("user")}
-                        className={activeTab === "user" ? "bg-blue-50 text-blue-700" : ""}
+                        className={activeTab === "user" ? "bg-blue-50 text-black-700" : ""}
                     >
                         <ListItemPrefix><UserCircleIcon className="h-5 w-5" /></ListItemPrefix>
                         회원 정보 수정
