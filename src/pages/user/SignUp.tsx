@@ -20,12 +20,12 @@ const SignUp = () => {
                         <Input type="password" size="lg" label="비밀번호 확인" crossOrigin={undefined} />
                         <Input size="lg" label="주소 (예: 경기도 오산시...)" crossOrigin={undefined} />
                     </div>
-                    <Button className="mt-6" fullWidth color="blue">
+                    <Button className="mt-6" fullWidth color="black">
                         가입하기
                     </Button>
                     <Typography color="gray" className="mt-4 text-center font-normal">
                         이미 계정이 있으신가요?{" "}
-                        <Link to="/login" className="font-medium text-blue-500 transition-colors hover:text-blue-700">
+                        <Link to="/login" className="font-medium text-black-500 transition-colors hover:text-black-700">
                             로그인
                         </Link>
                     </Typography>

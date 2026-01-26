@@ -16,12 +16,12 @@ const Login = () => {
                         <Input size="lg" label="아이디" crossOrigin={undefined} />
                         <Input type="password" size="lg" label="비밀번호" crossOrigin={undefined} />
                     </div>
-                    <Button className="mt-6" fullWidth color="blue">
+                    <Button className="mt-6" fullWidth color="black">
                         로그인
                     </Button>
                     <Typography color="gray" className="mt-4 text-center font-normal">
                         계정이 없으신가요?{" "}
-                        <Link to="/signup" className="font-medium text-blue-500 transition-colors hover:text-blue-700">
+                        <Link to="/signup" className="font-medium text-black-500 transition-colors hover:text-black-700">
                             회원가입
                         </Link>
                     </Typography>

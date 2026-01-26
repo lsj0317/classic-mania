@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
     Navbar,
     Typography,
@@ -11,7 +12,6 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { currentUser } from "../data/mockData";
 import { ChevronDownIcon, UserCircleIcon, PowerIcon } from "@heroicons/react/24/outline";
-import {useEffect, useState} from "react";
 
 const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -25,70 +25,59 @@ const Header = () => {
     ];
 
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener("scroll", handleScroll);
-        // 컴포넌트가 사라질 때 이벤트 리스너를 제거
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
-
-    // 스크롤 상태에 따른 공통 색상 로직
     const textColor = isScrolled ? "text-blue-gray-900" : "text-white";
     const navBg = isScrolled ? "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200" : "bg-black/95 border-none";
 
     return (
         <Navbar
             fullWidth
-            // [중요] h-20으로 높이를 고정하여 스크롤 시 끄떡거림 방지
-            className={`sticky top-0 z-50 h-20 flex items-center rounded-none px-4 py-0 transition-all duration-500 ${navBg}`}
+            className={`sticky top-0 z-50 h-16 lg:h-20 flex items-center rounded-none px-4 py-0 transition-all duration-500 ${navBg}`}
         >
-
-            <div className="container mx-auto flex items-center max-w-screen-xl">
-                {/* 좌측: 로고 (flex-1) */}
-                <div className="flex-1">
+            <div className="container mx-auto flex items-center justify-between max-w-screen-xl">
+                {/* 1. 로고 영역: 모바일에서는 중앙 정렬 고려, 데스크톱은 좌측 [cite: 2026-01-25] */}
+                <div className="flex-1 flex justify-center lg:justify-start">
                     <Link to="/">
-                        <Typography className={`cursor-pointer py-1.5 font-bold text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
+                        <Typography className={`cursor-pointer py-1.5 font-bold text-xl lg:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
                             Classic Mania
                         </Typography>
                     </Link>
                 </div>
 
-                {/* 중앙: 메뉴 리스트 (flex-none) */}
-                <ul className="flex items-center gap-10">
-                    {NAV_MENU.map((menu) => (
-                        <li key={menu.path}>
-                            <Link to={menu.path} className={`text-sm font-bold transition-colors hover:text-blue-500 whitespace-nowrap ${textColor}`}>
-                                {menu.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+                {/* 2. 데스크톱 전용 메뉴: lg(960px) 미만에서는 숨김 [cite: 2026-01-25] */}
+                <div className="hidden lg:flex items-center gap-10">
+                    <ul className="flex items-center gap-10">
+                        {NAV_MENU.map((menu) => (
+                            <li key={menu.path}>
+                                <Link
+                                    to={menu.path}
+                                    className={`text-sm font-bold transition-colors hover:text-blue-500 whitespace-nowrap ${textColor}`}
+                                >
+                                    {menu.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                {/* 우측: 유저 영역 (flex-1) */}
-                <div className="flex-1 flex justify-end">
+                {/* 3. 데스크톱 전용 유저 영역: lg(960px) 미만에서는 숨김 [cite: 2026-01-25] */}
+                <div className="hidden lg:flex flex-1 justify-end">
                     <div className="flex items-center gap-4">
                         {!isLoggedIn ? (
                             <Link to="/login">
-                                <Button
-                                    size="sm"
-                                    className={isScrolled ? "bg-blue-600" : "bg-white text-black"}
-                                >
+                                <Button size="sm" className={isScrolled ? "bg-blue-600" : "bg-white text-black"}>
                                     로그인
                                 </Button>
                             </Link>
                         ) : (
-                            // 기존의 아바타 및 드롭다운 메뉴 완벽 복구
                             <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
                                 <MenuHandler>
-                                    <Button
-                                        variant="text"
-                                        className="flex items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 capitalize focus:ring-0"
-                                    >
+                                    <Button variant="text" className="flex items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 capitalize focus:ring-0">
                                         <Avatar
                                             variant="circular"
                                             size="sm"
@@ -99,10 +88,7 @@ const Header = () => {
                                         <Typography variant="small" className={`font-bold ml-1 transition-colors ${textColor}`}>
                                             {currentUser.userId} 님
                                         </Typography>
-                                        <ChevronDownIcon
-                                            strokeWidth={2.5}
-                                            className={`h-3 w-3 transition-transform ${textColor} ${isMenuOpen ? "rotate-180" : ""}`}
-                                        />
+                                        <ChevronDownIcon strokeWidth={2.5} className={`h-3 w-3 transition-transform ${textColor} ${isMenuOpen ? "rotate-180" : ""}`} />
                                     </Button>
                                 </MenuHandler>
                                 <MenuList className="p-1 border-none shadow-xl bg-white text-blue-gray-900">
