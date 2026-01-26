@@ -92,7 +92,7 @@ const PerformanceMap = () => {
                     <div className="flex items-center gap-2 mb-1">
                         <MapPinIcon className="h-4 w-4 text-black" />
                         <Typography variant="h6" className="font-bold text-black uppercase tracking-tighter">
-                            {currentAreaName} 공연 목록
+                            {currentAreaName} 공연 목록 테스트
                         </Typography>
                     </div>
                     <Typography className="text-[11px] text-gray-500 italic">
