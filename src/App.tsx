@@ -11,6 +11,9 @@ import MyPage from "./pages/user/MyPage";
 import PolicyDetail from "./pages/policy/Terms.tsx";
 import PerformanceMain from "./pages/performance/PerformanceMain.tsx";
 import PerformanceMap from "./pages/performance/PerformanceMap.tsx";
+import TicketListPage from "./pages/ticket/TicketListPage.tsx";
+import TicketDetailPage from "./pages/ticket/TicketDetailPage.tsx";
+import PerformanceDetail from "./pages/performance/PerformanceDetail.tsx";
 
 function App() {
     return (
@@ -28,7 +31,10 @@ function App() {
                     <Route path="/terms" element={<PolicyDetail title="이용약관" />} />
                     <Route path="/privacy" element={<PolicyDetail title="개인정보처리방침" />} />
                     <Route path="/performance" element={<PerformanceMain />} />
+                    <Route path="/performance/:id" element={<PerformanceDetail />} />
                     <Route path="/performance/map" element={<PerformanceMap />} />
+                    <Route path="/ticket-info" element={<TicketListPage />} />
+                    <Route path="/ticket-info/:id" element={<TicketDetailPage />} />
                 </Route>
             </Routes>
         </Router>

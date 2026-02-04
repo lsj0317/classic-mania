@@ -21,7 +21,8 @@ const Header = () => {
     const NAV_MENU = [
         { name: "홈", path: "/" },
         { name: "게시판", path: "/board" },
-        { name: "공연 정보", path: "/performance" },
+        { name: "공연정보", path: "/performance" },
+        { name: "티켓정보", path: "/ticket-info" },
     ];
 
     useEffect(() => {

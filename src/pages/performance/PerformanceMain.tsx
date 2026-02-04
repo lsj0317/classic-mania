@@ -164,7 +164,8 @@ const PerformanceMain = () => {
                                 const classes = isLast ? "p-4" : "p-4 border-b border-gray-50";
 
                                 return (
-                                    <tr key={id} className="hover:bg-gray-50 transition-colors cursor-pointer group">
+                                    <tr key={id} className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                        onClick={() => navigate(`/performance/${id}`)}>
                                         <td className={classes}>
                                             <PerformanceThumbnail src={poster} alt={title} />
                                         </td>
