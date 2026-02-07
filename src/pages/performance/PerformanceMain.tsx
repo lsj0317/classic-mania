@@ -85,7 +85,7 @@ const PerformanceMain = () => {
             <div className="mb-8 flex flex-col justify-between gap-8 md:flex-row md:items-center">
                 <div>
                     <Typography variant="h4" color="blue-gray" className="font-bold tracking-tighter uppercase">
-                        Performance Info
+                        공연정보
                     </Typography>
                     <Typography color="gray" className="mt-1 font-normal text-sm">
                         전국의 클래식 공연 소식과 실시간 예매 현황을 확인하세요.

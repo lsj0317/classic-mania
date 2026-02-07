@@ -23,6 +23,7 @@ const Header = () => {
         { name: "게시판", path: "/board" },
         { name: "공연정보", path: "/performance" },
         { name: "티켓정보", path: "/ticket-info" },
+        { name: "뉴스", path: "/news" },
     ];
 
     useEffect(() => {

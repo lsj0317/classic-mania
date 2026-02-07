@@ -11,6 +11,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/kopis/, ''),
       },
+      '/api/naver': {
+        target: 'https://openapi.naver.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/naver/, ''),
+        secure: false,
+      },
     },
   },
 })

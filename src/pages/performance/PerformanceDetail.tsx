@@ -132,14 +132,20 @@ const PerformanceDetail = () => {
 
                         {performance.bookingUrl ? (
                             <a href={performance.bookingUrl} target="_blank" rel="noopener noreferrer">
-                                <Button className="w-full bg-black rounded-none mt-10 py-4 font-bold tracking-widest">
+                                <Button className="w-full bg-black rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
                                     예매하러 가기
                                 </Button>
                             </a>
                         ) : (
-                            <Button className="w-full bg-black rounded-none mt-10 py-4 font-bold tracking-widest">
-                                예매하러 가기
-                            </Button>
+                            <a
+                                href={`https://search.naver.com/search.naver?query=${encodeURIComponent(performance.title + ' 예매')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button className="w-full bg-gray-800 rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
+                                    예매처 검색하기
+                                </Button>
+                            </a>
                         )}
                     </div>
                 </div>
@@ -193,23 +199,24 @@ const PerformanceDetail = () => {
                     </Card>
                 )}
 
-                {/* 관련 링크 */}
+                {/* 관련 링크 (예매처 등) */}
                 {performance.relatedLinks && performance.relatedLinks.length > 0 && (
                     <Card className="p-6 border border-gray-100 shadow-none bg-gray-50 rounded-none">
                         <div className="flex items-center gap-2 mb-4">
                             <LinkIcon className="h-5 w-5 text-gray-400" />
-                            <Typography variant="small" className="font-bold uppercase tracking-widest">Related Links</Typography>
+                            <Typography variant="small" className="font-bold uppercase tracking-widest">Booking & Links</Typography>
                         </div>
-                        <div className="space-y-2">
+                        <div className="flex flex-wrap gap-2">
                             {performance.relatedLinks.map((link, idx) => (
                                 <a
                                     key={idx}
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block text-sm text-blue-600 hover:text-blue-800 underline"
                                 >
-                                    {link.name}
+                                    <Button variant="outlined" size="sm" className="rounded-full border-gray-300 text-gray-700 hover:bg-gray-100 normal-case font-normal">
+                                        {link.name}
+                                    </Button>
                                 </a>
                             ))}
                         </div>

@@ -8,6 +8,10 @@ const BASE_URL = isDev
     ? '/api/kopis/openApi/restful/pblprfr'
     : 'https://corsproxy.io/?url=http://www.kopis.or.kr/openApi/restful/pblprfr';
 
+const FACILITY_URL = isDev
+    ? '/api/kopis/openApi/restful/prfplc'
+    : 'https://corsproxy.io/?url=http://www.kopis.or.kr/openApi/restful/prfplc';
+
 /**
  * XML Element에서 태그명으로 텍스트 값 추출
  */
@@ -135,10 +139,22 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
         // 관련 링크 파싱
         const relatedLinks: RelatedLink[] = [];
         const relateNodes = item.getElementsByTagName('relate');
+        
+        // 예매처 키워드
+        const bookingKeywords = ['인터파크', '티켓링크', '예스24', '멜론티켓', '옥션티켓', '예매', '티켓'];
+        let foundBookingUrl: string | undefined = undefined;
+
         Array.from(relateNodes).forEach((node) => {
             const name = getTagText(node, 'relatenm');
             const url = getTagText(node, 'relateurl');
-            if (name && url) relatedLinks.push({ name, url });
+            if (name && url) {
+                relatedLinks.push({ name, url });
+                
+                // 아직 bookingUrl을 못 찾았고, 이름에 예매처 키워드가 있다면 설정
+                if (!foundBookingUrl && bookingKeywords.some(keyword => name.includes(keyword))) {
+                    foundBookingUrl = url;
+                }
+            }
         });
 
         return {
@@ -162,9 +178,41 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
             facilityId: getTagText(item, 'mt10id') || undefined,
             introImages: getAllTagTexts(item, 'steimg') || undefined,
             relatedLinks: relatedLinks.length > 0 ? relatedLinks : undefined,
+            bookingUrl: foundBookingUrl,
         };
     } catch (error) {
         console.error('KOPIS 공연 상세 API 호출 중 에러 발생:', error);
         throw error;
+    }
+};
+
+/**
+ * 공연시설 상세 조회 (KOPIS)
+ * GET /openApi/restful/prfplc/{mt10id}
+ */
+export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
+    try {
+        const response = await axios.get(`${FACILITY_URL}/${mt10id}`, {
+            params: {
+                service: API_KEY,
+            },
+        });
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(response.data, 'text/xml');
+        const items = xml.getElementsByTagName('db');
+
+        if (items.length === 0) return null;
+
+        const item = items[0];
+        const lat = parseFloat(getTagText(item, 'la'));
+        const lng = parseFloat(getTagText(item, 'lo'));
+
+        if (isNaN(lat) || isNaN(lng)) return null;
+
+        return { lat, lng };
+    } catch (error) {
+        console.error('KOPIS 공연시설 상세 API 호출 중 에러 발생:', error);
+        return null;
     }
 };
