@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
     Card,
     Typography,
@@ -6,36 +6,49 @@ import {
     CardBody,
     Input,
     CardFooter,
+    Spinner,
 } from "@material-tailwind/react";
 import { MagnifyingGlassIcon, MapIcon, PhotoIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-// 목업 데이터 및 타입 임포트
-import { performanceData } from "../../data/performanceData";
+import { usePerformanceStore } from "../../stores/performanceStore";
 
 const TABLE_HEAD = ["포스터", "공연명", "공연장", "공연기간", "지역", "상태"];
-const PERFORMANCE_TABS = ["전체", "예매중", "예정", "공연종료", "지역별"];
-// 전국 시도 하위 카테고리 정의
+const PERFORMANCE_TABS = ["전체", "공연중", "공연예정", "공연완료", "지역별"];
 const AREA_CATEGORIES = ["전체 지역", "서울", "경기", "인천", "부산", "대구", "광주", "대전", "울산", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
 const ITEMS_PER_PAGE = 5;
 
 const PerformanceMain = () => {
     const navigate = useNavigate();
 
-    // 상태 관리
-    const [activePage, setActivePage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedTab, setSelectedTab] = useState("전체");
-    const [selectedArea, setSelectedArea] = useState("전체 지역");
+    // Zustand 스토어에서 상태와 액션 가져오기
+    const {
+        performances,
+        listLoading,
+        listError,
+        fetchList,
+        selectedTab,
+        selectedArea,
+        searchTerm,
+        currentPage,
+        setSelectedTab,
+        setSelectedArea,
+        setSearchTerm,
+        setCurrentPage,
+    } = usePerformanceStore();
 
-    // [로직] 상단 탭(상태/지역별) + 하위 지역 + 검색어에 따른 삼중 필터링
-    const filteredData = performanceData.filter((p) => {
-        // 1. 상단 메인 탭 필터링
-        const matchesStatus = (selectedTab === "전체" || selectedTab === "지역별") || p.status === selectedTab;
+    // 최초 1회 목록 로드
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
 
-        // 2. 지역별 하위 카테고리 필터링 (메인 탭이 '지역별'일 때만 작동)
-        const matchesArea = selectedTab !== "지역별" || selectedArea === "전체 지역" || p.area === selectedArea;
+    // 삼중 필터링: 상태 탭 + 지역 + 검색어
+    const filteredData = performances.filter((p) => {
+        const matchesStatus =
+            selectedTab === "전체" || selectedTab === "지역별" || p.status === selectedTab;
 
-        // 3. 검색어 필터링
+        const matchesArea =
+            selectedTab !== "지역별" || selectedArea === "전체 지역" || p.area.includes(selectedArea);
+
         const matchesSearch =
             p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.place.toLowerCase().includes(searchTerm.toLowerCase());
@@ -43,16 +56,11 @@ const PerformanceMain = () => {
         return matchesStatus && matchesArea && matchesSearch;
     });
 
-    // [로직] 페이징 계산
+    // 페이징 계산
     const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-    const indexOfLastItem = activePage * ITEMS_PER_PAGE;
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
     const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-    // 필터 조건 변경 시 페이지 1로 리셋
-    useEffect(() => {
-        setActivePage(1);
-    }, [selectedTab, selectedArea, searchTerm]);
 
     const PerformanceThumbnail = ({ src, alt }: { src?: string; alt: string }) => (
         <div className="w-16 h-20 bg-gray-50 flex items-center justify-center border border-gray-100 relative overflow-hidden group">
@@ -91,6 +99,13 @@ const PerformanceMain = () => {
                 </Button>
             </div>
 
+            {/* 에러 알림 */}
+            {listError && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+                    {listError}
+                </div>
+            )}
+
             {/* 메인 필터 및 검색 */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center justify-between border-b border-gray-100 pb-6">
                 <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-none w-max">
@@ -102,7 +117,7 @@ const PerformanceMain = () => {
                             className={`rounded-none px-6 py-2 ${selectedTab === tab ? "shadow-sm text-white font-bold" : "text-gray-500"}`}
                             onClick={() => {
                                 setSelectedTab(tab);
-                                if (tab !== "지역별") setSelectedArea("전체 지역"); // 지역별이 아니면 하위 필터 리셋
+                                if (tab !== "지역별") setSelectedArea("전체 지역");
                             }}
                         >
                             {tab}
@@ -121,7 +136,7 @@ const PerformanceMain = () => {
                 </div>
             </div>
 
-            {/* [추가] 지역별 하위 카테고리 UI: '지역별' 탭 선택 시 노출 */}
+            {/* 지역별 하위 카테고리 UI */}
             {selectedTab === "지역별" && (
                 <Card className="mb-8 shadow-none border border-gray-100 bg-gray-50/30 rounded-none p-4">
                     <div className="flex flex-wrap gap-2">
@@ -142,93 +157,101 @@ const PerformanceMain = () => {
                 </Card>
             )}
 
-            {/* 공연 리스트 테이블 */}
-            <Card className="h-full w-full shadow-none border border-gray-200 rounded-none overflow-hidden">
-                <CardBody className="px-0 py-0">
-                    <table className="w-full min-w-max table-auto text-left">
-                        <thead>
-                        <tr className="bg-gray-50/50">
-                            {TABLE_HEAD.map((head) => (
-                                <th key={head} className="border-b border-gray-100 p-4">
-                                    <Typography variant="small" color="blue-gray" className="font-bold opacity-80 uppercase tracking-wider">
-                                        {head}
-                                    </Typography>
-                                </th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {currentItems.length > 0 ? (
-                            currentItems.map(({ id, poster, title, place, period, area, status }, index) => {
-                                const isLast = index === currentItems.length - 1;
-                                const classes = isLast ? "p-4" : "p-4 border-b border-gray-50";
-
-                                return (
-                                    <tr key={id} className="hover:bg-gray-50 transition-colors cursor-pointer group"
-                                        onClick={() => navigate(`/performance/${id}`)}>
-                                        <td className={classes}>
-                                            <PerformanceThumbnail src={poster} alt={title} />
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography variant="small" className="font-bold text-black group-hover:text-gray-600 transition-colors">
-                                                {title}
-                                            </Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600 font-medium">{place}</Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography variant="small" className="text-gray-500 text-xs font-mono">{period}</Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600">{area}</Typography>
-                                        </td>
-                                        <td className={classes}>
-                                            <div className={`inline-block px-3 py-1 border text-[10px] font-bold tracking-tighter ${
-                                                status === "예매중" ? "border-black text-black bg-white" :
-                                                    status === "공연종료" ? "border-gray-200 text-gray-300 bg-gray-50" : "border-gray-300 text-gray-500"
-                                            }`}>
-                                                {status}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                        ) : (
-                            <tr>
-                                <td colSpan={6} className="p-20 text-center text-gray-400">
-                                    해당 조건의 공연 정보가 없습니다.
-                                </td>
+            {/* 로딩 상태 */}
+            {listLoading ? (
+                <div className="flex justify-center items-center py-20">
+                    <Spinner className="h-8 w-8" />
+                    <Typography className="ml-3 text-gray-500">공연 정보를 불러오는 중...</Typography>
+                </div>
+            ) : (
+                /* 공연 리스트 테이블 */
+                <Card className="h-full w-full shadow-none border border-gray-200 rounded-none overflow-hidden">
+                    <CardBody className="px-0 py-0">
+                        <table className="w-full min-w-max table-auto text-left">
+                            <thead>
+                            <tr className="bg-gray-50/50">
+                                {TABLE_HEAD.map((head) => (
+                                    <th key={head} className="border-b border-gray-100 p-4">
+                                        <Typography variant="small" color="blue-gray" className="font-bold opacity-80 uppercase tracking-wider">
+                                            {head}
+                                        </Typography>
+                                    </th>
+                                ))}
                             </tr>
-                        )}
-                        </tbody>
-                    </table>
-                </CardBody>
+                            </thead>
+                            <tbody>
+                            {currentItems.length > 0 ? (
+                                currentItems.map(({ id, poster, title, place, period, area, status }, index) => {
+                                    const isLast = index === currentItems.length - 1;
+                                    const classes = isLast ? "p-4" : "p-4 border-b border-gray-50";
 
-                <CardFooter className="flex items-center justify-between border-t border-gray-100 p-4 bg-white">
-                    <Button
-                        variant="text"
-                        size="sm"
-                        onClick={() => setActivePage(activePage - 1)}
-                        disabled={activePage === 1}
-                        className={`flex items-center gap-1 font-bold ${activePage === 1 ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
-                    >
-                        <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
-                    </Button>
-                    <Typography variant="small" className="font-bold text-gray-500">
-                        <span className="text-black">{activePage}</span> / {totalPages || 1}
-                    </Typography>
-                    <Button
-                        variant="text"
-                        size="sm"
-                        onClick={() => setActivePage(activePage + 1)}
-                        disabled={activePage === totalPages || totalPages === 0}
-                        className={`flex items-center gap-1 font-bold ${activePage === totalPages ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
-                    >
-                        다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
-                    </Button>
-                </CardFooter>
-            </Card>
+                                    return (
+                                        <tr key={id} className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                            onClick={() => navigate(`/performance/${id}`)}>
+                                            <td className={classes}>
+                                                <PerformanceThumbnail src={poster} alt={title} />
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography variant="small" className="font-bold text-black group-hover:text-gray-600 transition-colors">
+                                                    {title}
+                                                </Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography variant="small" className="text-gray-600 font-medium">{place}</Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography variant="small" className="text-gray-500 text-xs font-mono">{period}</Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <Typography variant="small" className="text-gray-600">{area}</Typography>
+                                            </td>
+                                            <td className={classes}>
+                                                <div className={`inline-block px-3 py-1 border text-[10px] font-bold tracking-tighter ${
+                                                    status === "공연중" ? "border-black text-black bg-white" :
+                                                        status === "공연완료" ? "border-gray-200 text-gray-300 bg-gray-50" : "border-gray-300 text-gray-500"
+                                                }`}>
+                                                    {status}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="p-20 text-center text-gray-400">
+                                        해당 조건의 공연 정보가 없습니다.
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </CardBody>
+
+                    <CardFooter className="flex items-center justify-between border-t border-gray-100 p-4 bg-white">
+                        <Button
+                            variant="text"
+                            size="sm"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`flex items-center gap-1 font-bold ${currentPage === 1 ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
+                        >
+                            <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                        </Button>
+                        <Typography variant="small" className="font-bold text-gray-500">
+                            <span className="text-black">{currentPage}</span> / {totalPages || 1}
+                        </Typography>
+                        <Button
+                            variant="text"
+                            size="sm"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className={`flex items-center gap-1 font-bold ${currentPage === totalPages ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
+                        >
+                            다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
         </div>
     );
 };
