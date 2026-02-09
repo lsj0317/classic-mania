@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Typography, Avatar, Button } from "@material-tailwind/react";
 import {
@@ -51,21 +52,51 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
         };
     }, [isOpen]);
 
-    return (
-        <>
+    // ESC 키로 메뉴 닫기
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && isOpen) {
+                onClose();
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
+    const menuContent = (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 9999, pointerEvents: isOpen ? "auto" : "none" }}>
             {/* 오버레이 */}
             <div
-                className={`fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
-                    isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                }`}
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    backdropFilter: "blur(4px)",
+                    transition: "opacity 300ms ease",
+                    opacity: isOpen ? 1 : 0,
+                    pointerEvents: isOpen ? "auto" : "none",
+                }}
                 onClick={onClose}
             />
 
             {/* 사이드 메뉴 패널 */}
             <aside
-                className={`fixed top-0 right-0 z-[70] h-full w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
-                    isOpen ? "translate-x-0" : "translate-x-full"
-                }`}
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    right: 0,
+                    height: "100%",
+                    width: "288px",
+                    backgroundColor: "#fff",
+                    boxShadow: isOpen ? "-4px 0 24px rgba(0,0,0,0.15)" : "none",
+                    transform: isOpen ? "translateX(0)" : "translateX(100%)",
+                    transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                    zIndex: 10000,
+                    overflowY: "auto",
+                }}
             >
                 {/* 상단 헤더 */}
                 <div className="flex items-center justify-between p-5 border-b border-gray-100">
@@ -111,7 +142,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 </div>
 
                 {/* 네비게이션 메뉴 */}
-                <nav className="p-3 flex-1">
+                <nav className="p-3">
                     <ul className="flex flex-col gap-1">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.path;
@@ -136,7 +167,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
 
                 {/* 하단 유틸리티 */}
                 {isLoggedIn && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white">
                         <ul className="flex flex-col gap-1">
                             <li>
                                 <Link
@@ -164,8 +195,10 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                     </div>
                 )}
             </aside>
-        </>
+        </div>
     );
+
+    return createPortal(menuContent, document.body);
 };
 
 export default SideMenu;
