@@ -4,13 +4,26 @@ import type { Performance, RelatedLink } from '../types';
 const API_KEY = import.meta.env.VITE_KOPIS_API_KEY;
 
 const isDev = import.meta.env.DEV;
-const BASE_URL = isDev
-    ? '/api/kopis/openApi/restful/pblprfr'
-    : 'https://corsproxy.io/?url=http://www.kopis.or.kr/openApi/restful/pblprfr';
+const CORS_PROXY = 'https://corsproxy.io/?url=';
 
-const FACILITY_URL = isDev
-    ? '/api/kopis/openApi/restful/prfplc'
-    : 'https://corsproxy.io/?url=http://www.kopis.or.kr/openApi/restful/prfplc';
+/**
+ * KOPIS API URL 빌드 (개발: Vite 프록시, 배포: corsproxy.io CORS 프록시)
+ * 배포 환경에서는 전체 URL을 encodeURIComponent로 인코딩하여 query params가
+ * corsproxy.io가 아닌 실제 KOPIS API로 전달되도록 합니다.
+ */
+function buildKopisUrl(path: string, params: Record<string, string | number>): string {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        searchParams.append(key, String(value));
+    }
+
+    if (isDev) {
+        return `/api/kopis${path}?${searchParams.toString()}`;
+    }
+
+    const targetUrl = `http://www.kopis.or.kr${path}?${searchParams.toString()}`;
+    return `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+}
 
 /**
  * XML Element에서 태그명으로 텍스트 값 추출
@@ -74,16 +87,16 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
         const toYMD = (d: Date) =>
             `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 
-        const response = await axios.get(BASE_URL, {
-            params: {
-                service: API_KEY,
-                stdate: toYMD(sixMonthsAgo),
-                eddate: toYMD(sixMonthsLater),
-                cpage: page,
-                rows: rows,
-                shcate: 'CCCA', // 클래식 장르
-            },
+        const url = buildKopisUrl('/openApi/restful/pblprfr', {
+            service: API_KEY,
+            stdate: toYMD(sixMonthsAgo),
+            eddate: toYMD(sixMonthsLater),
+            cpage: page,
+            rows: rows,
+            shcate: 'CCCA', // 클래식 장르
         });
+
+        const response = await axios.get(url);
 
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
@@ -120,11 +133,11 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
  */
 export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Performance | null> => {
     try {
-        const response = await axios.get(`${BASE_URL}/${mt20id}`, {
-            params: {
-                service: API_KEY,
-            },
+        const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {
+            service: API_KEY,
         });
+
+        const response = await axios.get(url);
 
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
@@ -192,11 +205,11 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
  */
 export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
     try {
-        const response = await axios.get(`${FACILITY_URL}/${mt10id}`, {
-            params: {
-                service: API_KEY,
-            },
+        const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {
+            service: API_KEY,
         });
+
+        const response = await axios.get(url);
 
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
