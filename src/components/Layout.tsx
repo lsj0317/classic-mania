@@ -7,8 +7,19 @@ import SideMenu from "./SideMenu";
 
 const Layout = () => {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-    const openSideMenu = useCallback(() => setIsSideMenuOpen(true), []);
-    const closeSideMenu = useCallback(() => setIsSideMenuOpen(false), []);
+
+    const openSideMenu = useCallback(() => {
+        console.log("[Layout] openSideMenu 호출됨, 현재:", isSideMenuOpen, "→ true로 변경");
+        setIsSideMenuOpen(true);
+    }, [isSideMenuOpen]);
+
+    const closeSideMenu = useCallback(() => {
+        console.log("[Layout] closeSideMenu 호출됨, 현재:", isSideMenuOpen, "→ false로 변경");
+        console.trace("[Layout] closeSideMenu 호출 스택:");
+        setIsSideMenuOpen(false);
+    }, [isSideMenuOpen]);
+
+    console.log("[Layout] 렌더링, isSideMenuOpen =", isSideMenuOpen);
 
     return (
         <div className="flex min-h-screen flex-col">

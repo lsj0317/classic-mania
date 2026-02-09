@@ -41,6 +41,15 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         ? "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200"
         : "bg-black/95";
 
+    const handleBurgerClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("[Header] 햄버거 버튼 클릭됨!");
+        console.log("[Header] onMenuOpen 함수 호출 시작");
+        onMenuOpen();
+        console.log("[Header] onMenuOpen 함수 호출 완료");
+    };
+
     return (
         <header
             className={`sticky top-0 z-50 h-16 lg:h-20 flex items-center px-4 py-0 transition-all duration-500 ${navBg}`}
@@ -114,17 +123,22 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 </div>
 
                 {/* 모바일 햄버거 버튼 */}
-                <button
-                    type="button"
-                    className={`lg:hidden p-2 rounded-lg transition-colors hover:bg-white/10 ${textColor}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onMenuOpen();
+                <div
+                    className="lg:hidden"
+                    onClick={handleBurgerClick}
+                    role="button"
+                    tabIndex={0}
+                    style={{
+                        padding: "8px",
+                        cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent",
+                        touchAction: "manipulation",
+                        userSelect: "none",
                     }}
                     aria-label="메뉴 열기"
                 >
-                    <Bars3Icon className="h-6 w-6" strokeWidth={2} />
-                </button>
+                    <Bars3Icon className={`h-6 w-6 ${textColor}`} strokeWidth={2} />
+                </div>
             </div>
         </header>
     );

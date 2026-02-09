@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import {
     XMarkIcon,
@@ -29,69 +27,61 @@ const NAV_ITEMS = [
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
-    const prevPathRef = useRef(pathname);
 
-    // 경로 변경 시 메뉴 닫기
-    useEffect(() => {
-        if (prevPathRef.current !== pathname) {
-            prevPathRef.current = pathname;
-            onClose();
-        }
-    }, [pathname, onClose]);
+    console.log("[SideMenu] 렌더링, isOpen =", isOpen);
 
-    // body 스크롤 방지 + ESC 닫기
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = "hidden";
-            const handleKey = (e: KeyboardEvent) => {
-                if (e.key === "Escape") onClose();
-            };
-            document.addEventListener("keydown", handleKey);
-            return () => {
-                document.body.style.overflow = "";
-                document.removeEventListener("keydown", handleKey);
-            };
-        } else {
-            document.body.style.overflow = "";
-        }
-    }, [isOpen, onClose]);
+    const handleOverlayClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log("[SideMenu] 오버레이 클릭됨 → onClose 호출");
+        onClose();
+    };
 
-    const content = (
-        <div
-            id="side-menu-root"
-            style={{
-                position: "fixed",
-                inset: 0,
-                zIndex: 99999,
-                pointerEvents: isOpen ? "auto" : "none",
-                visibility: isOpen ? "visible" : "hidden",
-            }}
-        >
-            {/* 오버레이 */}
+    const handleCloseClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log("[SideMenu] X 버튼 클릭됨 → onClose 호출");
+        onClose();
+    };
+
+    const handleNavClick = () => {
+        console.log("[SideMenu] 네비게이션 항목 클릭됨 → onClose 호출");
+        onClose();
+    };
+
+    return (
+        <>
+            {/* 오버레이 - isOpen일 때만 렌더 */}
+            {isOpen && (
+                <div
+                    data-testid="side-menu-overlay"
+                    onClick={handleOverlayClick}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        zIndex: 99998,
+                    }}
+                />
+            )}
+
+            {/* 사이드 패널 - 항상 렌더하되 transform으로 토글 */}
             <div
-                onClick={onClose}
+                data-testid="side-menu-panel"
+                data-open={isOpen}
                 style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(0,0,0,0.5)",
-                    opacity: isOpen ? 1 : 0,
-                    transition: "opacity 0.3s ease",
-                }}
-            />
-
-            {/* 사이드 패널 */}
-            <div
-                style={{
-                    position: "absolute",
+                    position: "fixed",
                     top: 0,
                     right: 0,
                     bottom: 0,
                     width: "280px",
                     maxWidth: "85vw",
-                    background: "#fff",
-                    boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
-                    transform: isOpen ? "translateX(0)" : "translateX(100%)",
+                    backgroundColor: "#ffffff",
+                    boxShadow: isOpen ? "-4px 0 24px rgba(0,0,0,0.12)" : "none",
+                    transform: isOpen ? "translateX(0%)" : "translateX(100%)",
                     transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    zIndex: 99999,
                     display: "flex",
                     flexDirection: "column",
                     overflowY: "auto",
@@ -99,14 +89,14 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             >
                 {/* 헤더 */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px", borderBottom: "1px solid #f3f4f6" }}>
-                    <span style={{ fontWeight: 700, fontSize: "18px" }}>Menu</span>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        style={{ padding: "6px", borderRadius: "50%", border: "none", background: "transparent", cursor: "pointer", display: "flex" }}
+                    <span style={{ fontWeight: 700, fontSize: "18px", color: "#111" }}>Menu</span>
+                    <div
+                        onClick={handleCloseClick}
+                        role="button"
+                        style={{ padding: "6px", borderRadius: "50%", cursor: "pointer", display: "flex" }}
                     >
                         <XMarkIcon style={{ width: "20px", height: "20px", color: "#6b7280" }} />
-                    </button>
+                    </div>
                 </div>
 
                 {/* 유저 프로필 */}
@@ -119,27 +109,25 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                 style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", border: "2px solid #e5e7eb" }}
                             />
                             <div>
-                                <div style={{ fontWeight: 700, fontSize: "14px" }}>{currentUser.userId} 님</div>
+                                <div style={{ fontWeight: 700, fontSize: "14px", color: "#111" }}>{currentUser.userId} 님</div>
                                 <div style={{ fontSize: "12px", color: "#9ca3af" }}>환영합니다</div>
                             </div>
                         </div>
                     ) : (
-                        <Link to="/login" onClick={onClose} style={{ display: "block" }}>
-                            <button
-                                type="button"
+                        <Link to="/login" onClick={handleNavClick} style={{ display: "block", textDecoration: "none" }}>
+                            <div
                                 style={{
                                     width: "100%",
                                     padding: "10px",
                                     background: "#000",
                                     color: "#fff",
-                                    border: "none",
                                     fontWeight: 600,
                                     fontSize: "14px",
-                                    cursor: "pointer",
+                                    textAlign: "center",
                                 }}
                             >
                                 로그인
-                            </button>
+                            </div>
                         </Link>
                     )}
                 </div>
@@ -153,7 +141,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                onClick={onClose}
+                                onClick={handleNavClick}
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
@@ -166,7 +154,6 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                     color: isActive ? "#fff" : "#374151",
                                     fontWeight: 500,
                                     fontSize: "14px",
-                                    transition: "background 0.15s",
                                 }}
                             >
                                 <Icon style={{ width: "20px", height: "20px" }} strokeWidth={isActive ? 2 : 1.5} />
@@ -181,7 +168,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                     <div style={{ padding: "16px", borderTop: "1px solid #f3f4f6" }}>
                         <Link
                             to="/mypage"
-                            onClick={onClose}
+                            onClick={handleNavClick}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -199,9 +186,9 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             <UserCircleIcon style={{ width: "20px", height: "20px" }} />
                             마이페이지
                         </Link>
-                        <button
-                            type="button"
+                        <div
                             onClick={() => window.location.reload()}
+                            role="button"
                             style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -209,25 +196,20 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                 padding: "12px 16px",
                                 borderRadius: "8px",
                                 width: "100%",
-                                border: "none",
-                                background: "transparent",
                                 color: "#374151",
                                 fontWeight: 500,
                                 fontSize: "14px",
                                 cursor: "pointer",
-                                textAlign: "left",
                             }}
                         >
                             <ArrowRightOnRectangleIcon style={{ width: "20px", height: "20px" }} />
                             로그아웃
-                        </button>
+                        </div>
                     </div>
                 )}
             </div>
-        </div>
+        </>
     );
-
-    return createPortal(content, document.body);
 };
 
 export default SideMenu;
