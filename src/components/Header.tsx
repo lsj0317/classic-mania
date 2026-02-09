@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Navbar,
     Typography,
@@ -19,6 +19,7 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const closeSideMenu = useCallback(() => setIsSideMenuOpen(false), []);
 
     const NAV_MENU = [
         { name: "홈", path: "/" },
@@ -124,7 +125,7 @@ const Header = () => {
             </Navbar>
 
             {/* 사이드 메뉴 */}
-            <SideMenu isOpen={isSideMenuOpen} onClose={() => setIsSideMenuOpen(false)} />
+            <SideMenu isOpen={isSideMenuOpen} onClose={closeSideMenu} />
         </>
     );
 };

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Typography, Avatar, Button } from "@material-tailwind/react";
 import {
@@ -30,9 +30,13 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
 
-    // 경로 변경 시 메뉴 닫기
+    // 경로 변경 시 메뉴 닫기 (초기 마운트 제외)
+    const prevPathRef = useRef(pathname);
     useEffect(() => {
-        onClose();
+        if (prevPathRef.current !== pathname) {
+            prevPathRef.current = pathname;
+            onClose();
+        }
     }, [pathname, onClose]);
 
     // 메뉴 열릴 때 body 스크롤 방지
