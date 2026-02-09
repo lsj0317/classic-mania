@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import {
     XMarkIcon,
@@ -26,66 +28,57 @@ const NAV_ITEMS = [
 
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
+    const prevPathRef = useRef(pathname);
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
 
-    console.log("[SideMenu] 렌더링, isOpen =", isOpen);
+    // 라우트 변경 시 메뉴 닫기
+    useEffect(() => {
+        if (pathname !== prevPathRef.current) {
+            prevPathRef.current = pathname;
+            onClose();
+        }
+    }, [pathname, onClose]);
+
+    // 사이드 메뉴 열릴 때 body 스크롤 잠금
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isOpen]);
 
     const handleOverlayClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log("[SideMenu] 오버레이 클릭됨 → onClose 호출");
         onClose();
     };
 
     const handleCloseClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log("[SideMenu] X 버튼 클릭됨 → onClose 호출");
         onClose();
     };
 
     const handleNavClick = () => {
-        console.log("[SideMenu] 네비게이션 항목 클릭됨 → onClose 호출");
         onClose();
     };
 
-    return (
+    const content = (
         <>
-            {/* 오버레이 - isOpen일 때만 렌더 */}
+            {/* 오버레이 */}
             {isOpen && (
                 <div
-                    data-testid="side-menu-overlay"
+                    className="side-menu-overlay"
                     onClick={handleOverlayClick}
-                    style={{
-                        position: "fixed",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        zIndex: 99998,
-                    }}
                 />
             )}
 
-            {/* 사이드 패널 - 항상 렌더하되 transform으로 토글 */}
+            {/* 사이드 패널 */}
             <div
-                data-testid="side-menu-panel"
+                className="side-menu-panel"
                 data-open={isOpen}
-                style={{
-                    position: "fixed",
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: "280px",
-                    maxWidth: "85vw",
-                    backgroundColor: "#ffffff",
-                    boxShadow: isOpen ? "-4px 0 24px rgba(0,0,0,0.12)" : "none",
-                    transform: isOpen ? "translateX(0%)" : "translateX(100%)",
-                    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    zIndex: 99999,
-                    display: "flex",
-                    flexDirection: "column",
-                    overflowY: "auto",
-                }}
             >
                 {/* 헤더 */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px", borderBottom: "1px solid #f3f4f6" }}>
@@ -210,6 +203,9 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             </div>
         </>
     );
+
+    // createPortal로 document.body에 직접 렌더링 (CSS 컨테인먼트 우회)
+    return createPortal(content, document.body);
 };
 
 export default SideMenu;

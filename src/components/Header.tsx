@@ -44,10 +44,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     const handleBurgerClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log("[Header] 햄버거 버튼 클릭됨!");
-        console.log("[Header] onMenuOpen 함수 호출 시작");
         onMenuOpen();
-        console.log("[Header] onMenuOpen 함수 호출 완료");
     };
 
     return (
@@ -123,22 +120,23 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 </div>
 
                 {/* 모바일 햄버거 버튼 */}
-                <div
+                <button
+                    type="button"
                     className="lg:hidden"
                     onClick={handleBurgerClick}
-                    role="button"
-                    tabIndex={0}
                     style={{
                         padding: "8px",
                         cursor: "pointer",
                         WebkitTapHighlightColor: "transparent",
                         touchAction: "manipulation",
                         userSelect: "none",
+                        background: "none",
+                        border: "none",
                     }}
                     aria-label="메뉴 열기"
                 >
                     <Bars3Icon className={`h-6 w-6 ${textColor}`} strokeWidth={2} />
-                </div>
+                </button>
             </div>
         </header>
     );

@@ -48,6 +48,42 @@
     }
 }
 
+/* 사이드 메뉴 오버레이 */
+.side-menu-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 99998 !important;
+    cursor: pointer;
+}
+
+/* 사이드 메뉴 패널 */
+.side-menu-panel {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    background-color: #ffffff !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    transform: translateX(100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease !important;
+    box-shadow: none !important;
+}
+
+.side-menu-panel[data-open="true"] {
+    transform: translateX(0%) !important;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12) !important;
+}
+
 /* 모바일 반응형 테이블 카드 스타일 */
 .mobile-card-list {
     display: flex;
