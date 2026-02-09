@@ -87,29 +87,29 @@ const Home = () => {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-screen-xl">
-            <div className="relative h-96 w-full overflow-hidden rounded-lg shadow-lg mb-12">
+        <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl">
+            <div className="relative h-56 sm:h-72 lg:h-96 w-full overflow-hidden sm:rounded-lg shadow-lg mb-8 lg:mb-12">
                 <img
                     src={concertHallBaner}
                     alt="오케스트라 배경"
                     className="absolute inset-0 h-full w-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-black/50 grid place-items-center">
-                    <div className="text-center text-white">
-                        <Typography variant="h1" className="mb-2 text-3xl md:text-5xl font-extrabold">
+                    <div className="text-center text-white px-4">
+                        <Typography variant="h1" className="mb-2 text-2xl sm:text-3xl lg:text-5xl font-extrabold">
                             음악으로 하나되는 공간,
                         </Typography>
-                        <Typography variant="h1" className="mb-4 text-3xl md:text-5xl font-extrabold">
+                        <Typography variant="h1" className="mb-4 text-2xl sm:text-3xl lg:text-5xl font-extrabold">
                             클래식 매니아 커뮤니티
                         </Typography>
-                        <Button size="lg" color="black" className="mt-6 font-bold" onClick={() => navigate("/login")}>
+                        <Button size="lg" color="black" className="mt-4 sm:mt-6 font-bold" onClick={() => navigate("/login")}>
                             시작하기
                         </Button>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:gap-8 md:grid-cols-2 px-4 sm:px-0">
                 <PostSection title="최신 소식" data={latestPosts} sortType="latest" />
                 <PostSection title="인기 게시글" data={popularPosts} sortType="views" />
             </div>

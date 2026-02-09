@@ -60,8 +60,8 @@ const Board = () => {
     const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-screen-xl">
-            <div className="mb-6">
+        <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl">
+            <div className="mb-6 px-4 sm:px-0">
                 <Typography variant="h5" color="blue-gray" className="font-bold">
                     커뮤니티 게시판
                 </Typography>
@@ -70,14 +70,15 @@ const Board = () => {
                 </Typography>
             </div>
 
-            <div className="mb-8 flex flex-col gap-6">
-                <div className="flex flex-wrap gap-2">
+            <div className="mb-6 lg:mb-8 flex flex-col gap-4 lg:gap-6 px-4 sm:px-0">
+                {/* 카테고리 필터 - 모바일에서 가로 스크롤 */}
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
                     {CATEGORIES.map((category) => (
                         <Button
                             key={category}
                             size="sm"
                             variant={selectedCategory === category ? "filled" : "outlined"}
-                            className={`rounded-none px-6 py-2.5 transition-all ${
+                            className={`rounded-none px-4 sm:px-6 py-2 sm:py-2.5 transition-all whitespace-nowrap flex-shrink-0 text-xs sm:text-sm ${
                                 selectedCategory === category
                                     ? "bg-black text-white border-black"
                                     : "bg-transparent text-gray-500 border-gray-300 hover:border-black hover:text-black"
@@ -92,7 +93,7 @@ const Board = () => {
                     ))}
                 </div>
 
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center border-t border-gray-100 pt-6">
+                <div className="flex flex-col justify-between gap-3 sm:gap-4 md:flex-row md:items-center border-t border-gray-100 pt-4 lg:pt-6">
                     <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-none w-max">
                         <Button
                             variant={sortBy === "latest" ? "white" : "text"}
@@ -113,7 +114,7 @@ const Board = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="w-full md:w-72">
+                        <div className="flex-1 md:w-72 md:flex-none">
                             <Input
                                 label="검색어 입력"
                                 icon={<MagnifyingGlassIcon className="h-5 w-5" />}
@@ -127,7 +128,7 @@ const Board = () => {
                             />
                         </div>
                         <Button
-                            className="bg-black text-white rounded-none flex items-center gap-2"
+                            className="bg-black text-white rounded-none flex items-center gap-2 whitespace-nowrap"
                             size="sm"
                             onClick={() => navigate("/board/write")}
                         >
@@ -137,7 +138,8 @@ const Board = () => {
                 </div>
             </div>
 
-            <Card className="h-full w-full shadow-none border border-gray-200 rounded-none">
+            {/* 데스크톱: 테이블 뷰 */}
+            <Card className="h-full w-full shadow-none border border-gray-200 rounded-none hidden md:block">
                 <CardBody className="overflow-scroll px-0 py-0">
                     <table className="w-full min-w-max table-auto text-left">
                         <thead>
@@ -153,11 +155,9 @@ const Board = () => {
                         </thead>
                         <tbody>
                         {currentPosts.length > 0 ? (
-                            // [수정] authorId를 추가로 받아옵니다. [cite: 2026-01-21]
                             currentPosts.map(({ id, category, title, authorName, authorId, createdAt, views, images }, index) => {
                                 const isLast = index === currentPosts.length - 1;
                                 const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
-                                // [수정] 이름이 아닌 고유 ID로 본인 여부를 확인합니다. [cite: 2026-01-25]
                                 const isMine = authorId === currentUser.userId;
 
                                 return (
@@ -179,7 +179,6 @@ const Board = () => {
                                         <td className={classes}>
                                             <Typography variant="small" className="text-gray-600">
                                                 {authorName}
-                                                {/* [수정] 본인일 경우 (나) 표시 [cite: 2026-01-25] */}
                                                 {isMine && <span className="ml-1 text-black font-bold text-[11px]">(나)</span>}
                                             </Typography>
                                         </td>
@@ -227,6 +226,74 @@ const Board = () => {
                     </Button>
                 </CardFooter>
             </Card>
+
+            {/* 모바일: 카드 리스트 뷰 */}
+            <div className="md:hidden">
+                {currentPosts.length > 0 ? (
+                    <div className="flex flex-col gap-3 px-4 sm:px-0">
+                        {currentPosts.map(({ id, category, title, authorName, authorId, createdAt, views, images }) => {
+                            const isMine = authorId === currentUser.userId;
+                            return (
+                                <div
+                                    key={id}
+                                    className="border border-gray-200 p-4 active:bg-gray-50 transition-colors cursor-pointer"
+                                    onClick={() => handlePostClick(id)}
+                                >
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5">
+                                            {category}
+                                        </span>
+                                        {images.length > 0 && <span className="text-gray-400 text-xs">📷</span>}
+                                    </div>
+                                    <Typography className="font-bold text-sm text-black line-clamp-2 mb-2">
+                                        {title}
+                                    </Typography>
+                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-600 font-medium">
+                                                {authorName}
+                                                {isMine && <span className="ml-1 text-black font-bold">(나)</span>}
+                                            </span>
+                                            <span>|</span>
+                                            <span>{createdAt}</span>
+                                        </div>
+                                        <span>조회 {views.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="p-10 text-center mx-4">
+                        <Typography color="gray">해당 카테고리에 게시글이 없습니다.</Typography>
+                    </div>
+                )}
+
+                {/* 모바일 페이지네이션 */}
+                <div className="flex items-center justify-between border-t border-gray-100 p-4 mt-3">
+                    <Button
+                        variant="text"
+                        size="sm"
+                        onClick={() => setActivePage(activePage - 1)}
+                        disabled={activePage === 1}
+                        className={`flex items-center gap-1 font-bold ${activePage === 1 ? "text-gray-300" : "text-black"}`}
+                    >
+                        <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                    </Button>
+                    <Typography variant="small" className="font-bold text-gray-500">
+                        <span className="text-black">{activePage}</span> / {totalPages || 1}
+                    </Typography>
+                    <Button
+                        variant="text"
+                        size="sm"
+                        onClick={() => setActivePage(activePage + 1)}
+                        disabled={activePage === totalPages || totalPages === 0}
+                        className={`flex items-center gap-1 font-bold ${activePage === totalPages ? "text-gray-300" : "text-black"}`}
+                    >
+                        다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 };
