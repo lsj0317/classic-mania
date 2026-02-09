@@ -59,10 +59,10 @@ const TicketListPage = () => {
     }
 
     return (
-        <div className="p-4 max-w-5xl mx-auto min-h-screen bg-white">
+        <div className="px-4 sm:p-4 max-w-5xl mx-auto min-h-screen bg-white">
             {/* 헤더 섹션 */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b-2 border-black pb-4">
-                <Typography variant="h4" className="font-bold uppercase tracking-tighter">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 border-b-2 border-black pb-4">
+                <Typography variant="h4" className="font-bold uppercase tracking-tighter text-xl lg:text-2xl">
                     공연 티켓 정보
                 </Typography>
 
@@ -82,7 +82,7 @@ const TicketListPage = () => {
 
             {/* 리스트 그리드 */}
             {currentItems.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                     {currentItems.map((item) => (
                         <Card
                             key={item.id}

@@ -19,9 +19,9 @@ const Footer = () => {
     };
 
     return (
-        <footer className="w-full bg-black p-8 pt-12 text-white">
+        <footer className="w-full bg-black p-6 sm:p-8 pt-8 sm:pt-12 text-white">
             <div className="container mx-auto max-w-screen-xl">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-blue-gray-800 pb-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 border-b border-blue-gray-800 pb-8 lg:pb-12">
 
                     {/* 1. 기업/서비스 정보 */}
                     <div className="flex flex-col gap-4">

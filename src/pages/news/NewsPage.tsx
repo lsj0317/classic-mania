@@ -93,19 +93,19 @@ const NewsPage = () => {
     const maxPages = Math.min(Math.ceil(totalResults / itemsPerPage), 100);
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-screen-xl min-h-screen">
+        <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl min-h-screen">
             {/* 헤더 섹션 */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12 border-b-2 border-black pb-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 lg:gap-6 mb-8 lg:mb-12 border-b-2 border-black pb-4 lg:pb-6 px-4 sm:px-0">
                 <div className="flex-1">
-                    <Typography variant="h2" className="font-bold text-black tracking-tighter mb-2">
+                    <Typography variant="h2" className="font-bold text-black tracking-tighter mb-1 lg:mb-2 text-xl lg:text-3xl">
                         클래식뉴스
                     </Typography>
-                    <Typography className="text-gray-600 font-normal">
+                    <Typography className="text-gray-600 font-normal text-sm">
                         클래식 공연계의 최신 소식과 아티스트들의 이야기를 전해드립니다.
                     </Typography>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
                     <div className="w-full sm:w-40">
                         <Select 
                             label="정렬" 
@@ -154,30 +154,30 @@ const NewsPage = () => {
 
             {/* 뉴스 리스트 */}
             {loading ? (
-                <div className="flex justify-center items-center py-40">
-                    <Spinner className="h-10 w-10" />
-                    <Typography className="ml-4 text-gray-500">최신 뉴스를 불러오는 중...</Typography>
+                <div className="flex justify-center items-center py-20 lg:py-40">
+                    <Spinner className="h-8 w-8 lg:h-10 lg:w-10" />
+                    <Typography className="ml-3 lg:ml-4 text-gray-500 text-sm">최신 뉴스를 불러오는 중...</Typography>
                 </div>
             ) : newsList.length > 0 ? (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3 sm:gap-6 px-4 sm:px-0">
                     {newsList.map((news, index) => (
-                        <Card 
-                            key={index} 
-                            className="p-6 rounded-none border border-gray-200 shadow-none hover:border-black transition-all cursor-pointer group"
+                        <Card
+                            key={index}
+                            className="p-4 sm:p-6 rounded-none border border-gray-200 shadow-none hover:border-black transition-all cursor-pointer group"
                             onClick={() => handleNewsClick(news)}
                         >
-                            <div className="flex flex-col md:flex-row gap-4 md:items-start justify-between">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">News</span>
-                                        <span className="text-xs text-gray-400 border-l pl-3 border-gray-300">
+                            <div className="flex flex-col md:flex-row gap-3 md:gap-4 md:items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-1.5 sm:mb-2">
+                                        <span className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider">News</span>
+                                        <span className="text-[10px] sm:text-xs text-gray-400 border-l pl-3 border-gray-300">
                                             {formatDate(news.pubDate)}
                                         </span>
                                     </div>
-                                    <Typography variant="h5" className="font-bold text-black mb-3 group-hover:text-blue-700 transition-colors leading-tight">
+                                    <Typography variant="h5" className="font-bold text-black mb-2 sm:mb-3 group-hover:text-blue-700 transition-colors leading-tight text-sm sm:text-lg">
                                         {decodeHtml(news.title)}
                                     </Typography>
-                                    <Typography className="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                                    <Typography className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
                                         {decodeHtml(news.description)}
                                     </Typography>
                                 </div>
@@ -191,7 +191,7 @@ const NewsPage = () => {
                     ))}
                 </div>
             ) : (
-                <div className="py-40 text-center border border-dashed border-gray-300">
+                <div className="py-20 lg:py-40 text-center border border-dashed border-gray-300 mx-4 sm:mx-0">
                     <Typography className="text-gray-400">검색 결과가 없습니다.</Typography>
                 </div>
             )}
