@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Typography, Avatar, Button } from "@material-tailwind/react";
 import {
     XMarkIcon,
     HomeIcon,
@@ -30,136 +28,186 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
 
-    // 경로 변경 시 메뉴 닫기
-    useEffect(() => {
-        onClose();
-    }, [pathname, onClose]);
+    console.log("[SideMenu] 렌더링, isOpen =", isOpen);
 
-    // 메뉴 열릴 때 body 스크롤 방지
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [isOpen]);
+    const handleOverlayClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log("[SideMenu] 오버레이 클릭됨 → onClose 호출");
+        onClose();
+    };
+
+    const handleCloseClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log("[SideMenu] X 버튼 클릭됨 → onClose 호출");
+        onClose();
+    };
+
+    const handleNavClick = () => {
+        console.log("[SideMenu] 네비게이션 항목 클릭됨 → onClose 호출");
+        onClose();
+    };
 
     return (
         <>
-            {/* 오버레이 */}
-            <div
-                className={`fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
-                    isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                }`}
-                onClick={onClose}
-            />
+            {/* 오버레이 - isOpen일 때만 렌더 */}
+            {isOpen && (
+                <div
+                    data-testid="side-menu-overlay"
+                    onClick={handleOverlayClick}
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        zIndex: 99998,
+                    }}
+                />
+            )}
 
-            {/* 사이드 메뉴 패널 */}
-            <aside
-                className={`fixed top-0 right-0 z-[70] h-full w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
-                    isOpen ? "translate-x-0" : "translate-x-full"
-                }`}
+            {/* 사이드 패널 - 항상 렌더하되 transform으로 토글 */}
+            <div
+                data-testid="side-menu-panel"
+                data-open={isOpen}
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: "280px",
+                    maxWidth: "85vw",
+                    backgroundColor: "#ffffff",
+                    boxShadow: isOpen ? "-4px 0 24px rgba(0,0,0,0.12)" : "none",
+                    transform: isOpen ? "translateX(0%)" : "translateX(100%)",
+                    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    zIndex: 99999,
+                    display: "flex",
+                    flexDirection: "column",
+                    overflowY: "auto",
+                }}
             >
-                {/* 상단 헤더 */}
-                <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                    <Typography className="font-bold text-lg tracking-tight">
-                        Menu
-                    </Typography>
-                    <button
-                        onClick={onClose}
-                        className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                        aria-label="메뉴 닫기"
+                {/* 헤더 */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px", borderBottom: "1px solid #f3f4f6" }}>
+                    <span style={{ fontWeight: 700, fontSize: "18px", color: "#111" }}>Menu</span>
+                    <div
+                        onClick={handleCloseClick}
+                        role="button"
+                        style={{ padding: "6px", borderRadius: "50%", cursor: "pointer", display: "flex" }}
                     >
-                        <XMarkIcon className="h-5 w-5 text-gray-600" />
-                    </button>
+                        <XMarkIcon style={{ width: "20px", height: "20px", color: "#6b7280" }} />
+                    </div>
                 </div>
 
-                {/* 유저 프로필 영역 */}
-                <div className="p-5 border-b border-gray-100">
+                {/* 유저 프로필 */}
+                <div style={{ padding: "20px", borderBottom: "1px solid #f3f4f6" }}>
                     {isLoggedIn ? (
-                        <div className="flex items-center gap-3">
-                            <Avatar
-                                variant="circular"
-                                size="md"
-                                alt={currentUser.name}
-                                className="border-2 border-gray-200 p-0.5"
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <img
                                 src={currentUser.profileImage || "https://docs.material-tailwind.com/img/face-2.jpg"}
+                                alt={currentUser.name}
+                                style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", border: "2px solid #e5e7eb" }}
                             />
                             <div>
-                                <Typography className="font-bold text-sm">
-                                    {currentUser.userId} 님
-                                </Typography>
-                                <Typography className="text-xs text-gray-500">
-                                    환영합니다
-                                </Typography>
+                                <div style={{ fontWeight: 700, fontSize: "14px", color: "#111" }}>{currentUser.userId} 님</div>
+                                <div style={{ fontSize: "12px", color: "#9ca3af" }}>환영합니다</div>
                             </div>
                         </div>
                     ) : (
-                        <Link to="/login" onClick={onClose}>
-                            <Button size="sm" className="w-full bg-black rounded-none">
+                        <Link to="/login" onClick={handleNavClick} style={{ display: "block", textDecoration: "none" }}>
+                            <div
+                                style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    background: "#000",
+                                    color: "#fff",
+                                    fontWeight: 600,
+                                    fontSize: "14px",
+                                    textAlign: "center",
+                                }}
+                            >
                                 로그인
-                            </Button>
+                            </div>
                         </Link>
                     )}
                 </div>
 
-                {/* 네비게이션 메뉴 */}
-                <nav className="p-3 flex-1">
-                    <ul className="flex flex-col gap-1">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.path;
-                            return (
-                                <li key={item.path}>
-                                    <Link
-                                        to={item.path}
-                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                                            isActive
-                                                ? "bg-black text-white"
-                                                : "text-gray-700 hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <item.icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.5} />
-                                        <span className="font-medium text-sm">{item.name}</span>
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                {/* 네비게이션 */}
+                <nav style={{ padding: "12px", flex: 1 }}>
+                    {NAV_ITEMS.map((item) => {
+                        const isActive = pathname === item.path;
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                onClick={handleNavClick}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "12px",
+                                    padding: "12px 16px",
+                                    borderRadius: "8px",
+                                    textDecoration: "none",
+                                    marginBottom: "4px",
+                                    background: isActive ? "#000" : "transparent",
+                                    color: isActive ? "#fff" : "#374151",
+                                    fontWeight: 500,
+                                    fontSize: "14px",
+                                }}
+                            >
+                                <Icon style={{ width: "20px", height: "20px" }} strokeWidth={isActive ? 2 : 1.5} />
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 {/* 하단 유틸리티 */}
                 {isLoggedIn && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
-                        <ul className="flex flex-col gap-1">
-                            <li>
-                                <Link
-                                    to="/mypage"
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                                        pathname === "/mypage"
-                                            ? "bg-black text-white"
-                                            : "text-gray-700 hover:bg-gray-50"
-                                    }`}
-                                >
-                                    <UserCircleIcon className="h-5 w-5" />
-                                    <span className="font-medium text-sm">마이페이지</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                                >
-                                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                                    <span className="font-medium text-sm">로그아웃</span>
-                                </button>
-                            </li>
-                        </ul>
+                    <div style={{ padding: "16px", borderTop: "1px solid #f3f4f6" }}>
+                        <Link
+                            to="/mypage"
+                            onClick={handleNavClick}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                textDecoration: "none",
+                                marginBottom: "4px",
+                                background: pathname === "/mypage" ? "#000" : "transparent",
+                                color: pathname === "/mypage" ? "#fff" : "#374151",
+                                fontWeight: 500,
+                                fontSize: "14px",
+                            }}
+                        >
+                            <UserCircleIcon style={{ width: "20px", height: "20px" }} />
+                            마이페이지
+                        </Link>
+                        <div
+                            onClick={() => window.location.reload()}
+                            role="button"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                width: "100%",
+                                color: "#374151",
+                                fontWeight: 500,
+                                fontSize: "14px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <ArrowRightOnRectangleIcon style={{ width: "20px", height: "20px" }} />
+                            로그아웃
+                        </div>
                     </div>
                 )}
-            </aside>
+            </div>
         </>
     );
 };
