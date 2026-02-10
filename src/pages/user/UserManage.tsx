@@ -78,8 +78,9 @@ const UserManage = () => {
                         size="lg"
                         disabled
                         value={currentUser.userId}
-                        className="!border-t-blue-gray-200 focus:!border-t-gray-900"
+                        className="!rounded-none !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{ className: "before:content-none after:content-none" }}
+                        containerProps={{ className: "!rounded-none" }}
                         crossOrigin={undefined}
                     />
                     <Typography variant="small" className="mt-1 text-gray-500">
@@ -128,8 +129,9 @@ const UserManage = () => {
                         placeholder="변경할 닉네임을 입력하세요"
                         value={nickName}
                         onChange={(e) => setNickName(e.target.value)}
-                        className="focus:!border-t-blue-500"
+                        className="!rounded-none focus:!border-t-blue-500"
                         labelProps={{ className: "before:content-none after:content-none" }}
+                        containerProps={{ className: "!rounded-none" }}
                         crossOrigin={undefined}
                     />
                 </div>
@@ -145,8 +147,9 @@ const UserManage = () => {
                         placeholder="********"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="focus:!border-t-blue-500"
+                        className="!rounded-none focus:!border-t-blue-500"
                         labelProps={{ className: "before:content-none after:content-none" }}
+                        containerProps={{ className: "!rounded-none" }}
                         crossOrigin={undefined}
                     />
                 </div>
