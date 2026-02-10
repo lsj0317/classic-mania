@@ -20,7 +20,7 @@ const PostManage = () => {
         <Card className="p-6 shadow-sm border border-gray-100">
             <div className="flex justify-between mb-6">
                 <Typography variant="h6" className="font-bold">작성글 관리</Typography>
-                <div className="w-64"><Input label="내 글 검색" onChange={(e) => setSearch(e.target.value)} /></div>
+                <div className="w-64"><Input label="내 글 검색" onChange={(e) => setSearch(e.target.value)} className="!rounded-none" containerProps={{ className: "!rounded-none" }} /></div>
             </div>
             <table className="w-full text-left">
                 <thead><tr className="border-b border-gray-100 pb-2"><th className="pb-2 text-sm font-bold text-gray-500">제목</th><th className="pb-2 text-sm font-bold text-gray-500 text-center">관리</th></tr></thead>

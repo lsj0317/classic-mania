@@ -24,7 +24,7 @@ const Home = () => {
 
     // 공통 테이블 섹션 컴포넌트
     const PostSection = ({ title, data, sortType }: { title: string, data: typeof posts, sortType: string }) => (
-        <Card className="shadow-lg">
+        <Card className="shadow-lg rounded-none">
             <CardBody>
                 <div className="flex items-center justify-between mb-6">
                     <Typography variant="h5" color="blue-gray" className="font-bold">
@@ -43,7 +43,7 @@ const Home = () => {
                     {data.map((post) => (
                         <li
                             key={post.id}
-                            className="flex items-center gap-4 cursor-pointer group p-1 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center gap-4 cursor-pointer group p-1 hover:bg-gray-50 transition-colors"
                             // [수정] navigate 대신 handlePostClick 함수 호출
                             onClick={() => handlePostClick(post.id)}
                         >

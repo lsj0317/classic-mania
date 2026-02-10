@@ -81,6 +81,8 @@ const PostWrite = () => {
                             label="카테고리 선택"
                             value={category}
                             onChange={(val) => setCategory(val || "자유")}
+                            className="!rounded-none"
+                            containerProps={{ className: "!rounded-none" }}
                         >
                             <Option value="자유">자유</Option>
                             <Option value="정보">정보</Option>
@@ -94,6 +96,8 @@ const PostWrite = () => {
                             label="제목을 입력하세요"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            className="!rounded-none"
+                            containerProps={{ className: "!rounded-none" }}
                             crossOrigin={undefined}
                         />
 
@@ -103,6 +107,8 @@ const PostWrite = () => {
                             rows={12}
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
+                            className="!rounded-none"
+                            containerProps={{ className: "!rounded-none" }}
                         />
 
                         {/* 이미지 업로드 영역 */}

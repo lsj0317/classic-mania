@@ -128,13 +128,17 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                             <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
                                 <MenuHandler>
                                     <Button variant="text" className="flex items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 capitalize focus:ring-0">
-                                        <Avatar
-                                            variant="circular"
-                                            size="sm"
-                                            alt={currentUser.name}
-                                            className={`border-2 p-0.5 ${isScrolled ? "border-blue-500" : "border-white"}`}
-                                            src={currentUser.profileImage || "https://docs.material-tailwind.com/img/face-2.jpg"}
-                                        />
+                                        {currentUser.profileImage ? (
+                                            <Avatar
+                                                variant="circular"
+                                                size="sm"
+                                                alt={currentUser.name}
+                                                className={`border-2 p-0.5 ${isScrolled ? "border-blue-500" : "border-white"}`}
+                                                src={currentUser.profileImage}
+                                            />
+                                        ) : (
+                                            <UserCircleIcon className={`h-9 w-9 ${isScrolled ? "text-blue-500" : "text-white"}`} />
+                                        )}
                                         <Typography variant="small" className={`font-bold ml-1 transition-colors ${textColor}`}>
                                             {currentUser.userId} {t.auth.honorific}
                                         </Typography>
