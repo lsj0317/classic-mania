@@ -1,30 +1,34 @@
 import React, { useEffect, useRef } from 'react';
-import { Typography, Input, Button, Spinner, Card, Select, Option } from "@material-tailwind/react";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Card } from "@/components/ui/card";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Search, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useNewsStore } from '../../stores/newsStore';
 import type {NewsItem} from '../../api/newsApi';
 import { useNavigate } from 'react-router-dom';
 
 const NewsPage = () => {
     const navigate = useNavigate();
-    const { 
-        newsList, 
-        loading, 
-        error, 
-        keyword, 
-        currentPage, 
-        totalResults, 
+    const {
+        newsList,
+        loading,
+        error,
+        keyword,
+        currentPage,
+        totalResults,
         sortBy,
         lastFetched,
-        fetchNewsList, 
-        setKeyword, 
+        fetchNewsList,
+        setKeyword,
         setCurrentPage,
         setSortBy
     } = useNewsStore();
 
     // 검색어 입력 상태 (엔터키 입력 시 검색을 위해 별도 관리)
     const [localKeyword, setLocalKeyword] = React.useState(keyword);
-    
+
     // 이전 파라미터 추적을 위한 Ref (불필요한 재요청 방지)
     const prevParamsRef = useRef({ keyword, currentPage, sortBy });
 
@@ -36,7 +40,7 @@ const NewsPage = () => {
         }
 
         // 2. 파라미터(검색어, 페이지, 정렬)가 변경되었는지 확인
-        const isParamsChanged = 
+        const isParamsChanged =
             prevParamsRef.current.keyword !== keyword ||
             prevParamsRef.current.currentPage !== currentPage ||
             prevParamsRef.current.sortBy !== sortBy;
@@ -97,49 +101,41 @@ const NewsPage = () => {
             {/* 헤더 섹션 */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 lg:gap-6 mb-8 lg:mb-12 border-b-2 border-black pb-4 lg:pb-6 px-4 sm:px-0">
                 <div className="flex-1">
-                    <Typography variant="h2" className="font-bold text-black tracking-tighter mb-1 lg:mb-2 text-xl lg:text-3xl">
+                    <h2 className="font-bold text-black tracking-tighter mb-1 lg:mb-2 text-xl lg:text-3xl">
                         클래식뉴스
-                    </Typography>
-                    <Typography className="text-gray-600 font-normal text-sm">
+                    </h2>
+                    <p className="text-gray-600 font-normal text-sm">
                         클래식 공연계의 최신 소식과 아티스트들의 이야기를 전해드립니다.
-                    </Typography>
+                    </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full lg:w-auto">
                     <div className="w-full sm:w-40">
-                        <Select 
-                            label="정렬" 
-                            value={sortBy} 
-                            onChange={(val) => setSortBy(val || 'sim')}
-                            className="!rounded-none border-t-blue-gray-200 focus:!border-t-gray-900"
-                            labelProps={{
-                                className: "before:content-none after:content-none",
-                            }}
-                            containerProps={{
-                                className: "!min-w-[100px] !rounded-none",
-                            }}
-                            menuProps={{ className: "rounded-none" }}
+                        <Select
+                            value={sortBy}
+                            onValueChange={(val) => setSortBy(val || 'sim')}
                         >
-                            <Option value="sim" className="rounded-none">관련도순</Option>
-                            <Option value="date" className="rounded-none">최신순</Option>
+                            <SelectTrigger>
+                                <SelectValue placeholder="정렬" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="sim">관련도순</SelectItem>
+                                <SelectItem value="date">최신순</SelectItem>
+                            </SelectContent>
                         </Select>
                     </div>
                     <div className="relative w-full sm:w-80">
                         <Input
                             type="text"
-                            label="뉴스 검색"
+                            placeholder="뉴스 검색"
                             value={localKeyword}
                             onChange={(e) => setLocalKeyword(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            icon={<MagnifyingGlassIcon className="h-5 w-5 cursor-pointer hover:text-black" onClick={handleSearch} />}
-                            className="!rounded-none focus:!border-t-gray-900"
-                            labelProps={{
-                                className: "before:content-none after:content-none",
-                            }}
-                            containerProps={{
-                                className: "!rounded-none",
-                            }}
-                            crossOrigin={undefined}
+                            className="pr-10"
+                        />
+                        <Search
+                            className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 cursor-pointer hover:text-black text-gray-400"
+                            onClick={handleSearch}
                         />
                     </div>
                 </div>
@@ -155,8 +151,8 @@ const NewsPage = () => {
             {/* 뉴스 리스트 */}
             {loading ? (
                 <div className="flex justify-center items-center py-20 lg:py-40">
-                    <Spinner className="h-8 w-8 lg:h-10 lg:w-10" />
-                    <Typography className="ml-3 lg:ml-4 text-gray-500 text-sm">최신 뉴스를 불러오는 중...</Typography>
+                    <Spinner size="md" />
+                    <span className="ml-3 lg:ml-4 text-gray-500 text-sm">최신 뉴스를 불러오는 중...</span>
                 </div>
             ) : newsList.length > 0 ? (
                 <div className="flex flex-col gap-3 sm:gap-6 px-4 sm:px-0">
@@ -174,16 +170,16 @@ const NewsPage = () => {
                                             {formatDate(news.pubDate)}
                                         </span>
                                     </div>
-                                    <Typography variant="h5" className="font-bold text-black mb-2 sm:mb-3 group-hover:text-blue-700 transition-colors leading-tight text-sm sm:text-lg">
+                                    <h5 className="font-bold text-black mb-2 sm:mb-3 group-hover:text-blue-700 transition-colors leading-tight text-sm sm:text-lg">
                                         {decodeHtml(news.title)}
-                                    </Typography>
-                                    <Typography className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
+                                    </h5>
+                                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
                                         {decodeHtml(news.description)}
-                                    </Typography>
+                                    </p>
                                 </div>
                                 <div className="hidden md:flex items-center justify-center h-full pl-4">
-                                    <Button variant="text" className="flex items-center gap-2 rounded-full p-3 text-gray-400 group-hover:text-black group-hover:bg-gray-100">
-                                        <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                                    <Button variant="ghost" className="flex items-center gap-2 rounded-full p-3 text-gray-400 group-hover:text-black group-hover:bg-gray-100">
+                                        <ExternalLink className="h-5 w-5" />
                                     </Button>
                                 </div>
                             </div>
@@ -192,7 +188,7 @@ const NewsPage = () => {
                 </div>
             ) : (
                 <div className="py-20 lg:py-40 text-center border border-dashed border-gray-300 mx-4 sm:mx-0">
-                    <Typography className="text-gray-400">검색 결과가 없습니다.</Typography>
+                    <p className="text-gray-400">검색 결과가 없습니다.</p>
                 </div>
             )}
 
@@ -200,12 +196,12 @@ const NewsPage = () => {
             {!loading && newsList.length > 0 && (
                 <div className="flex items-center justify-center gap-2 mt-16">
                     <Button
-                        variant="text"
-                        className="flex items-center gap-1 rounded-none p-2"
+                        variant="ghost"
+                        className="flex items-center gap-1 p-2"
                         onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
                         disabled={currentPage === 1}
                     >
-                        <ChevronLeftIcon strokeWidth={2} className="h-4 w-4" />
+                        <ChevronLeft strokeWidth={2} className="h-4 w-4" />
                     </Button>
 
                     <div className="flex items-center gap-1">
@@ -215,13 +211,13 @@ const NewsPage = () => {
                                 if (Math.abs(currentPage - pageNum) === 5) return <span key={index} className="px-1 text-gray-300">...</span>;
                                 return null;
                             }
-                            
+
                             return (
                                 <Button
                                     key={pageNum}
-                                    variant={currentPage === pageNum ? "filled" : "text"}
+                                    variant={currentPage === pageNum ? "default" : "ghost"}
                                     size="sm"
-                                    className={`rounded-none w-8 h-8 p-0 ${currentPage === pageNum ? "bg-black text-white" : "text-gray-600"}`}
+                                    className={`w-8 h-8 p-0 ${currentPage === pageNum ? "bg-black text-white" : "text-gray-600"}`}
                                     onClick={() => setCurrentPage(pageNum)}
                                 >
                                     {pageNum}
@@ -231,12 +227,12 @@ const NewsPage = () => {
                     </div>
 
                     <Button
-                        variant="text"
-                        className="flex items-center gap-1 rounded-none p-2"
+                        variant="ghost"
+                        className="flex items-center gap-1 p-2"
                         onClick={() => setCurrentPage(Math.min(currentPage + 1, maxPages))}
                         disabled={currentPage === maxPages}
                     >
-                        <ChevronRightIcon strokeWidth={2} className="h-4 w-4" />
+                        <ChevronRight strokeWidth={2} className="h-4 w-4" />
                     </Button>
                 </div>
             )}

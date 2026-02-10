@@ -1,14 +1,9 @@
 import { useEffect } from "react";
-import {
-    Card,
-    Typography,
-    Button,
-    CardBody,
-    Input,
-    CardFooter,
-    Spinner,
-} from "@material-tailwind/react";
-import { MagnifyingGlassIcon, MapIcon, PhotoIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Search, Map, Image, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePerformanceStore } from "../../stores/performanceStore";
 
@@ -72,7 +67,7 @@ const PerformanceMain = () => {
                 />
             ) : (
                 <div className="flex flex-col items-center gap-1">
-                    <PhotoIcon className="h-6 w-6 text-gray-200" />
+                    <Image className="h-6 w-6 text-gray-200" />
                     <span className="text-[8px] text-gray-300 font-bold uppercase tracking-widest leading-none">No Poster</span>
                 </div>
             )}
@@ -93,18 +88,18 @@ const PerformanceMain = () => {
             {/* 상단 헤더 영역 */}
             <div className="mb-6 lg:mb-8 flex flex-col justify-between gap-4 lg:gap-8 md:flex-row md:items-center px-4 sm:px-0">
                 <div>
-                    <Typography variant="h4" color="blue-gray" className="font-bold tracking-tighter uppercase text-xl lg:text-2xl">
+                    <h4 className="font-bold tracking-tighter uppercase text-xl lg:text-2xl text-gray-900">
                         공연정보
-                    </Typography>
-                    <Typography color="gray" className="mt-1 font-normal text-sm">
+                    </h4>
+                    <p className="mt-1 font-normal text-sm text-gray-500">
                         전국의 클래식 공연 소식과 실시간 예매 현황을 확인하세요.
-                    </Typography>
+                    </p>
                 </div>
                 <Button
-                    className="flex items-center gap-3 bg-black rounded-none shadow-none hover:shadow-lg transition-all px-8 w-full sm:w-auto justify-center"
+                    className="flex items-center gap-3 bg-black hover:bg-black/90 shadow-none hover:shadow-lg transition-all px-8 w-full sm:w-auto justify-center rounded-none"
                     onClick={() => navigate("/performance/map")}
                 >
-                    <MapIcon className="h-5 w-5" /> 공연지도 보기
+                    <Map className="h-5 w-5" /> 공연지도 보기
                 </Button>
             </div>
 
@@ -118,13 +113,13 @@ const PerformanceMain = () => {
             {/* 메인 필터 및 검색 */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center justify-between border-b border-gray-100 pb-6 px-4 sm:px-0">
                 {/* 탭 필터 - 모바일에서 가로 스크롤 */}
-                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-none overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-1 sm:overflow-visible sm:w-max">
+                <div className="flex items-center gap-2 bg-gray-100 p-1 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-1 sm:overflow-visible sm:w-max">
                     {PERFORMANCE_TABS.map((tab) => (
                         <Button
                             key={tab}
-                            variant={selectedTab === tab ? "white" : "text"}
+                            variant={selectedTab === tab ? "default" : "ghost"}
                             size="sm"
-                            className={`rounded-none px-4 sm:px-6 py-2 whitespace-nowrap flex-shrink-0 ${selectedTab === tab ? "shadow-sm text-white font-bold" : "text-gray-500"}`}
+                            className={`rounded-none px-4 sm:px-6 py-2 whitespace-nowrap flex-shrink-0 ${selectedTab === tab ? "shadow-sm font-bold" : "text-gray-500"}`}
                             onClick={() => {
                                 setSelectedTab(tab);
                                 if (tab !== "지역별") setSelectedArea("전체 지역");
@@ -134,29 +129,28 @@ const PerformanceMain = () => {
                         </Button>
                     ))}
                 </div>
-                <div className="w-full md:w-80">
+                <div className="w-full md:w-80 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                        label="공연명 또는 공연장 검색"
-                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                        placeholder="공연명 또는 공연장 검색"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        crossOrigin={undefined}
-                        className="!rounded-none focus:!border-black"
+                        className="pl-10 focus:border-black"
                     />
                 </div>
             </div>
 
             {/* 지역별 하위 카테고리 UI */}
             {selectedTab === "지역별" && (
-                <Card className="mb-6 lg:mb-8 shadow-none border border-gray-100 bg-gray-50/30 rounded-none p-3 lg:p-4 mx-4 sm:mx-0">
+                <div className="mb-6 lg:mb-8 shadow-none border border-gray-100 bg-gray-50/30 p-3 lg:p-4 mx-4 sm:mx-0">
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {AREA_CATEGORIES.map((area) => (
                             <Button
                                 key={area}
                                 size="sm"
-                                variant={selectedArea === area ? "filled" : "text"}
+                                variant={selectedArea === area ? "default" : "ghost"}
                                 className={`rounded-none px-3 sm:px-4 py-1.5 transition-all text-[10px] sm:text-[11px] font-bold ${
-                                    selectedArea === area ? "bg-black text-white" : "text-gray-500 hover:text-black"
+                                    selectedArea === area ? "bg-black text-white hover:bg-black/90" : "text-gray-500 hover:text-black"
                                 }`}
                                 onClick={() => setSelectedArea(area)}
                             >
@@ -164,28 +158,28 @@ const PerformanceMain = () => {
                             </Button>
                         ))}
                     </div>
-                </Card>
+                </div>
             )}
 
             {/* 로딩 상태 */}
             {listLoading ? (
                 <div className="flex justify-center items-center py-20">
-                    <Spinner className="h-8 w-8" />
-                    <Typography className="ml-3 text-gray-500">공연 정보를 불러오는 중...</Typography>
+                    <Spinner size="md" />
+                    <span className="ml-3 text-gray-500">공연 정보를 불러오는 중...</span>
                 </div>
             ) : (
                 <>
                     {/* 데스크톱: 테이블 뷰 */}
                     <Card className="h-full w-full shadow-none border border-gray-200 rounded-none overflow-hidden hidden md:block">
-                        <CardBody className="px-0 py-0">
+                        <CardContent className="px-0 py-0">
                             <table className="w-full min-w-max table-auto text-left">
                                 <thead>
                                 <tr className="bg-gray-50/50">
                                     {TABLE_HEAD.map((head) => (
                                         <th key={head} className="border-b border-gray-100 p-4">
-                                            <Typography variant="small" color="blue-gray" className="font-bold opacity-80 uppercase tracking-wider">
+                                            <span className="text-sm font-bold text-gray-700 opacity-80 uppercase tracking-wider">
                                                 {head}
-                                            </Typography>
+                                            </span>
                                         </th>
                                     ))}
                                 </tr>
@@ -203,18 +197,18 @@ const PerformanceMain = () => {
                                                     <PerformanceThumbnail src={poster} alt={title} />
                                                 </td>
                                                 <td className={classes}>
-                                                    <Typography variant="small" className="font-bold text-black group-hover:text-gray-600 transition-colors">
+                                                    <span className="text-sm font-bold text-black group-hover:text-gray-600 transition-colors">
                                                         {title}
-                                                    </Typography>
+                                                    </span>
                                                 </td>
                                                 <td className={classes}>
-                                                    <Typography variant="small" className="text-gray-600 font-medium">{place}</Typography>
+                                                    <span className="text-sm text-gray-600 font-medium">{place}</span>
                                                 </td>
                                                 <td className={classes}>
-                                                    <Typography variant="small" className="text-gray-500 text-xs font-mono">{period}</Typography>
+                                                    <span className="text-sm text-gray-500 text-xs font-mono">{period}</span>
                                                 </td>
                                                 <td className={classes}>
-                                                    <Typography variant="small" className="text-gray-600">{area}</Typography>
+                                                    <span className="text-sm text-gray-600">{area}</span>
                                                 </td>
                                                 <td className={classes}>
                                                     <StatusBadge status={status} />
@@ -231,29 +225,29 @@ const PerformanceMain = () => {
                                 )}
                                 </tbody>
                             </table>
-                        </CardBody>
+                        </CardContent>
 
                         <CardFooter className="flex items-center justify-between border-t border-gray-100 p-4 bg-white">
                             <Button
-                                variant="text"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => setCurrentPage(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 className={`flex items-center gap-1 font-bold ${currentPage === 1 ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
                             >
-                                <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                                <ChevronLeft strokeWidth={3} className="h-3 w-3" /> 이전
                             </Button>
-                            <Typography variant="small" className="font-bold text-gray-500">
+                            <span className="text-sm font-bold text-gray-500">
                                 <span className="text-black">{currentPage}</span> / {totalPages || 1}
-                            </Typography>
+                            </span>
                             <Button
-                                variant="text"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => setCurrentPage(currentPage + 1)}
                                 disabled={currentPage === totalPages || totalPages === 0}
                                 className={`flex items-center gap-1 font-bold ${currentPage === totalPages ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
                             >
-                                다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                                다음 <ChevronRight strokeWidth={3} className="h-3 w-3" />
                             </Button>
                         </CardFooter>
                     </Card>
@@ -275,15 +269,15 @@ const PerformanceMain = () => {
                                                     <StatusBadge status={status} />
                                                     <span className="text-[10px] text-gray-400">{area}</span>
                                                 </div>
-                                                <Typography className="font-bold text-sm text-black line-clamp-2 mb-1">
+                                                <p className="font-bold text-sm text-black line-clamp-2 mb-1">
                                                     {title}
-                                                </Typography>
-                                                <Typography className="text-xs text-gray-500 truncate">
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
                                                     {place}
-                                                </Typography>
-                                                <Typography className="text-[10px] text-gray-400 font-mono mt-1">
+                                                </p>
+                                                <p className="text-[10px] text-gray-400 font-mono mt-1">
                                                     {period}
-                                                </Typography>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -298,25 +292,25 @@ const PerformanceMain = () => {
                         {/* 모바일 페이지네이션 */}
                         <div className="flex items-center justify-between border-t border-gray-100 p-4 mt-3">
                             <Button
-                                variant="text"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => setCurrentPage(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 className={`flex items-center gap-1 font-bold ${currentPage === 1 ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
                             >
-                                <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                                <ChevronLeft strokeWidth={3} className="h-3 w-3" /> 이전
                             </Button>
-                            <Typography variant="small" className="font-bold text-gray-500">
+                            <span className="text-sm font-bold text-gray-500">
                                 <span className="text-black">{currentPage}</span> / {totalPages || 1}
-                            </Typography>
+                            </span>
                             <Button
-                                variant="text"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => setCurrentPage(currentPage + 1)}
                                 disabled={currentPage === totalPages || totalPages === 0}
                                 className={`flex items-center gap-1 font-bold ${currentPage === totalPages ? "text-gray-300" : "text-black hover:bg-gray-100"}`}
                             >
-                                다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                                다음 <ChevronRight strokeWidth={3} className="h-3 w-3" />
                             </Button>
                         </div>
                     </div>

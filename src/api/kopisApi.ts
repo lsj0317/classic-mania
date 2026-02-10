@@ -3,46 +3,30 @@ import type { Performance, RelatedLink } from '../types';
 
 const API_KEY = import.meta.env.VITE_KOPIS_API_KEY;
 
-const isDev = import.meta.env.DEV;
-const CORS_PROXY = 'https://corsproxy.io/?url=';
-
 /**
- * KOPIS API URL 빌드 (개발: Vite 프록시, 배포: corsproxy.io CORS 프록시)
- * 배포 환경에서는 전체 URL을 encodeURIComponent로 인코딩하여 query params가
- * corsproxy.io가 아닌 실제 KOPIS API로 전달되도록 합니다.
+ * KOPIS API URL 빌드
+ * 개발/배포 모두 동일하게 /api/kopis 프록시 사용
+ * - 개발: Vite dev server proxy
+ * - 배포: Vercel Serverless Function
  */
 function buildKopisUrl(path: string, params: Record<string, string | number>): string {
     const searchParams = new URLSearchParams();
+    searchParams.append('path', path);
     for (const [key, value] of Object.entries(params)) {
         searchParams.append(key, String(value));
     }
-
-    if (isDev) {
-        return `/api/kopis${path}?${searchParams.toString()}`;
-    }
-
-    const targetUrl = `http://www.kopis.or.kr${path}?${searchParams.toString()}`;
-    return `${CORS_PROXY}${encodeURIComponent(targetUrl)}`;
+    return `/api/kopis?${searchParams.toString()}`;
 }
 
-/**
- * XML Element에서 태그명으로 텍스트 값 추출
- */
 const getTagText = (el: Element, tag: string): string => {
     return el.getElementsByTagName(tag)[0]?.textContent?.trim() || '';
 };
 
-/**
- * XML Element에서 태그명으로 모든 텍스트 값 추출 (배열)
- */
 const getAllTagTexts = (el: Element, tag: string): string[] => {
     const nodes = el.getElementsByTagName(tag);
     return Array.from(nodes).map((n) => n.textContent?.trim() || '').filter(Boolean);
 };
 
-/**
- * KOPIS 날짜 형식(YYYYMMDD 또는 YYYY.MM.DD) → YYYY.MM.DD 변환
- */
 const formatDate = (raw: string): string => {
     if (!raw) return '';
     const clean = raw.replace(/\./g, '');
@@ -52,9 +36,6 @@ const formatDate = (raw: string): string => {
     return raw;
 };
 
-/**
- * KOPIS 지역명에서 시도명 추출 (예: "서울특별시" → "서울")
- */
 const extractArea = (raw: string): string => {
     if (!raw) return '기타';
     const map: Record<string, string> = {
@@ -71,13 +52,8 @@ const extractArea = (raw: string): string => {
     return raw;
 };
 
-/**
- * 공연 목록 조회 (KOPIS)
- * GET /openApi/restful/pblprfr
- */
 export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Performance[]> => {
     try {
-        // 검색 기간: 6개월 전 ~ 6개월 후
         const today = new Date();
         const sixMonthsAgo = new Date(today);
         sixMonthsAgo.setMonth(today.getMonth() - 6);
@@ -93,11 +69,10 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
             eddate: toYMD(sixMonthsLater),
             cpage: page,
             rows: rows,
-            shcate: 'CCCA', // 클래식 장르
+            shcate: 'CCCA',
         });
 
         const response = await axios.get(url);
-
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
@@ -107,7 +82,6 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
         return Array.from(items).map((item) => {
             const startDate = formatDate(getTagText(item, 'prfpdfrom'));
             const endDate = formatDate(getTagText(item, 'prfpdto'));
-
             return {
                 id: getTagText(item, 'mt20id'),
                 title: getTagText(item, 'prfnm') || '제목 없음',
@@ -127,10 +101,6 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
     }
 };
 
-/**
- * 공연 상세 조회 (KOPIS)
- * GET /openApi/restful/pblprfr/{mt20id}
- */
 export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Performance | null> => {
     try {
         const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {
@@ -138,7 +108,6 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
         });
 
         const response = await axios.get(url);
-
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
@@ -149,23 +118,19 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
         const startDate = formatDate(getTagText(item, 'prfpdfrom'));
         const endDate = formatDate(getTagText(item, 'prfpdto'));
 
-        // 관련 링크 파싱
         const relatedLinks: RelatedLink[] = [];
         const relateNodes = item.getElementsByTagName('relate');
-        
-        // 예매처 키워드
+
         const bookingKeywords = ['인터파크', '티켓링크', '예스24', '멜론티켓', '옥션티켓', '예매', '티켓'];
         let foundBookingUrl: string | undefined = undefined;
 
         Array.from(relateNodes).forEach((node) => {
             const name = getTagText(node, 'relatenm');
-            const url = getTagText(node, 'relateurl');
-            if (name && url) {
-                relatedLinks.push({ name, url });
-                
-                // 아직 bookingUrl을 못 찾았고, 이름에 예매처 키워드가 있다면 설정
+            const linkUrl = getTagText(node, 'relateurl');
+            if (name && linkUrl) {
+                relatedLinks.push({ name, url: linkUrl });
                 if (!foundBookingUrl && bookingKeywords.some(keyword => name.includes(keyword))) {
-                    foundBookingUrl = url;
+                    foundBookingUrl = linkUrl;
                 }
             }
         });
@@ -199,10 +164,6 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
     }
 };
 
-/**
- * 공연시설 상세 조회 (KOPIS)
- * GET /openApi/restful/prfplc/{mt10id}
- */
 export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
     try {
         const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {
@@ -210,7 +171,6 @@ export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: n
         });
 
         const response = await axios.get(url);
-
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
@@ -222,7 +182,6 @@ export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: n
         const lng = parseFloat(getTagText(item, 'lo'));
 
         if (isNaN(lat) || isNaN(lng)) return null;
-
         return { lat, lng };
     } catch (error) {
         console.error('KOPIS 공연시설 상세 API 호출 중 에러 발생:', error);

@@ -1,4 +1,7 @@
-import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -46,95 +49,85 @@ const Login = () => {
 
     return (
         <div className="flex justify-center items-center min-h-[80vh] bg-gray-50/50">
-            <Card color="transparent" shadow={false} className="w-full max-w-md p-8 border border-gray-200 shadow-xl bg-white rounded-none">
-                <div className="text-center mb-8">
-                    <Typography variant="h4" color="blue-gray" className="font-bold tracking-tight">
-                        로그인
-                    </Typography>
-                    <Typography color="gray" className="mt-2 font-normal text-sm">
-                        Classic Mania에 오신 것을 환영합니다.
-                    </Typography>
-                </div>
-
-                <form className="flex flex-col gap-4" onSubmit={handleLogin}>
-                    <div className="flex flex-col gap-4">
-                        <Input 
-                            size="lg" 
-                            label="아이디" 
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="!rounded-none focus:!border-t-gray-900" 
-                            labelProps={{
-                                className: "before:content-none after:content-none",
-                            }}
-                            containerProps={{
-                                className: "!rounded-none",
-                            }}
-                            crossOrigin={undefined} 
-                        />
-                        <Input 
-                            type="password" 
-                            size="lg" 
-                            label="비밀번호" 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="!rounded-none focus:!border-t-gray-900" 
-                            labelProps={{
-                                className: "before:content-none after:content-none",
-                            }}
-                            containerProps={{
-                                className: "!rounded-none",
-                            }}
-                            crossOrigin={undefined} 
-                        />
+            <Card className="w-full max-w-md border border-gray-200 shadow-xl bg-white">
+                <CardContent className="p-8">
+                    <div className="text-center mb-8">
+                        <h4 className="text-xl font-bold tracking-tight text-gray-800">
+                            로그인
+                        </h4>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Classic Mania에 오신 것을 환영합니다.
+                        </p>
                     </div>
-                    
-                    <Button type="submit" className="mt-2 rounded-none bg-black hover:scale-[1.01] transition-transform" fullWidth>
-                        로그인
-                    </Button>
 
-                    <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-                        <div className="flex gap-4">
-                            <Link to="#" className="hover:text-black hover:underline">아이디 찾기</Link>
-                            <Link to="#" className="hover:text-black hover:underline">비밀번호 찾기</Link>
+                    <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+                        <div className="flex flex-col gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email">아이디</Label>
+                                <Input
+                                    id="email"
+                                    placeholder="아이디"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="h-11 focus:border-gray-900"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password">비밀번호</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="비밀번호"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="h-11 focus:border-gray-900"
+                                />
+                            </div>
                         </div>
-                        <Link to="/signup" className="font-bold text-black hover:underline">
-                            회원가입
-                        </Link>
+
+                        <Button type="submit" className="mt-2 w-full bg-black hover:bg-gray-800 hover:scale-[1.01] transition-transform">
+                            로그인
+                        </Button>
+
+                        <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                            <div className="flex gap-4">
+                                <Link to="#" className="hover:text-black hover:underline">아이디 찾기</Link>
+                                <Link to="#" className="hover:text-black hover:underline">비밀번호 찾기</Link>
+                            </div>
+                            <Link to="/signup" className="font-bold text-black hover:underline">
+                                회원가입
+                            </Link>
+                        </div>
+                    </form>
+
+                    {/* 소셜 로그인 구분선 */}
+                    <div className="relative flex py-8 items-center">
+                        <div className="flex-grow border-t border-gray-200"></div>
+                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium">SNS 계정으로 로그인</span>
+                        <div className="flex-grow border-t border-gray-200"></div>
                     </div>
-                </form>
 
-                {/* 소셜 로그인 구분선 */}
-                <div className="relative flex py-8 items-center">
-                    <div className="flex-grow border-t border-gray-200"></div>
-                    <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium">SNS 계정으로 로그인</span>
-                    <div className="flex-grow border-t border-gray-200"></div>
-                </div>
+                    {/* 소셜 로그인 버튼 */}
+                    <div className="flex flex-col gap-3">
+                        <Button
+                            variant="outline"
+                            className="w-full h-11 flex items-center justify-center gap-2 border-[#FEE500] bg-[#FEE500] text-black hover:bg-[#FDD835] hover:border-[#FDD835] font-medium text-sm"
+                            onClick={handleKakaoLogin}
+                        >
+                            <KakaoIcon />
+                            카카오로 시작하기
+                        </Button>
 
-                {/* 소셜 로그인 버튼 */}
-                <div className="flex flex-col gap-3">
-                    <Button 
-                        size="lg"
-                        variant="outlined"
-                        className="flex items-center justify-center gap-2 rounded-none border-[#FEE500] bg-[#FEE500] text-black hover:bg-[#FDD835] hover:border-[#FDD835] focus:ring-0 shadow-none hover:shadow-none normal-case font-medium text-sm"
-                        fullWidth
-                        onClick={handleKakaoLogin}
-                    >
-                        <KakaoIcon />
-                        카카오로 시작하기
-                    </Button>
-                    
-                    <Button 
-                        size="lg"
-                        variant="outlined"
-                        className="flex items-center justify-center gap-2 rounded-none border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-0 shadow-none hover:shadow-sm normal-case font-medium text-sm"
-                        fullWidth
-                        onClick={handleGoogleLogin}
-                    >
-                        <GoogleIcon />
-                        Google로 시작하기
-                    </Button>
-                </div>
+                        <Button
+                            variant="outline"
+                            className="w-full h-11 flex items-center justify-center gap-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 font-medium text-sm"
+                            onClick={handleGoogleLogin}
+                        >
+                            <GoogleIcon />
+                            Google로 시작하기
+                        </Button>
+                    </div>
+                </CardContent>
             </Card>
         </div>
     );

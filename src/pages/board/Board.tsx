@@ -1,13 +1,8 @@
-import {
-    Card,
-    Typography,
-    Button,
-    CardBody,
-    CardFooter,
-    Input,
-} from "@material-tailwind/react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { posts, currentUser } from "../../data/mockData.ts";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -62,12 +57,12 @@ const Board = () => {
     return (
         <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl">
             <div className="mb-6 px-4 sm:px-0">
-                <Typography variant="h5" color="blue-gray" className="font-bold">
+                <h2 className="text-xl font-bold text-gray-800">
                     커뮤니티 게시판
-                </Typography>
-                <Typography color="gray" className="mt-1 font-normal text-sm">
+                </h2>
+                <p className="mt-1 font-normal text-sm text-gray-500">
                     클래식 음악에 대한 다양한 이야기를 나누어 보세요.
-                </Typography>
+                </p>
             </div>
 
             <div className="mb-6 lg:mb-8 flex flex-col gap-4 lg:gap-6 px-4 sm:px-0">
@@ -76,9 +71,9 @@ const Board = () => {
                     {CATEGORIES.map((category) => (
                         <Button
                             key={category}
+                            variant={selectedCategory === category ? "default" : "outline"}
                             size="sm"
-                            variant={selectedCategory === category ? "filled" : "outlined"}
-                            className={`rounded-none px-4 sm:px-6 py-2 sm:py-2.5 transition-all whitespace-nowrap flex-shrink-0 text-xs sm:text-sm ${
+                            className={`px-4 sm:px-6 py-2 sm:py-2.5 transition-all whitespace-nowrap flex-shrink-0 text-xs sm:text-sm ${
                                 selectedCategory === category
                                     ? "bg-black text-white border-black"
                                     : "bg-transparent text-gray-500 border-gray-300 hover:border-black hover:text-black"
@@ -94,19 +89,19 @@ const Board = () => {
                 </div>
 
                 <div className="flex flex-col justify-between gap-3 sm:gap-4 md:flex-row md:items-center border-t border-gray-100 pt-4 lg:pt-6">
-                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-none w-max">
+                    <div className="flex items-center gap-2 bg-gray-100 p-1 w-max">
                         <Button
-                            variant={sortBy === "latest" ? "white" : "text"}
+                            variant="ghost"
                             size="sm"
-                            className={`rounded-none px-4 py-2 ${sortBy === "latest" ? "shadow-sm text-white font-bold" : "text-white-500"}`}
+                            className={`px-4 py-2 ${sortBy === "latest" ? "bg-white shadow-sm font-bold" : "text-gray-500"}`}
                             onClick={() => setSortBy("latest")}
                         >
                             최신순
                         </Button>
                         <Button
-                            variant={sortBy === "views" ? "white" : "text"}
+                            variant="ghost"
                             size="sm"
-                            className={`rounded-none px-4 py-2 ${sortBy === "views" ? "shadow-sm text-white font-bold" : "text-white-500"}`}
+                            className={`px-4 py-2 ${sortBy === "views" ? "bg-white shadow-sm font-bold" : "text-gray-500"}`}
                             onClick={() => setSortBy("views")}
                         >
                             조회순
@@ -114,21 +109,20 @@ const Board = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="flex-1 md:w-72 md:flex-none">
+                        <div className="flex-1 md:w-72 md:flex-none relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
-                                label="검색어 입력"
-                                icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                                placeholder="검색어 입력"
                                 value={searchTerm}
                                 onChange={(e) => {
                                     setSearchTerm(e.target.value);
                                     setActivePage(1);
                                 }}
-                                crossOrigin={undefined}
-                                className="!rounded-none"
+                                className="pl-9"
                             />
                         </div>
                         <Button
-                            className="bg-black text-white rounded-none flex items-center gap-2 whitespace-nowrap"
+                            className="bg-black text-white flex items-center gap-2 whitespace-nowrap"
                             size="sm"
                             onClick={() => navigate("/board/write")}
                         >
@@ -139,16 +133,16 @@ const Board = () => {
             </div>
 
             {/* 데스크톱: 테이블 뷰 */}
-            <Card className="h-full w-full shadow-none border border-gray-200 rounded-none hidden md:block">
-                <CardBody className="overflow-scroll px-0 py-0">
+            <Card className="h-full w-full shadow-none border border-gray-200 hidden md:block">
+                <CardContent className="overflow-scroll px-0 py-0">
                     <table className="w-full min-w-max table-auto text-left">
                         <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
                                 <th key={head} className="border-b border-gray-100 bg-gray-50/50 p-4">
-                                    <Typography variant="small" color="blue-gray" className="font-bold leading-none opacity-80">
+                                    <span className="text-sm font-bold text-gray-700 leading-none opacity-80">
                                         {head}
-                                    </Typography>
+                                    </span>
                                 </th>
                             ))}
                         </tr>
@@ -157,36 +151,36 @@ const Board = () => {
                         {currentPosts.length > 0 ? (
                             currentPosts.map(({ id, category, title, authorName, authorId, createdAt, views, images }, index) => {
                                 const isLast = index === currentPosts.length - 1;
-                                const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+                                const classes = isLast ? "p-4" : "p-4 border-b border-gray-100";
                                 const isMine = authorId === currentUser.userId;
 
                                 return (
                                     <tr key={id} className="hover:bg-gray-50 transition-colors">
                                         <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600">{id}</Typography>
+                                            <span className="text-sm text-gray-600">{id}</span>
                                         </td>
                                         <td className={classes}>
-                                            <Typography variant="small" className="font-bold text-black">{category}</Typography>
+                                            <span className="text-sm font-bold text-black">{category}</span>
                                         </td>
                                         <td className={classes}>
                                             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => handlePostClick(id)}>
-                                                <Typography variant="small" className="font-medium group-hover:text-gray-500 line-clamp-1">
+                                                <span className="text-sm font-medium group-hover:text-gray-500 line-clamp-1">
                                                     {title}
                                                     {images.length > 0 && <span className="ml-2 text-gray-400">📷</span>}
-                                                </Typography>
+                                                </span>
                                             </div>
                                         </td>
                                         <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600">
+                                            <span className="text-sm text-gray-600">
                                                 {authorName}
                                                 {isMine && <span className="ml-1 text-black font-bold text-[11px]">(나)</span>}
-                                            </Typography>
+                                            </span>
                                         </td>
                                         <td className={classes}>
-                                            <Typography variant="small" className="text-gray-400 text-xs">{createdAt}</Typography>
+                                            <span className="text-xs text-gray-400">{createdAt}</span>
                                         </td>
                                         <td className={classes}>
-                                            <Typography variant="small" className="text-gray-600 font-medium">{views.toLocaleString()}</Typography>
+                                            <span className="text-sm text-gray-600 font-medium">{views.toLocaleString()}</span>
                                         </td>
                                     </tr>
                                 );
@@ -194,35 +188,35 @@ const Board = () => {
                         ) : (
                             <tr>
                                 <td colSpan={6} className="p-10 text-center">
-                                    <Typography color="gray">해당 카테고리에 게시글이 없습니다.</Typography>
+                                    <p className="text-gray-500">해당 카테고리에 게시글이 없습니다.</p>
                                 </td>
                             </tr>
                         )}
                         </tbody>
                     </table>
-                </CardBody>
+                </CardContent>
 
                 <CardFooter className="flex items-center justify-between border-t border-gray-100 p-4">
                     <Button
-                        variant="text"
+                        variant="ghost"
                         size="sm"
                         onClick={() => setActivePage(activePage - 1)}
                         disabled={activePage === 1}
                         className={`flex items-center gap-1 font-bold ${activePage === 1 ? "text-gray-300" : "text-black"}`}
                     >
-                        <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                        <ChevronLeft strokeWidth={3} className="h-3 w-3" /> 이전
                     </Button>
-                    <Typography variant="small" className="font-bold text-gray-500">
+                    <span className="text-sm font-bold text-gray-500">
                         <span className="text-black">{activePage}</span> / {totalPages || 1}
-                    </Typography>
+                    </span>
                     <Button
-                        variant="text"
+                        variant="ghost"
                         size="sm"
                         onClick={() => setActivePage(activePage + 1)}
                         disabled={activePage === totalPages || totalPages === 0}
                         className={`flex items-center gap-1 font-bold ${activePage === totalPages ? "text-gray-300" : "text-black"}`}
                     >
-                        다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                        다음 <ChevronRight strokeWidth={3} className="h-3 w-3" />
                     </Button>
                 </CardFooter>
             </Card>
@@ -245,9 +239,9 @@ const Board = () => {
                                         </span>
                                         {images.length > 0 && <span className="text-gray-400 text-xs">📷</span>}
                                     </div>
-                                    <Typography className="font-bold text-sm text-black line-clamp-2 mb-2">
+                                    <p className="font-bold text-sm text-black line-clamp-2 mb-2">
                                         {title}
-                                    </Typography>
+                                    </p>
                                     <div className="flex items-center justify-between text-xs text-gray-400">
                                         <div className="flex items-center gap-2">
                                             <span className="text-gray-600 font-medium">
@@ -265,32 +259,32 @@ const Board = () => {
                     </div>
                 ) : (
                     <div className="p-10 text-center mx-4">
-                        <Typography color="gray">해당 카테고리에 게시글이 없습니다.</Typography>
+                        <p className="text-gray-500">해당 카테고리에 게시글이 없습니다.</p>
                     </div>
                 )}
 
                 {/* 모바일 페이지네이션 */}
                 <div className="flex items-center justify-between border-t border-gray-100 p-4 mt-3">
                     <Button
-                        variant="text"
+                        variant="ghost"
                         size="sm"
                         onClick={() => setActivePage(activePage - 1)}
                         disabled={activePage === 1}
                         className={`flex items-center gap-1 font-bold ${activePage === 1 ? "text-gray-300" : "text-black"}`}
                     >
-                        <ChevronLeftIcon strokeWidth={3} className="h-3 w-3" /> 이전
+                        <ChevronLeft strokeWidth={3} className="h-3 w-3" /> 이전
                     </Button>
-                    <Typography variant="small" className="font-bold text-gray-500">
+                    <span className="text-sm font-bold text-gray-500">
                         <span className="text-black">{activePage}</span> / {totalPages || 1}
-                    </Typography>
+                    </span>
                     <Button
-                        variant="text"
+                        variant="ghost"
                         size="sm"
                         onClick={() => setActivePage(activePage + 1)}
                         disabled={activePage === totalPages || totalPages === 0}
                         className={`flex items-center gap-1 font-bold ${activePage === totalPages ? "text-gray-300" : "text-black"}`}
                     >
-                        다음 <ChevronRightIcon strokeWidth={3} className="h-3 w-3" />
+                        다음 <ChevronRight strokeWidth={3} className="h-3 w-3" />
                     </Button>
                 </div>
             </div>
