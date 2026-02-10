@@ -10,24 +10,27 @@ import {
 } from "@material-tailwind/react";
 import { Link, useNavigate } from "react-router-dom";
 import { currentUser } from "../data/mockData";
-import { ChevronDownIcon, UserCircleIcon, PowerIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, UserCircleIcon, PowerIcon, Bars3Icon, GlobeAltIcon } from "@heroicons/react/24/outline";
+import { useLanguageStore, type Language } from "../stores/languageStore";
 
 interface HeaderProps {
     onMenuOpen: () => void;
 }
 
-const NAV_MENU = [
-    { name: "홈", path: "/" },
-    { name: "게시판", path: "/board" },
-    { name: "공연정보", path: "/performance" },
-    { name: "티켓정보", path: "/ticket-info" },
-    { name: "뉴스", path: "/news" },
-];
-
 const Header = ({ onMenuOpen }: HeaderProps) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const { language, t, setLanguage } = useLanguageStore();
+
+    const NAV_MENU = [
+        { name: t.nav.home, path: "/" },
+        { name: t.nav.board, path: "/board" },
+        { name: t.nav.performance, path: "/performance" },
+        { name: t.nav.ticket, path: "/ticket-info" },
+        { name: t.nav.news, path: "/news" },
+    ];
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -44,11 +47,13 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     const handleBurgerClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log("[Header] 햄버거 버튼 클릭됨!");
-        console.log("[Header] onMenuOpen 함수 호출 시작");
         onMenuOpen();
-        console.log("[Header] onMenuOpen 함수 호출 완료");
     };
+
+    const LANG_OPTIONS: { code: Language; label: string }[] = [
+        { code: "ko", label: t.language.ko },
+        { code: "en", label: t.language.en },
+    ];
 
     return (
         <header
@@ -80,13 +85,43 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                     </ul>
                 </div>
 
-                {/* 데스크톱 유저 영역 */}
+                {/* 데스크톱 유저 영역 + 언어 선택 */}
                 <div className="hidden lg:flex flex-1 justify-end">
                     <div className="flex items-center gap-4">
+                        {/* 언어 드롭다운 */}
+                        <Menu open={isLangMenuOpen} handler={setIsLangMenuOpen} placement="bottom-end">
+                            <MenuHandler>
+                                <Button
+                                    variant="text"
+                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-full capitalize focus:ring-0 ${textColor}`}
+                                >
+                                    <GlobeAltIcon className="h-4 w-4" strokeWidth={2} />
+                                    <span className="text-xs font-bold">
+                                        {language === "ko" ? "KO" : "EN"}
+                                    </span>
+                                    <ChevronDownIcon
+                                        strokeWidth={2.5}
+                                        className={`h-3 w-3 transition-transform ${isLangMenuOpen ? "rotate-180" : ""}`}
+                                    />
+                                </Button>
+                            </MenuHandler>
+                            <MenuList className="p-1 min-w-[120px] border-none shadow-xl bg-white text-blue-gray-900">
+                                {LANG_OPTIONS.map((opt) => (
+                                    <MenuItem
+                                        key={opt.code}
+                                        className={`flex items-center gap-2 rounded text-sm ${language === opt.code ? "bg-gray-100 font-bold" : ""}`}
+                                        onClick={() => setLanguage(opt.code)}
+                                    >
+                                        {opt.label}
+                                    </MenuItem>
+                                ))}
+                            </MenuList>
+                        </Menu>
+
                         {!isLoggedIn ? (
                             <Link to="/login">
                                 <Button size="sm" className={isScrolled ? "bg-blue-600" : "bg-white text-black"}>
-                                    로그인
+                                    {t.auth.login}
                                 </Button>
                             </Link>
                         ) : (
@@ -101,7 +136,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                             src={currentUser.profileImage || "https://docs.material-tailwind.com/img/face-2.jpg"}
                                         />
                                         <Typography variant="small" className={`font-bold ml-1 transition-colors ${textColor}`}>
-                                            {currentUser.userId} 님
+                                            {currentUser.userId} {t.auth.honorific}
                                         </Typography>
                                         <ChevronDownIcon strokeWidth={2.5} className={`h-3 w-3 transition-transform ${textColor} ${isMenuOpen ? "rotate-180" : ""}`} />
                                     </Button>
@@ -109,12 +144,12 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                 <MenuList className="p-1 border-none shadow-xl bg-white text-blue-gray-900">
                                     <MenuItem className="flex items-center gap-2 rounded" onClick={() => navigate("/mypage")}>
                                         <UserCircleIcon className="h-4 w-4" />
-                                        <Typography variant="small" className="font-normal">마이페이지</Typography>
+                                        <Typography variant="small" className="font-normal">{t.auth.mypage}</Typography>
                                     </MenuItem>
                                     <hr className="my-2 border-blue-gray-50" />
                                     <MenuItem className="flex items-center gap-2 rounded" onClick={() => window.location.reload()}>
                                         <PowerIcon className="h-4 w-4" />
-                                        <Typography variant="small" className="font-normal">로그아웃</Typography>
+                                        <Typography variant="small" className="font-normal">{t.auth.logout}</Typography>
                                     </MenuItem>
                                 </MenuList>
                             </Menu>

@@ -1,14 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { HomeIcon, TableCellsIcon, MapIcon, UserIcon } from "@heroicons/react/24/outline";
+import { useLanguageStore } from "../stores/languageStore";
 
 const BottomNav = () => {
     const { pathname } = useLocation();
+    const { t } = useLanguageStore();
 
     const navItems = [
-        { name: "홈", path: "/", icon: HomeIcon },
-        { name: "게시판", path: "/board", icon: TableCellsIcon },
-        { name: "공연정보", path: "/performance", icon: MapIcon },
-        { name: "마이", path: "/mypage", icon: UserIcon },
+        { name: t.bottomNav.home, path: "/", icon: HomeIcon },
+        { name: t.bottomNav.board, path: "/board", icon: TableCellsIcon },
+        { name: t.bottomNav.performance, path: "/performance", icon: MapIcon },
+        { name: t.bottomNav.my, path: "/mypage", icon: UserIcon },
     ];
 
     return (

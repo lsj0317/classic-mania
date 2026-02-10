@@ -8,48 +8,51 @@ import {
     NewspaperIcon,
     UserCircleIcon,
     ArrowRightOnRectangleIcon,
+    GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import { currentUser } from "../data/mockData";
+import { useLanguageStore, type Language } from "../stores/languageStore";
 
 interface SideMenuProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
-const NAV_ITEMS = [
-    { name: "홈", path: "/", icon: HomeIcon },
-    { name: "게시판", path: "/board", icon: TableCellsIcon },
-    { name: "공연정보", path: "/performance", icon: MusicalNoteIcon },
-    { name: "티켓정보", path: "/ticket-info", icon: TicketIcon },
-    { name: "뉴스", path: "/news", icon: NewspaperIcon },
-];
-
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
+    const { language, t, setLanguage } = useLanguageStore();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
 
-    console.log("[SideMenu] 렌더링, isOpen =", isOpen);
+    const NAV_ITEMS = [
+        { name: t.nav.home, path: "/", icon: HomeIcon },
+        { name: t.nav.board, path: "/board", icon: TableCellsIcon },
+        { name: t.nav.performance, path: "/performance", icon: MusicalNoteIcon },
+        { name: t.nav.ticket, path: "/ticket-info", icon: TicketIcon },
+        { name: t.nav.news, path: "/news", icon: NewspaperIcon },
+    ];
+
+    const LANG_OPTIONS: { code: Language; label: string }[] = [
+        { code: "ko", label: t.language.ko },
+        { code: "en", label: t.language.en },
+    ];
 
     const handleOverlayClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log("[SideMenu] 오버레이 클릭됨 → onClose 호출");
         onClose();
     };
 
     const handleCloseClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log("[SideMenu] X 버튼 클릭됨 → onClose 호출");
         onClose();
     };
 
     const handleNavClick = () => {
-        console.log("[SideMenu] 네비게이션 항목 클릭됨 → onClose 호출");
         onClose();
     };
 
     return (
         <>
-            {/* 오버레이 - isOpen일 때만 렌더 */}
+            {/* 오버레이 */}
             {isOpen && (
                 <div
                     data-testid="side-menu-overlay"
@@ -66,7 +69,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 />
             )}
 
-            {/* 사이드 패널 - 항상 렌더하되 transform으로 토글 */}
+            {/* 사이드 패널 */}
             <div
                 data-testid="side-menu-panel"
                 data-open={isOpen}
@@ -89,7 +92,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             >
                 {/* 헤더 */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px", borderBottom: "1px solid #f3f4f6" }}>
-                    <span style={{ fontWeight: 700, fontSize: "18px", color: "#111" }}>Menu</span>
+                    <span style={{ fontWeight: 700, fontSize: "18px", color: "#111" }}>{t.sideMenu.title}</span>
                     <div
                         onClick={handleCloseClick}
                         role="button"
@@ -109,8 +112,8 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                 style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", border: "2px solid #e5e7eb" }}
                             />
                             <div>
-                                <div style={{ fontWeight: 700, fontSize: "14px", color: "#111" }}>{currentUser.userId} 님</div>
-                                <div style={{ fontSize: "12px", color: "#9ca3af" }}>환영합니다</div>
+                                <div style={{ fontWeight: 700, fontSize: "14px", color: "#111" }}>{currentUser.userId} {t.auth.honorific}</div>
+                                <div style={{ fontSize: "12px", color: "#9ca3af" }}>{t.auth.welcome}</div>
                             </div>
                         </div>
                     ) : (
@@ -126,7 +129,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                     textAlign: "center",
                                 }}
                             >
-                                로그인
+                                {t.auth.login}
                             </div>
                         </Link>
                     )}
@@ -163,6 +166,36 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                     })}
                 </nav>
 
+                {/* 언어 선택 */}
+                <div style={{ padding: "12px 16px", borderTop: "1px solid #f3f4f6" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", padding: "0 4px" }}>
+                        <GlobeAltIcon style={{ width: "18px", height: "18px", color: "#6b7280" }} />
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#6b7280" }}>{t.language.label}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        {LANG_OPTIONS.map((opt) => (
+                            <button
+                                key={opt.code}
+                                onClick={() => setLanguage(opt.code)}
+                                style={{
+                                    flex: 1,
+                                    padding: "8px 12px",
+                                    borderRadius: "8px",
+                                    border: language === opt.code ? "2px solid #000" : "1px solid #e5e7eb",
+                                    background: language === opt.code ? "#000" : "#fff",
+                                    color: language === opt.code ? "#fff" : "#374151",
+                                    fontWeight: language === opt.code ? 700 : 500,
+                                    fontSize: "13px",
+                                    cursor: "pointer",
+                                    transition: "all 0.15s ease",
+                                }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 {/* 하단 유틸리티 */}
                 {isLoggedIn && (
                     <div style={{ padding: "16px", borderTop: "1px solid #f3f4f6" }}>
@@ -184,7 +217,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             }}
                         >
                             <UserCircleIcon style={{ width: "20px", height: "20px" }} />
-                            마이페이지
+                            {t.auth.mypage}
                         </Link>
                         <div
                             onClick={() => window.location.reload()}
@@ -203,7 +236,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             }}
                         >
                             <ArrowRightOnRectangleIcon style={{ width: "20px", height: "20px" }} />
-                            로그아웃
+                            {t.auth.logout}
                         </div>
                     </div>
                 )}
