@@ -49,3 +49,28 @@ export interface Performance {
     introImages?: string[];    // 소개 이미지 목록
     relatedLinks?: RelatedLink[]; // 관련 링크 목록
 }
+
+// 아티스트 관련 타입
+export interface Artist {
+    id: string;
+    name: string;           // 한글 이름
+    nameEn: string;         // 영어 이름
+    role: string;           // 역할 (피아니스트, 바이올리니스트, 지휘자 등)
+    roleEn: string;         // 영어 역할
+    profileImage: string;   // 프로필 이미지 URL
+    bio: string;            // 약력/소개
+    bioEn: string;          // 영어 약력
+    nationality: string;    // 국적
+    likes: number;          // 좋아요 수
+    performanceCount: number; // 공연 수
+}
+
+export interface CheerMessage {
+    id: string;
+    artistId: string;
+    userId: string;
+    userName: string;
+    userProfileImage?: string;
+    message: string;
+    createdAt: string;      // ISO date string
+}

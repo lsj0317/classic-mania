@@ -26,6 +26,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         { name: t.nav.home, path: "/" },
         { name: t.nav.board, path: "/board" },
         { name: t.nav.performance, path: "/performance" },
+        { name: t.nav.artist, path: "/artist" },
         { name: t.nav.ticket, path: "/ticket-info" },
         { name: t.nav.news, path: "/news" },
     ];

@@ -16,6 +16,8 @@ import TicketDetailPage from "./pages/ticket/TicketDetailPage.tsx";
 import PerformanceDetail from "./pages/performance/PerformanceDetail.tsx";
 import NewsPage from "./pages/news/NewsPage.tsx";
 import NewsDetail from "./pages/news/NewsDetail.tsx";
+import ArtistList from "./pages/artist/ArtistList.tsx";
+import ArtistDetail from "./pages/artist/ArtistDetail.tsx";
 
 function App() {
     return (
@@ -39,6 +41,8 @@ function App() {
                     <Route path="ticket-info/:id" element={<TicketDetailPage />} />
                     <Route path="news" element={<NewsPage />} />
                     <Route path="news/detail" element={<NewsDetail />} />
+                    <Route path="artist" element={<ArtistList />} />
+                    <Route path="artist/:id" element={<ArtistDetail />} />
                 </Route>
             </Routes>
         </Router>

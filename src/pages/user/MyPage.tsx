@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, PenSquare, UserCircle } from "lucide-react";
+import { FileText, PenSquare, UserCircle, Heart } from "lucide-react";
 import MyPosts from "./MyPosts";
 import PostManage from "./PostManage";
 import {useState} from "react";
 import UserManage from "./UserManage.tsx";
+import FollowedArtists from "./FollowedArtists.tsx";
 import { cn } from "@/lib/utils";
 
 const MyPage = () => {
@@ -12,6 +13,7 @@ const MyPage = () => {
     const menuItems = [
         { key: "posts", label: "내 게시글 현황", icon: FileText },
         { key: "manage", label: "작성글 관리", icon: PenSquare },
+        { key: "artists", label: "팔로우 아티스트", icon: Heart },
         { key: "user", label: "회원 정보 수정", icon: UserCircle },
     ];
 
@@ -49,6 +51,7 @@ const MyPage = () => {
             <div className="w-full md:w-[70%]">
                 {activeTab === "posts" && <MyPosts />}
                 {activeTab === "manage" && <PostManage />}
+                {activeTab === "artists" && <FollowedArtists />}
                 {activeTab === "user" && <UserManage />}
             </div>
         </div>
