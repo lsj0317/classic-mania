@@ -38,25 +38,6 @@ const Layout = () => {
             {/* 사이드 메뉴 - flex 컨테이너 바깥에서 렌더 */}
             <SideMenu isOpen={isSideMenuOpen} onClose={closeSideMenu} />
 
-            {/* 디버그 인디케이터 - 개발 확인용 (우측 하단에 상태 표시) */}
-            <div
-                style={{
-                    position: "fixed",
-                    bottom: "10px",
-                    left: "10px",
-                    padding: "6px 12px",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    fontFamily: "monospace",
-                    zIndex: 999999,
-                    pointerEvents: "none",
-                    backgroundColor: isSideMenuOpen ? "#22c55e" : "#ef4444",
-                    color: "#fff",
-                }}
-            >
-                MENU: {isSideMenuOpen ? "OPEN" : "CLOSED"}
-            </div>
         </>
     );
 };
