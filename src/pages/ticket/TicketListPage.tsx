@@ -1,20 +1,23 @@
 import React, { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Typography, Input, Button, Spinner } from "@material-tailwind/react";
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Card } from "@/components/ui/card";
+import { Search, ChevronLeft, ChevronRight, Image } from "lucide-react";
 import { usePerformanceStore } from '../../stores/performanceStore';
 
 const TicketListPage = () => {
     const navigate = useNavigate();
-    const { 
-        performances, 
-        listLoading, 
-        fetchList, 
+    const {
+        performances,
+        listLoading,
+        fetchList,
         fetchPriceForList,
-        ticketSearchTerm, 
-        ticketCurrentPage, 
-        setTicketSearchTerm, 
-        setTicketCurrentPage 
+        ticketSearchTerm,
+        ticketCurrentPage,
+        setTicketSearchTerm,
+        setTicketCurrentPage
     } = usePerformanceStore();
 
     const itemsPerPage = 6; // 한 페이지에 보여줄 게시물 수
@@ -52,8 +55,8 @@ const TicketListPage = () => {
     if (listLoading && performances.length === 0) {
         return (
             <div className="flex justify-center items-center min-h-screen">
-                <Spinner className="h-8 w-8" />
-                <Typography className="ml-3 text-gray-500">티켓 정보를 불러오는 중...</Typography>
+                <Spinner size="md" />
+                <span className="ml-3 text-gray-500">티켓 정보를 불러오는 중...</span>
             </div>
         );
     }
@@ -62,21 +65,20 @@ const TicketListPage = () => {
         <div className="px-4 sm:p-4 max-w-5xl mx-auto min-h-screen bg-white">
             {/* 헤더 섹션 */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 border-b-2 border-black pb-4">
-                <Typography variant="h4" className="font-bold uppercase tracking-tighter text-xl lg:text-2xl">
+                <h4 className="font-bold uppercase tracking-tighter text-xl lg:text-2xl">
                     공연 티켓 정보
-                </Typography>
+                </h4>
 
                 {/* 검색창 (게시판 스타일) */}
                 <div className="relative w-full md:w-72">
                     <Input
                         type="text"
-                        label="공연명 검색"
+                        placeholder="공연명 검색"
                         value={ticketSearchTerm}
                         onChange={handleSearch}
-                        icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                        className="rounded-none"
-                        crossOrigin={undefined}
+                        className="pr-10"
                     />
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
             </div>
 
@@ -86,7 +88,7 @@ const TicketListPage = () => {
                     {currentItems.map((item) => (
                         <Card
                             key={item.id}
-                            className="rounded-none border border-gray-200 shadow-none cursor-pointer hover:border-black transition-all group"
+                            className="border border-gray-200 shadow-none cursor-pointer hover:border-black transition-all group rounded-none"
                             onClick={() => navigate(`/ticket-info/${item.id}`)}
                         >
                             <div className="aspect-[3/4] overflow-hidden bg-gray-100 relative">
@@ -98,19 +100,19 @@ const TicketListPage = () => {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                        <PhotoIcon className="h-12 w-12 mb-2" />
+                                        <Image className="h-12 w-12 mb-2" />
                                         <span className="text-xs font-bold">NO POSTER</span>
                                     </div>
                                 )}
                             </div>
                             <div className="p-4">
-                                <Typography className="font-bold text-sm truncate mb-1">{item.title}</Typography>
-                                <Typography className="text-[11px] text-gray-500 mb-3 truncate">{item.place}</Typography>
+                                <p className="font-bold text-sm truncate mb-1">{item.title}</p>
+                                <p className="text-[11px] text-gray-500 mb-3 truncate">{item.place}</p>
                                 <div className="flex justify-between items-end border-t pt-2">
-                                    <Typography className="text-[10px] text-gray-400 font-mono">{item.period.split(' ~ ')[0]}</Typography>
-                                    <Typography className="text-sm font-bold text-black truncate max-w-[60%]">
+                                    <span className="text-[10px] text-gray-400 font-mono">{item.period.split(' ~ ')[0]}</span>
+                                    <span className="text-sm font-bold text-black truncate max-w-[60%]">
                                         {item.price ? item.price : '가격정보 확인중...'}
-                                    </Typography>
+                                    </span>
                                 </div>
                             </div>
                         </Card>
@@ -118,7 +120,7 @@ const TicketListPage = () => {
                 </div>
             ) : (
                 <div className="py-20 text-center border border-dashed border-gray-300">
-                    <Typography className="text-gray-400">검색 결과가 없습니다.</Typography>
+                    <p className="text-gray-400">검색 결과가 없습니다.</p>
                 </div>
             )}
 
@@ -126,12 +128,12 @@ const TicketListPage = () => {
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-12">
                     <Button
-                        variant="text"
-                        className="flex items-center gap-1 rounded-none p-2"
+                        variant="ghost"
+                        className="flex items-center gap-1 p-2"
                         onClick={() => setTicketCurrentPage(Math.max(ticketCurrentPage - 1, 1))}
                         disabled={ticketCurrentPage === 1}
                     >
-                        <ChevronLeftIcon strokeWidth={2} className="h-4 w-4" />
+                        <ChevronLeft strokeWidth={2} className="h-4 w-4" />
                     </Button>
 
                     <div className="flex items-center gap-1">
@@ -140,13 +142,13 @@ const TicketListPage = () => {
                                 if (Math.abs(ticketCurrentPage - (index + 1)) === 5) return <span key={index} className="px-1">...</span>;
                                 return null;
                             }
-                            
+
                             return (
                                 <Button
                                     key={index + 1}
-                                    variant={ticketCurrentPage === index + 1 ? "filled" : "text"}
+                                    variant={ticketCurrentPage === index + 1 ? "default" : "ghost"}
                                     size="sm"
-                                    className={`rounded-none w-8 h-8 p-0 ${ticketCurrentPage === index + 1 ? "bg-black text-white" : "text-gray-600"}`}
+                                    className={`w-8 h-8 p-0 ${ticketCurrentPage === index + 1 ? "bg-black text-white" : "text-gray-600"}`}
                                     onClick={() => setTicketCurrentPage(index + 1)}
                                 >
                                     {index + 1}
@@ -156,12 +158,12 @@ const TicketListPage = () => {
                     </div>
 
                     <Button
-                        variant="text"
-                        className="flex items-center gap-1 rounded-none p-2"
+                        variant="ghost"
+                        className="flex items-center gap-1 p-2"
                         onClick={() => setTicketCurrentPage(Math.min(ticketCurrentPage + 1, totalPages))}
                         disabled={ticketCurrentPage === totalPages}
                     >
-                        <ChevronRightIcon strokeWidth={2} className="h-4 w-4" />
+                        <ChevronRight strokeWidth={2} className="h-4 w-4" />
                     </Button>
                 </div>
             )}

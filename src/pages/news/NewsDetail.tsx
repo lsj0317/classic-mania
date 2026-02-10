@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Typography, Button, Card } from "@material-tailwind/react";
-import { ArrowLeftIcon, CalendarIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, Calendar, Link as LinkIcon } from "lucide-react";
 import { useEffect } from 'react';
 import type { NewsItem } from '../../api/newsApi';
 
@@ -38,12 +39,12 @@ const NewsDetail = () => {
     return (
         <div className="container mx-auto px-4 py-8 max-w-screen-md min-h-screen">
             <Button
-                variant="text"
+                variant="ghost"
                 size="sm"
                 className="flex items-center gap-2 mb-8 px-0 hover:bg-transparent font-bold text-black uppercase tracking-widest"
                 onClick={() => navigate(-1)}
             >
-                <ArrowLeftIcon className="h-4 w-4" /> Back to list
+                <ArrowLeft className="h-4 w-4" /> Back to list
             </Button>
 
             <div className="flex flex-col gap-6">
@@ -54,20 +55,20 @@ const NewsDetail = () => {
                             Naver News
                         </span>
                         <div className="flex items-center gap-1 text-gray-500 text-xs">
-                            <CalendarIcon className="h-3 w-3" />
+                            <Calendar className="h-3 w-3" />
                             <span>{formatDate(news.pubDate)}</span>
                         </div>
                     </div>
-                    <Typography variant="h3" className="font-bold text-black leading-tight">
+                    <h3 className="text-2xl font-bold text-black leading-tight">
                         {decodeHtml(news.title)}
-                    </Typography>
+                    </h3>
                 </div>
 
                 {/* 본문 요약 영역 */}
                 <Card className="p-8 bg-gray-50 border border-gray-100 shadow-none rounded-none">
-                    <Typography className="text-lg text-gray-800 leading-relaxed font-serif">
+                    <p className="text-lg text-gray-800 leading-relaxed font-serif">
                         {decodeHtml(news.description)}
-                    </Typography>
+                    </p>
                 </Card>
 
                 {/* 링크 및 액션 버튼 */}
@@ -75,12 +76,12 @@ const NewsDetail = () => {
                     <div className="flex items-center gap-2 p-4 border border-gray-200 bg-white">
                         <LinkIcon className="h-5 w-5 text-gray-400" />
                         <div className="flex-1 overflow-hidden">
-                            <Typography variant="small" className="font-bold text-gray-900 block">
+                            <span className="font-bold text-gray-900 block text-sm">
                                 원본 링크
-                            </Typography>
-                            <a 
-                                href={news.originallink || news.link} 
-                                target="_blank" 
+                            </span>
+                            <a
+                                href={news.originallink || news.link}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:underline text-xs truncate block"
                             >
@@ -89,8 +90,8 @@ const NewsDetail = () => {
                         </div>
                     </div>
 
-                    <Button 
-                        className="w-full bg-black rounded-none py-4 text-base font-bold tracking-widest hover:scale-[1.01] transition-transform"
+                    <Button
+                        className="w-full bg-black py-4 text-base font-bold tracking-widest hover:scale-[1.01] transition-transform"
                         onClick={() => window.open(news.link, '_blank')}
                     >
                         기사 원문 전체 보기

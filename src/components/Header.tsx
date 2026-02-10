@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-    Typography,
-    Button,
-    Menu,
-    MenuHandler,
-    MenuList,
-    MenuItem,
-    Avatar,
-} from "@material-tailwind/react";
 import { Link, useNavigate } from "react-router-dom";
 import { currentUser } from "../data/mockData";
-import { ChevronDownIcon, UserCircleIcon, PowerIcon, Bars3Icon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { useLanguageStore, type Language } from "../stores/languageStore";
+import { Button } from "./ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+} from "./ui/dropdown-menu";
+import { ChevronDown, Globe, User, LogOut, Menu } from "lucide-react";
 
 interface HeaderProps {
     onMenuOpen: () => void;
@@ -19,8 +19,6 @@ interface HeaderProps {
 
 const Header = ({ onMenuOpen }: HeaderProps) => {
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const navigate = useNavigate();
     const { language, t, setLanguage } = useLanguageStore();
 
@@ -39,16 +37,10 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     }, []);
 
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
-    const textColor = isScrolled ? "text-gray-900" : "text-white";
+    const textColor = isScrolled ? "text-foreground" : "text-white";
     const navBg = isScrolled
-        ? "bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200"
+        ? "bg-background/90 backdrop-blur-md shadow-sm border-b"
         : "bg-black/95";
-
-    const handleBurgerClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onMenuOpen();
-    };
 
     const LANG_OPTIONS: { code: Language; label: string }[] = [
         { code: "ko", label: t.language.ko },
@@ -63,9 +55,9 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 {/* 로고 */}
                 <div className="flex-1 flex justify-start">
                     <Link to="/">
-                        <Typography className={`cursor-pointer py-1.5 font-bold text-xl lg:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
+                        <span className={`cursor-pointer py-1.5 font-bold text-xl lg:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
                             Classic Mania
-                        </Typography>
+                        </span>
                     </Link>
                 </div>
 
@@ -76,7 +68,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                             <li key={menu.path}>
                                 <Link
                                     to={menu.path}
-                                    className={`text-sm font-bold transition-colors hover:text-blue-500 whitespace-nowrap ${textColor}`}
+                                    className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
                                 >
                                     {menu.name}
                                 </Link>
@@ -87,97 +79,83 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
 
                 {/* 데스크톱 유저 영역 + 언어 선택 */}
                 <div className="hidden lg:flex flex-1 justify-end">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         {/* 언어 드롭다운 */}
-                        <Menu open={isLangMenuOpen} handler={setIsLangMenuOpen} placement="bottom-end">
-                            <MenuHandler>
-                                <Button
-                                    variant="text"
-                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-full capitalize focus:ring-0 ${textColor}`}
-                                >
-                                    <GlobeAltIcon className="h-4 w-4" strokeWidth={2} />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className={`gap-1.5 ${textColor} hover:bg-white/10`}>
+                                    <Globe className="h-4 w-4" />
                                     <span className="text-xs font-bold">
                                         {language === "ko" ? "KO" : "EN"}
                                     </span>
-                                    <ChevronDownIcon
-                                        strokeWidth={2.5}
-                                        className={`h-3 w-3 transition-transform ${isLangMenuOpen ? "rotate-180" : ""}`}
-                                    />
+                                    <ChevronDown className="h-3 w-3" />
                                 </Button>
-                            </MenuHandler>
-                            <MenuList className="p-1 min-w-[120px] border-none shadow-xl bg-white text-blue-gray-900">
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="min-w-[120px]">
                                 {LANG_OPTIONS.map((opt) => (
-                                    <MenuItem
+                                    <DropdownMenuItem
                                         key={opt.code}
-                                        className={`flex items-center gap-2 rounded text-sm ${language === opt.code ? "bg-gray-100 font-bold" : ""}`}
+                                        className={language === opt.code ? "bg-accent font-bold" : ""}
                                         onClick={() => setLanguage(opt.code)}
                                     >
                                         {opt.label}
-                                    </MenuItem>
+                                    </DropdownMenuItem>
                                 ))}
-                            </MenuList>
-                        </Menu>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
                         {!isLoggedIn ? (
                             <Link to="/login">
-                                <Button size="sm" className={isScrolled ? "bg-blue-600" : "bg-white text-black"}>
+                                <Button size="sm" className={isScrolled ? "" : "bg-white text-black hover:bg-white/90"}>
                                     {t.auth.login}
                                 </Button>
                             </Link>
                         ) : (
-                            <Menu open={isMenuOpen} handler={setIsMenuOpen} placement="bottom-end">
-                                <MenuHandler>
-                                    <Button variant="text" className="flex items-center gap-2 rounded-full py-0.5 pr-2 pl-0.5 capitalize focus:ring-0">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className={`gap-2 px-2 ${textColor} hover:bg-white/10`}>
                                         {currentUser.profileImage ? (
-                                            <Avatar
-                                                variant="circular"
-                                                size="sm"
-                                                alt={currentUser.name}
-                                                className={`border-2 p-0.5 ${isScrolled ? "border-blue-500" : "border-white"}`}
-                                                src={currentUser.profileImage}
-                                            />
+                                            <Avatar className={`h-8 w-8 border-2 ${isScrolled ? "border-primary" : "border-white"}`}>
+                                                <AvatarImage src={currentUser.profileImage} alt={currentUser.name} />
+                                                <AvatarFallback>{currentUser.name[0]}</AvatarFallback>
+                                            </Avatar>
                                         ) : (
-                                            <UserCircleIcon className={`h-9 w-9 ${isScrolled ? "text-blue-500" : "text-white"}`} />
+                                            <User className={`h-8 w-8 ${isScrolled ? "text-primary" : "text-white"}`} />
                                         )}
-                                        <Typography variant="small" className={`font-bold ml-1 transition-colors ${textColor}`}>
+                                        <span className="text-sm font-semibold">
                                             {currentUser.userId} {t.auth.honorific}
-                                        </Typography>
-                                        <ChevronDownIcon strokeWidth={2.5} className={`h-3 w-3 transition-transform ${textColor} ${isMenuOpen ? "rotate-180" : ""}`} />
+                                        </span>
+                                        <ChevronDown className="h-3 w-3" />
                                     </Button>
-                                </MenuHandler>
-                                <MenuList className="p-1 border-none shadow-xl bg-white text-blue-gray-900">
-                                    <MenuItem className="flex items-center gap-2 rounded" onClick={() => navigate("/mypage")}>
-                                        <UserCircleIcon className="h-4 w-4" />
-                                        <Typography variant="small" className="font-normal">{t.auth.mypage}</Typography>
-                                    </MenuItem>
-                                    <hr className="my-2 border-blue-gray-50" />
-                                    <MenuItem className="flex items-center gap-2 rounded" onClick={() => window.location.reload()}>
-                                        <PowerIcon className="h-4 w-4" />
-                                        <Typography variant="small" className="font-normal">{t.auth.logout}</Typography>
-                                    </MenuItem>
-                                </MenuList>
-                            </Menu>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => navigate("/mypage")} className="gap-2">
+                                        <User className="h-4 w-4" />
+                                        {t.auth.mypage}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => window.location.reload()} className="gap-2">
+                                        <LogOut className="h-4 w-4" />
+                                        {t.auth.logout}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         )}
                     </div>
                 </div>
 
                 {/* 모바일 햄버거 버튼 */}
-                <div
-                    className="lg:hidden"
-                    onClick={handleBurgerClick}
-                    role="button"
-                    tabIndex={0}
-                    style={{
-                        padding: "8px",
-                        cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent",
-                        touchAction: "manipulation",
-                        userSelect: "none",
+                <button
+                    className="lg:hidden p-2"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onMenuOpen();
                     }}
                     aria-label="메뉴 열기"
                 >
-                    <Bars3Icon className={`h-6 w-6 ${textColor}`} strokeWidth={2} />
-                </div>
+                    <Menu className={`h-6 w-6 ${textColor}`} />
+                </button>
             </div>
         </header>
     );

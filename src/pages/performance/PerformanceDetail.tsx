@@ -1,16 +1,18 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Button, Card, Spinner } from "@material-tailwind/react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import {
-    ArrowLeftIcon,
-    MapPinIcon,
-    CalendarIcon,
-    ClockIcon,
-    UserGroupIcon,
-    TicketIcon,
-    LinkIcon,
-    PhotoIcon,
-} from "@heroicons/react/24/outline";
+    ArrowLeft,
+    MapPin,
+    Calendar,
+    Clock,
+    Users,
+    Ticket,
+    Link as LinkIcon,
+    Image,
+} from "lucide-react";
 import { usePerformanceStore } from "../../stores/performanceStore";
 
 const PerformanceDetail = () => {
@@ -28,8 +30,8 @@ const PerformanceDetail = () => {
     if (detailLoading && !performance) {
         return (
             <div className="flex justify-center items-center py-20">
-                <Spinner className="h-8 w-8" />
-                <Typography className="ml-3 text-gray-500">공연 정보를 불러오는 중...</Typography>
+                <Spinner size="md" />
+                <span className="ml-3 text-gray-500">공연 정보를 불러오는 중...</span>
             </div>
         );
     }
@@ -37,10 +39,10 @@ const PerformanceDetail = () => {
     if (!performance) {
         return (
             <div className="container mx-auto px-4 py-8 max-w-screen-md text-center">
-                <Typography className="text-gray-400 py-20">
+                <p className="text-gray-400 py-20">
                     {detailError || '공연 정보를 찾을 수 없습니다.'}
-                </Typography>
-                <Button variant="text" className="text-black font-bold" onClick={() => navigate(-1)}>
+                </p>
+                <Button variant="ghost" className="text-black font-bold" onClick={() => navigate(-1)}>
                     목록으로 돌아가기
                 </Button>
             </div>
@@ -50,12 +52,12 @@ const PerformanceDetail = () => {
     return (
         <div className="container mx-auto px-4 py-8 max-w-screen-md">
             <Button
-                variant="text"
+                variant="ghost"
                 size="sm"
                 className="flex items-center gap-2 mb-8 px-0 hover:bg-transparent font-bold text-black uppercase tracking-widest"
                 onClick={() => navigate(-1)}
             >
-                <ArrowLeftIcon className="h-4 w-4" /> Back to list
+                <ArrowLeft className="h-4 w-4" /> Back to list
             </Button>
 
             {/* 에러 알림 */}
@@ -83,48 +85,48 @@ const PerformanceDetail = () => {
                             }`}>
                                 {performance.status}
                             </div>
-                            <Typography variant="h3" className="font-bold text-black leading-tight mb-6">
+                            <h3 className="text-2xl font-bold text-black leading-tight mb-6">
                                 {performance.title}
-                            </Typography>
+                            </h3>
 
                             <div className="space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <MapPinIcon className="h-5 w-5 text-gray-400 shrink-0" />
+                                    <MapPin className="h-5 w-5 text-gray-400 shrink-0" />
                                     <div>
-                                        <Typography variant="small" className="font-bold text-black">{performance.place}</Typography>
-                                        <Typography className="text-xs text-gray-500">{performance.area} 지역</Typography>
+                                        <span className="text-sm font-bold text-black">{performance.place}</span>
+                                        <p className="text-xs text-gray-500">{performance.area} 지역</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <CalendarIcon className="h-5 w-5 text-gray-400 shrink-0" />
-                                    <Typography variant="small" className="font-mono text-black">{performance.period}</Typography>
+                                    <Calendar className="h-5 w-5 text-gray-400 shrink-0" />
+                                    <span className="text-sm font-mono text-black">{performance.period}</span>
                                 </div>
                                 {performance.schedule && (
                                     <div className="flex items-center gap-3">
-                                        <ClockIcon className="h-5 w-5 text-gray-400 shrink-0" />
-                                        <Typography variant="small" className="text-gray-700">{performance.schedule}</Typography>
+                                        <Clock className="h-5 w-5 text-gray-400 shrink-0" />
+                                        <span className="text-sm text-gray-700">{performance.schedule}</span>
                                     </div>
                                 )}
                                 {performance.runtime && (
                                     <div className="flex items-center gap-3">
-                                        <ClockIcon className="h-5 w-5 text-gray-400 shrink-0" />
-                                        <Typography variant="small" className="text-gray-500">러닝타임: {performance.runtime}</Typography>
+                                        <Clock className="h-5 w-5 text-gray-400 shrink-0" />
+                                        <span className="text-sm text-gray-500">러닝타임: {performance.runtime}</span>
                                     </div>
                                 )}
                                 {performance.age && (
                                     <div className="flex items-center gap-3">
-                                        <TicketIcon className="h-5 w-5 text-gray-400 shrink-0" />
-                                        <Typography variant="small" className="text-gray-500">관람연령: {performance.age}</Typography>
+                                        <Ticket className="h-5 w-5 text-gray-400 shrink-0" />
+                                        <span className="text-sm text-gray-500">관람연령: {performance.age}</span>
                                     </div>
                                 )}
                                 {performance.price && (
                                     <div className="flex items-center gap-3">
-                                        <Typography variant="small" className="text-gray-500">가격: {performance.price}</Typography>
+                                        <span className="text-sm text-gray-500">가격: {performance.price}</span>
                                     </div>
                                 )}
                                 {performance.genre && (
                                     <div className="flex items-center gap-3">
-                                        <Typography variant="small" className="text-gray-500">장르: {performance.genre}</Typography>
+                                        <span className="text-sm text-gray-500">장르: {performance.genre}</span>
                                     </div>
                                 )}
                             </div>
@@ -132,7 +134,7 @@ const PerformanceDetail = () => {
 
                         {performance.bookingUrl ? (
                             <a href={performance.bookingUrl} target="_blank" rel="noopener noreferrer">
-                                <Button className="w-full bg-black rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
+                                <Button className="w-full bg-black hover:bg-black/90 rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
                                     예매하러 가기
                                 </Button>
                             </a>
@@ -142,7 +144,7 @@ const PerformanceDetail = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <Button className="w-full bg-gray-800 rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
+                                <Button className="w-full bg-gray-800 hover:bg-gray-700 rounded-none mt-10 py-4 font-bold tracking-widest hover:scale-[1.02] transition-transform">
                                     예매처 검색하기
                                 </Button>
                             </a>
@@ -154,19 +156,19 @@ const PerformanceDetail = () => {
                 {(performance.cast || performance.crew) && (
                     <Card className="p-6 border border-gray-100 shadow-none bg-gray-50 rounded-none">
                         <div className="flex items-center gap-2 mb-4">
-                            <UserGroupIcon className="h-5 w-5 text-gray-400" />
-                            <Typography variant="small" className="font-bold uppercase tracking-widest">Cast & Crew</Typography>
+                            <Users className="h-5 w-5 text-gray-400" />
+                            <span className="text-sm font-bold uppercase tracking-widest">Cast & Crew</span>
                         </div>
                         {performance.cast && (
                             <div className="mb-3">
-                                <Typography className="text-xs text-gray-400 font-bold mb-1">출연진</Typography>
-                                <Typography className="text-sm text-gray-700 leading-relaxed">{performance.cast}</Typography>
+                                <p className="text-xs text-gray-400 font-bold mb-1">출연진</p>
+                                <p className="text-sm text-gray-700 leading-relaxed">{performance.cast}</p>
                             </div>
                         )}
                         {performance.crew && (
                             <div>
-                                <Typography className="text-xs text-gray-400 font-bold mb-1">제작진</Typography>
-                                <Typography className="text-sm text-gray-700 leading-relaxed">{performance.crew}</Typography>
+                                <p className="text-xs text-gray-400 font-bold mb-1">제작진</p>
+                                <p className="text-sm text-gray-700 leading-relaxed">{performance.crew}</p>
                             </div>
                         )}
                     </Card>
@@ -175,10 +177,10 @@ const PerformanceDetail = () => {
                 {/* 줄거리 */}
                 {performance.synopsis && (
                     <Card className="p-6 border border-gray-100 shadow-none bg-white rounded-none">
-                        <Typography variant="small" className="font-bold uppercase tracking-widest mb-4">Synopsis</Typography>
-                        <Typography className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                        <span className="text-sm font-bold uppercase tracking-widest mb-4 block">Synopsis</span>
+                        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
                             {performance.synopsis}
-                        </Typography>
+                        </p>
                     </Card>
                 )}
 
@@ -186,8 +188,8 @@ const PerformanceDetail = () => {
                 {performance.introImages && performance.introImages.length > 0 && (
                     <Card className="p-6 border border-gray-100 shadow-none bg-white rounded-none">
                         <div className="flex items-center gap-2 mb-4">
-                            <PhotoIcon className="h-5 w-5 text-gray-400" />
-                            <Typography variant="small" className="font-bold uppercase tracking-widest">Gallery</Typography>
+                            <Image className="h-5 w-5 text-gray-400" />
+                            <span className="text-sm font-bold uppercase tracking-widest">Gallery</span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {performance.introImages.map((img, idx) => (
@@ -204,7 +206,7 @@ const PerformanceDetail = () => {
                     <Card className="p-6 border border-gray-100 shadow-none bg-gray-50 rounded-none">
                         <div className="flex items-center gap-2 mb-4">
                             <LinkIcon className="h-5 w-5 text-gray-400" />
-                            <Typography variant="small" className="font-bold uppercase tracking-widest">Booking & Links</Typography>
+                            <span className="text-sm font-bold uppercase tracking-widest">Booking & Links</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {performance.relatedLinks.map((link, idx) => (
@@ -214,7 +216,7 @@ const PerformanceDetail = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <Button variant="outlined" size="sm" className="rounded-full border-gray-300 text-gray-700 hover:bg-gray-100 normal-case font-normal">
+                                    <Button variant="outline" size="sm" className="rounded-full border-gray-300 text-gray-700 hover:bg-gray-100 normal-case font-normal">
                                         {link.name}
                                     </Button>
                                 </a>
@@ -225,13 +227,13 @@ const PerformanceDetail = () => {
 
                 {/* 하단 위치 정보 안내 */}
                 <Card className="p-6 border border-gray-100 shadow-none bg-gray-50 rounded-none">
-                    <Typography variant="small" className="font-bold uppercase tracking-widest mb-2">Location Info</Typography>
-                    <Typography className="text-xs text-gray-500 leading-relaxed">
+                    <span className="text-sm font-bold uppercase tracking-widest mb-2 block">Location Info</span>
+                    <p className="text-xs text-gray-500 leading-relaxed">
                         해당 공연은 <span className="text-black font-bold">{performance.place}</span>에서 진행됩니다.
                         {performance.lat && performance.lng && (
                             <><br/>좌표 정보: {performance.lat}, {performance.lng}</>
                         )}
-                    </Typography>
+                    </p>
                 </Card>
             </div>
         </div>
