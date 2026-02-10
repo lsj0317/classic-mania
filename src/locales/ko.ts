@@ -4,6 +4,7 @@ const ko = {
         home: "홈",
         board: "게시판",
         performance: "공연정보",
+        artist: "아티스트",
         ticket: "티켓정보",
         news: "뉴스",
     },

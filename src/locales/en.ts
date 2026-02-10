@@ -6,6 +6,7 @@ const en: Translations = {
         home: "Home",
         board: "Board",
         performance: "Performances",
+        artist: "Artists",
         ticket: "Tickets",
         news: "News",
     },

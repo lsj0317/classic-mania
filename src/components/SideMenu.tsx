@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
-import { X, Home, LayoutGrid, Music, Ticket, Newspaper, User, LogOut, Globe } from "lucide-react";
+import { X, Home, LayoutGrid, Music, Ticket, Newspaper, User, LogOut, Globe, Users } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface SideMenuProps {
@@ -18,6 +18,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
         { name: t.nav.home, path: "/", icon: Home },
         { name: t.nav.board, path: "/board", icon: LayoutGrid },
         { name: t.nav.performance, path: "/performance", icon: Music },
+        { name: t.nav.artist, path: "/artist", icon: Users },
         { name: t.nav.ticket, path: "/ticket-info", icon: Ticket },
         { name: t.nav.news, path: "/news", icon: Newspaper },
     ];
