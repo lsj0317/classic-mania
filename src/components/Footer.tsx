@@ -2,9 +2,11 @@
 import { Typography } from "@material-tailwind/react";
 import {Link, useNavigate} from "react-router-dom";
 import { posts } from "../data/mockData";
+import { useLanguageStore } from "../stores/languageStore";
 
 const Footer = () => {
     const navigate = useNavigate();
+    const { t } = useLanguageStore();
 
     // 최신글 3개 및 인기글 3개 추출 [cite: 2026-01-21]
     const latestShort = [...posts].sort((a, b) => b.id - a.id).slice(0, 3);
@@ -28,18 +30,15 @@ const Footer = () => {
                         <Typography variant="h5" className="font-bold text-white-400">
                             Classic Mania
                         </Typography>
-                        <Typography variant="small" className="text-blue-gray-300 leading-relaxed">
-                            클래식매니아 (Classic Mania)<br />
-                            경기도 오산시 원동로 00번길 00<br />
-                            대표: 이서준 | Tel: 031-000-0000<br />
-                            Email: mujuki@classicmania.com
+                        <Typography variant="small" className="text-blue-gray-300 leading-relaxed whitespace-pre-line">
+                            {t.footer.companyInfo}
                         </Typography>
                     </div>
 
                     {/* 2. 푸터 위젯: 최신 소식 */}
                     <div>
                         <Typography variant="small" className="font-bold mb-4 uppercase text-blue-gray-400">
-                            최신 소식
+                            {t.footer.latestNews}
                         </Typography>
                         <ul className="flex flex-col gap-3">
                             {latestShort.map((post) => (
@@ -57,7 +56,7 @@ const Footer = () => {
                     {/* 3. 푸터 위젯: 인기 게시글 */}
                     <div>
                         <Typography variant="small" className="font-bold mb-4 uppercase text-blue-gray-400">
-                            인기 게시글
+                            {t.footer.popularPosts}
                         </Typography>
                         <ul className="flex flex-col gap-3">
                             {popularShort.map((post) => (
@@ -76,12 +75,12 @@ const Footer = () => {
                 <div className="flex gap-6 text-blue-gray-500 sm:justify-center">
                     <Link to="/terms">
                         <Typography variant="small" className="hover:text-white transition-colors cursor-pointer">
-                            이용약관
+                            {t.footer.terms}
                         </Typography>
                     </Link>
                     <Link to="/privacy">
                         <Typography variant="small" className="hover:text-white font-bold transition-colors cursor-pointer">
-                            개인정보처리방침
+                            {t.footer.privacy}
                         </Typography>
                     </Link>
                 </div>
