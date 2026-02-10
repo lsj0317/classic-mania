@@ -32,6 +32,10 @@ jobs:
       - name: Create .nojekyll
         run: touch ./dist/.nojekyll
 
+      # SPA 라우팅 지원: 404.html = index.html 복사 (GitHub Pages fallback)
+      - name: Copy index.html to 404.html
+        run: cp ./dist/index.html ./dist/404.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
