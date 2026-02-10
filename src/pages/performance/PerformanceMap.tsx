@@ -98,11 +98,13 @@ const PerformanceMap = () => {
             // 좌표가 있는 경우에만 마커 생성
             if (perf.lat && perf.lng) {
                 const position = new window.naver.maps.LatLng(perf.lat, perf.lng);
+                const markerTitle = perf.title || '';
+                const markerPlace = perf.place || '공연장';
 
                 const marker = new window.naver.maps.Marker({
                     position: position,
                     map: mapRef.current,
-                    title: perf.title,
+                    title: markerTitle,
                     icon: {
                         content: `
                             <div style="
@@ -116,7 +118,7 @@ const PerformanceMap = () => {
                                 white-space: nowrap;
                                 cursor: pointer;
                             ">
-                                ${perf.place}
+                                ${markerPlace}
                             </div>
                         `,
                         anchor: new window.naver.maps.Point(15, 15)
