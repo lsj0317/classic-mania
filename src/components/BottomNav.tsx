@@ -14,7 +14,7 @@ const BottomNav = () => {
     ];
 
     return (
-        <div className="lg:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t flex items-center justify-around px-2 pb-safe">
+        <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t flex items-center justify-around px-2 pb-safe">
             {navItems.map((item) => {
                 const isActive = pathname === item.path;
                 return (
