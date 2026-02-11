@@ -86,21 +86,21 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
 
     return (
         <header
-            className={`sticky top-0 z-50 h-16 lg:h-20 flex items-center px-4 py-0 transition-all duration-500 ${navBg}`}
+            className={`sticky top-0 z-50 h-16 md:h-20 flex items-center px-4 py-0 transition-all duration-500 ${navBg}`}
         >
             <div className="container mx-auto flex items-center justify-between max-w-screen-xl">
                 {/* 로고 */}
                 <div className="flex-1 flex justify-start">
                     <Link to="/">
-                        <span className={`cursor-pointer py-1.5 font-bold text-xl lg:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
+                        <span className={`cursor-pointer py-1.5 font-bold text-xl md:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
                             Classic Mania
                         </span>
                     </Link>
                 </div>
 
                 {/* 데스크톱 메뉴 */}
-                <div className="hidden lg:flex items-center gap-8">
-                    <ul className="flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-6 lg:gap-8">
+                    <ul className="flex items-center gap-4 lg:gap-8">
                         {NAV_MENU.map((item) => {
                             if (item.type === "link") {
                                 return (
@@ -159,7 +159,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 </div>
 
                 {/* 데스크톱 유저 영역 + 언어 선택 */}
-                <div className="hidden lg:flex flex-1 justify-end">
+                <div className="hidden md:flex flex-1 justify-end">
                     <div className="flex items-center gap-3">
                         {/* 언어 드롭다운 */}
                         <DropdownMenu>
@@ -227,7 +227,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
 
                 {/* 모바일 햄버거 버튼 */}
                 <button
-                    className="lg:hidden p-2"
+                    className="md:hidden p-2"
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
