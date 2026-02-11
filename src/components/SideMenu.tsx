@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
-import { X, Home, LayoutGrid, Music, Ticket, Newspaper, User, LogOut, Globe, Users } from "lucide-react";
+import { X, Home, LayoutGrid, Music, Ticket, Newspaper, User, LogOut, Globe, Users, ChevronDown } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface SideMenuProps {
@@ -9,24 +10,50 @@ interface SideMenuProps {
     onClose: () => void;
 }
 
+type NavItem =
+    | { type: "link"; name: string; path: string; icon: typeof Home }
+    | { type: "group"; name: string; icon: typeof Home; children: { name: string; path: string; icon: typeof Home }[] };
+
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
     const { language, t, setLanguage } = useLanguageStore();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
+    const [openGroup, setOpenGroup] = useState<string | null>(null);
 
-    const NAV_ITEMS = [
-        { name: t.nav.home, path: "/", icon: Home },
-        { name: t.nav.board, path: "/board", icon: LayoutGrid },
-        { name: t.nav.performance, path: "/performance", icon: Music },
-        { name: t.nav.artist, path: "/artist", icon: Users },
-        { name: t.nav.ticket, path: "/ticket-info", icon: Ticket },
-        { name: t.nav.news, path: "/news", icon: Newspaper },
+    const NAV_ITEMS: NavItem[] = [
+        { type: "link", name: t.nav.home, path: "/", icon: Home },
+        { type: "link", name: t.nav.board, path: "/board", icon: LayoutGrid },
+        {
+            type: "group",
+            name: t.nav.showAndTicket,
+            icon: Music,
+            children: [
+                { name: t.nav.performance, path: "/performance", icon: Music },
+                { name: t.nav.ticket, path: "/ticket-info", icon: Ticket },
+            ],
+        },
+        {
+            type: "group",
+            name: t.nav.artistAndNews,
+            icon: Users,
+            children: [
+                { name: t.nav.artist, path: "/artist", icon: Users },
+                { name: t.nav.news, path: "/news", icon: Newspaper },
+            ],
+        },
     ];
 
     const LANG_OPTIONS: { code: Language; label: string }[] = [
         { code: "ko", label: t.language.ko },
         { code: "en", label: t.language.en },
     ];
+
+    const toggleGroup = (name: string) => {
+        setOpenGroup((prev) => (prev === name ? null : name));
+    };
+
+    const isChildActive = (children: { path: string }[]) =>
+        children.some((c) => pathname === c.path);
 
     return (
         <>
@@ -74,18 +101,63 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 {/* 네비게이션 */}
                 <nav className="p-3 flex-1">
                     {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.path;
-                        const Icon = item.icon;
+                        if (item.type === "link") {
+                            const isActive = pathname === item.path;
+                            const Icon = item.icon;
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={onClose}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
+                                >
+                                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.5} />
+                                    {item.name}
+                                </Link>
+                            );
+                        }
+
+                        const isExpanded = openGroup === item.name;
+                        const hasActive = isChildActive(item.children);
+                        const GroupIcon = item.icon;
+
                         return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                onClick={onClose}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
-                            >
-                                <Icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.5} />
-                                {item.name}
-                            </Link>
+                            <div key={item.name} className="mb-1">
+                                {/* 그룹 헤더 (아코디언 토글) */}
+                                <button
+                                    onClick={() => toggleGroup(item.name)}
+                                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors ${hasActive ? "text-primary" : "text-foreground hover:bg-accent"}`}
+                                >
+                                    <GroupIcon className="h-5 w-5" strokeWidth={hasActive ? 2 : 1.5} />
+                                    <span className="flex-1 text-left">{item.name}</span>
+                                    <ChevronDown
+                                        className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                                    />
+                                </button>
+
+                                {/* 하위 메뉴 (아코디언 콘텐츠) */}
+                                <div
+                                    className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+                                >
+                                    <div className="ml-4 pl-4 border-l-2 border-border">
+                                        {item.children.map((child) => {
+                                            const isActive = pathname === child.path;
+                                            const ChildIcon = child.icon;
+                                            return (
+                                                <Link
+                                                    key={child.path}
+                                                    to={child.path}
+                                                    onClick={onClose}
+                                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg mb-0.5 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
+                                                >
+                                                    <ChildIcon className="h-4 w-4" strokeWidth={isActive ? 2 : 1.5} />
+                                                    {child.name}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
                         );
                     })}
                 </nav>
