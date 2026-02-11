@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
 import { Button } from "./ui/button";
@@ -17,18 +17,37 @@ interface HeaderProps {
     onMenuOpen: () => void;
 }
 
+type NavItem =
+    | { type: "link"; name: string; path: string }
+    | { type: "group"; name: string; children: { name: string; path: string }[] };
+
 const Header = ({ onMenuOpen }: HeaderProps) => {
     const [isScrolled, setIsScrolled] = useState(false);
+    const [openGroup, setOpenGroup] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const { language, t, setLanguage } = useLanguageStore();
+    const groupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const NAV_MENU = [
-        { name: t.nav.home, path: "/" },
-        { name: t.nav.board, path: "/board" },
-        { name: t.nav.performance, path: "/performance" },
-        { name: t.nav.artist, path: "/artist" },
-        { name: t.nav.ticket, path: "/ticket-info" },
-        { name: t.nav.news, path: "/news" },
+    const NAV_MENU: NavItem[] = [
+        { type: "link", name: t.nav.home, path: "/" },
+        { type: "link", name: t.nav.board, path: "/board" },
+        {
+            type: "group",
+            name: t.nav.showAndTicket,
+            children: [
+                { name: t.nav.performance, path: "/performance" },
+                { name: t.nav.ticket, path: "/ticket-info" },
+            ],
+        },
+        {
+            type: "group",
+            name: t.nav.artistAndNews,
+            children: [
+                { name: t.nav.artist, path: "/artist" },
+                { name: t.nav.news, path: "/news" },
+            ],
+        },
     ];
 
     useEffect(() => {
@@ -48,6 +67,23 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         { code: "en", label: t.language.en },
     ];
 
+    const handleGroupEnter = (name: string) => {
+        if (groupTimeoutRef.current) {
+            clearTimeout(groupTimeoutRef.current);
+            groupTimeoutRef.current = null;
+        }
+        setOpenGroup(name);
+    };
+
+    const handleGroupLeave = () => {
+        groupTimeoutRef.current = setTimeout(() => {
+            setOpenGroup(null);
+        }, 150);
+    };
+
+    const isChildActive = (children: { path: string }[]) =>
+        children.some((c) => pathname === c.path);
+
     return (
         <header
             className={`sticky top-0 z-50 h-16 lg:h-20 flex items-center px-4 py-0 transition-all duration-500 ${navBg}`}
@@ -63,18 +99,62 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 </div>
 
                 {/* 데스크톱 메뉴 */}
-                <div className="hidden lg:flex items-center gap-10">
-                    <ul className="flex items-center gap-10">
-                        {NAV_MENU.map((menu) => (
-                            <li key={menu.path}>
-                                <Link
-                                    to={menu.path}
-                                    className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
+                <div className="hidden lg:flex items-center gap-8">
+                    <ul className="flex items-center gap-8">
+                        {NAV_MENU.map((item) => {
+                            if (item.type === "link") {
+                                return (
+                                    <li key={item.path}>
+                                        <Link
+                                            to={item.path}
+                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
+                                        >
+                                            {item.name}
+                                        </Link>
+                                    </li>
+                                );
+                            }
+
+                            const isOpen = openGroup === item.name;
+                            const hasActive = isChildActive(item.children);
+
+                            return (
+                                <li
+                                    key={item.name}
+                                    className="relative"
+                                    onMouseEnter={() => handleGroupEnter(item.name)}
+                                    onMouseLeave={handleGroupLeave}
                                 >
-                                    {menu.name}
-                                </Link>
-                            </li>
-                        ))}
+                                    <button
+                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${hasActive ? "text-primary" : textColor}`}
+                                        onClick={() => setOpenGroup(isOpen ? null : item.name)}
+                                    >
+                                        {item.name}
+                                        <ChevronDown
+                                            className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                                        />
+                                    </button>
+
+                                    {/* 드롭다운 */}
+                                    <div
+                                        className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-200 ${isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-1"}`}
+                                    >
+                                        <div className="bg-background border rounded-lg shadow-lg py-1 min-w-[140px]">
+                                            {item.children.map((child) => (
+                                                <Link
+                                                    key={child.path}
+                                                    to={child.path}
+                                                    onClick={() => setOpenGroup(null)}
+                                                    className={`block px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent ${pathname === child.path ? "text-primary bg-accent/50" : "text-foreground"}`}
+                                                >
+                                                    {child.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
 

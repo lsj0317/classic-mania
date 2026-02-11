@@ -7,6 +7,8 @@ const ko = {
         artist: "아티스트",
         ticket: "티켓정보",
         news: "뉴스",
+        showAndTicket: "공연/티켓",
+        artistAndNews: "아티스트/뉴스",
     },
 
     // Header & Auth
