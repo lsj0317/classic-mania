@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
-import { X, Home, LayoutGrid, Music, Ticket, Newspaper, User, LogOut, Globe, Users, ChevronDown } from "lucide-react";
+import { X, ChevronDown, Globe } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface SideMenuProps {
@@ -11,8 +11,8 @@ interface SideMenuProps {
 }
 
 type NavItem =
-    | { type: "link"; name: string; path: string; icon: typeof Home }
-    | { type: "group"; name: string; icon: typeof Home; children: { name: string; path: string; icon: typeof Home }[] };
+    | { type: "link"; name: string; path: string }
+    | { type: "group"; name: string; children: { name: string; path: string }[] };
 
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const { pathname } = useLocation();
@@ -21,24 +21,22 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const [openGroup, setOpenGroup] = useState<string | null>(null);
 
     const NAV_ITEMS: NavItem[] = [
-        { type: "link", name: t.nav.home, path: "/", icon: Home },
-        { type: "link", name: t.nav.board, path: "/board", icon: LayoutGrid },
+        { type: "link", name: t.nav.home, path: "/" },
+        { type: "link", name: t.nav.board, path: "/board" },
         {
             type: "group",
             name: t.nav.showAndTicket,
-            icon: Music,
             children: [
-                { name: t.nav.performance, path: "/performance", icon: Music },
-                { name: t.nav.ticket, path: "/ticket-info", icon: Ticket },
+                { name: t.nav.performance, path: "/performance" },
+                { name: t.nav.ticket, path: "/ticket-info" },
             ],
         },
         {
             type: "group",
             name: t.nav.artistAndNews,
-            icon: Users,
             children: [
-                { name: t.nav.artist, path: "/artist", icon: Users },
-                { name: t.nav.news, path: "/news", icon: Newspaper },
+                { name: t.nav.artist, path: "/artist" },
+                { name: t.nav.news, path: "/news" },
             ],
         },
     ];
@@ -103,15 +101,13 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                     {NAV_ITEMS.map((item) => {
                         if (item.type === "link") {
                             const isActive = pathname === item.path;
-                            const Icon = item.icon;
                             return (
                                 <Link
                                     key={item.path}
                                     to={item.path}
                                     onClick={onClose}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
+                                    className={`flex items-center px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                                 >
-                                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2 : 1.5} />
                                     {item.name}
                                 </Link>
                             );
@@ -119,16 +115,14 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
 
                         const isExpanded = openGroup === item.name;
                         const hasActive = isChildActive(item.children);
-                        const GroupIcon = item.icon;
 
                         return (
                             <div key={item.name} className="mb-1">
                                 {/* 그룹 헤더 (아코디언 토글) */}
                                 <button
                                     onClick={() => toggleGroup(item.name)}
-                                    className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors ${hasActive ? "text-primary" : "text-foreground hover:bg-accent"}`}
+                                    className={`flex items-center w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors ${hasActive ? "text-primary" : "text-foreground hover:bg-accent"}`}
                                 >
-                                    <GroupIcon className="h-5 w-5" strokeWidth={hasActive ? 2 : 1.5} />
                                     <span className="flex-1 text-left">{item.name}</span>
                                     <ChevronDown
                                         className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
@@ -142,15 +136,13 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                     <div className="ml-4 pl-4 border-l-2 border-border">
                                         {item.children.map((child) => {
                                             const isActive = pathname === child.path;
-                                            const ChildIcon = child.icon;
                                             return (
                                                 <Link
                                                     key={child.path}
                                                     to={child.path}
                                                     onClick={onClose}
-                                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg mb-0.5 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
+                                                    className={`flex items-center px-4 py-2.5 rounded-lg mb-0.5 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                                                 >
-                                                    <ChildIcon className="h-4 w-4" strokeWidth={isActive ? 2 : 1.5} />
                                                     {child.name}
                                                 </Link>
                                             );
@@ -187,16 +179,14 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                         <Link
                             to="/mypage"
                             onClick={onClose}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${pathname === "/mypage" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
+                            className={`flex items-center px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${pathname === "/mypage" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                         >
-                            <User className="h-5 w-5" />
                             {t.auth.mypage}
                         </Link>
                         <button
                             onClick={() => window.location.reload()}
-                            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                            className="flex items-center w-full px-4 py-3 rounded-lg text-sm font-medium text-foreground hover:bg-accent transition-colors"
                         >
-                            <LogOut className="h-5 w-5" />
                             {t.auth.logout}
                         </button>
                     </div>

@@ -36,6 +36,23 @@ const en: Translations = {
         popularPosts: "Popular Posts",
         more: "More +",
         views: "Views",
+        // Carousel
+        carouselEvent: "Events",
+        carouselPerformance: "Performances",
+        // Tabs
+        tabAll: "All",
+        tabPerformance: "Performances",
+        tabCommunity: "Community",
+        tabArtist: "Artists",
+        // Two-column
+        boardPopular: "Popular Board Posts",
+        monthlyPerformance: "This Month's Performances",
+        morePerformance: "More Performances",
+        // Artist of the week
+        artistOfTheWeek: "Artist of the Week",
+        moreArtist: "More",
+        // New posts
+        newPosts: "New Posts",
     },
 
     // Footer
@@ -44,6 +61,7 @@ const en: Translations = {
             "Classic Mania\nGyeonggi-do, Osan-si, Wondong-ro 00beon-gil 00\nCEO: Seojun Lee | Tel: 031-000-0000\nEmail: mujuki@classicmania.com",
         latestNews: "Latest News",
         popularPosts: "Popular Posts",
+        newPosts: "New Posts",
         terms: "Terms of Service",
         privacy: "Privacy Policy",
     },

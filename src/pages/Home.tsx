@@ -1,112 +1,482 @@
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { posts } from "../data/mockData";
-import concertHallBaner from "../assets/home/concert_hall_baner.png";
-import { ImageIcon } from "lucide-react";
+import { performanceData } from "../data/performanceData";
+import { artistData } from "../data/artistData";
 import { useLanguageStore } from "../stores/languageStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+
+// ─── Carousel Slides (이벤트 / 공연정보) ─────────────────────────────
+const CAROUSEL_SLIDES = [
+    {
+        id: 1,
+        image: "https://images.unsplash.com/photo-1465847899078-b413929f7120?q=80&w=1200&auto=format&fit=crop",
+        title: "2026 빈 필하모닉 내한 공연",
+        subtitle: "세계 최고의 오케스트라가 서울에 옵니다",
+        tag: "event",
+    },
+    {
+        id: 2,
+        image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1200&auto=format&fit=crop",
+        title: "베토벤 합창 교향곡",
+        subtitle: "예술의전당 | 2026.02.01 ~ 2026.02.02",
+        tag: "performance",
+    },
+    {
+        id: 3,
+        image: "https://images.unsplash.com/photo-1514782390807-73d762e58c97?q=80&w=1200&auto=format&fit=crop",
+        title: "조성진 피아노 리사이틀",
+        subtitle: "롯데콘서트홀 | 2026.02.15",
+        tag: "performance",
+    },
+    {
+        id: 4,
+        image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1200&auto=format&fit=crop",
+        title: "신규회원 가입 이벤트",
+        subtitle: "가입만 해도 공연 할인 쿠폰 증정!",
+        tag: "event",
+    },
+];
 
 const Home = () => {
     const navigate = useNavigate();
     const { t } = useLanguageStore();
 
-    const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
+    // ─── Data ──────────────────────────────────────────────
     const popularPosts = [...posts].sort((a, b) => b.views - a.views).slice(0, 5);
+    const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
+    const monthlyPerformances = performanceData
+        .filter((p) => p.status === "공연중" || p.status === "공연예정")
+        .slice(0, 6);
+    const weeklyArtists = [...artistData].sort((a, b) => b.likes - a.likes).slice(0, 4);
 
+    // ─── Hero Carousel State ──────────────────────────────
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const nextSlide = useCallback(() => {
+        setCurrentSlide((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
+    }, []);
+
+    const prevSlide = useCallback(() => {
+        setCurrentSlide((prev) => (prev - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length);
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(nextSlide, 5000);
+        return () => clearInterval(timer);
+    }, [nextSlide]);
+
+    // ─── Performance Carousel State ───────────────────────
+    const [perfSlide, setPerfSlide] = useState(0);
+    const perfPerPage = 3;
+    const perfMaxSlide = Math.max(0, Math.ceil(monthlyPerformances.length / perfPerPage) - 1);
+
+    // ─── Tab State ────────────────────────────────────────
+    const [activeTab, setActiveTab] = useState("all");
+    const tabs = [
+        { key: "all", label: t.home.tabAll },
+        { key: "performance", label: t.home.tabPerformance },
+        { key: "community", label: t.home.tabCommunity },
+        { key: "artist", label: t.home.tabArtist },
+    ];
+
+    // ─── Handlers ─────────────────────────────────────────
     const handlePostClick = (postId: number) => {
         const targetPost = posts.find((p) => p.id === postId);
-        if (targetPost) {
-            targetPost.views += 1;
-        }
+        if (targetPost) targetPost.views += 1;
         navigate(`/board/${postId}`);
     };
 
-    const PostSection = ({ title, data, sortType }: { title: string, data: typeof posts, sortType: string }) => (
-        <Card>
-            <CardContent className="p-6">
+    // ─── Tab filtered content ─────────────────────────────
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case "performance":
+                return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {monthlyPerformances.slice(0, 6).map((perf) => (
+                            <Card
+                                key={perf.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow"
+                                onClick={() => navigate(`/performance/${perf.id}`)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        {perf.poster ? (
+                                            <img
+                                                src={perf.poster}
+                                                alt={perf.title}
+                                                className="w-16 h-20 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-20 bg-muted rounded flex items-center justify-center">
+                                                <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h6 className="font-semibold text-sm truncate">{perf.title}</h6>
+                                            <p className="text-xs text-muted-foreground mt-1">{perf.place}</p>
+                                            <p className="text-xs text-muted-foreground">{perf.period}</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                );
+            case "community":
+                return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {latestPosts.map((post) => (
+                            <Card
+                                key={post.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow"
+                                onClick={() => handlePostClick(post.id)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-3">
+                                        {post.images?.[0] ? (
+                                            <img
+                                                src={post.images[0]}
+                                                alt={post.title}
+                                                className="w-14 h-14 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <div className="w-14 h-14 bg-muted rounded flex items-center justify-center">
+                                                <ImageIcon className="h-5 w-5 text-muted-foreground/30" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h6 className="font-semibold text-sm truncate">{post.title}</h6>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {post.authorName} | {post.createdAt}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                );
+            case "artist":
+                return (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {artistData.slice(0, 8).map((artist) => (
+                            <Card
+                                key={artist.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow"
+                                onClick={() => navigate(`/artist/${artist.id}`)}
+                            >
+                                <CardContent className="p-4 text-center">
+                                    <img
+                                        src={artist.profileImage}
+                                        alt={artist.name}
+                                        className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                                    />
+                                    <h6 className="font-semibold text-sm">{artist.name}</h6>
+                                    <p className="text-xs text-muted-foreground">{artist.role}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                );
+            default:
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* 전체: 인기 게시글 + 공연 미리보기 */}
+                        <div>
+                            <h4 className="font-bold text-base mb-3">{t.home.popularPosts}</h4>
+                            <ul className="space-y-3">
+                                {popularPosts.slice(0, 3).map((post) => (
+                                    <li
+                                        key={post.id}
+                                        className="flex items-center gap-3 cursor-pointer hover:bg-accent rounded p-2 transition-colors"
+                                        onClick={() => handlePostClick(post.id)}
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{post.title}</p>
+                                            <p className="text-xs text-muted-foreground">{post.authorName}</p>
+                                        </div>
+                                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                            {t.home.views} {post.views}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-base mb-3">{t.home.monthlyPerformance}</h4>
+                            <ul className="space-y-3">
+                                {monthlyPerformances.slice(0, 3).map((perf) => (
+                                    <li
+                                        key={perf.id}
+                                        className="flex items-center gap-3 cursor-pointer hover:bg-accent rounded p-2 transition-colors"
+                                        onClick={() => navigate(`/performance/${perf.id}`)}
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{perf.title}</p>
+                                            <p className="text-xs text-muted-foreground">{perf.place}</p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <div className="w-full">
+            {/* ══════════════════════════════════════════════════════
+                1. Hero Carousel
+               ══════════════════════════════════════════════════════ */}
+            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[460px] overflow-hidden bg-black">
+                {CAROUSEL_SLIDES.map((slide, idx) => (
+                    <div
+                        key={slide.id}
+                        className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                    >
+                        <img
+                            src={slide.image}
+                            alt={slide.title}
+                            className="absolute inset-0 h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                        <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 lg:px-20">
+                            <div className="container mx-auto max-w-screen-xl">
+                                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white mb-3">
+                                    {slide.tag === "event" ? t.home.carouselEvent : t.home.carouselPerformance}
+                                </span>
+                                <h2 className="text-white text-xl sm:text-2xl lg:text-4xl font-bold mb-1">
+                                    {slide.title}
+                                </h2>
+                                <p className="text-white/80 text-sm sm:text-base">{slide.subtitle}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Carousel Controls */}
+                <button
+                    onClick={prevSlide}
+                    className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                >
+                    <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                    onClick={nextSlide}
+                    className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                >
+                    <ChevronRight className="h-5 w-5" />
+                </button>
+
+                {/* Dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                    {CAROUSEL_SLIDES.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setCurrentSlide(idx)}
+                            className={`w-2 h-2 rounded-full transition-all ${idx === currentSlide ? "bg-white w-6" : "bg-white/50"}`}
+                        />
+                    ))}
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════
+                2. Tabs
+               ══════════════════════════════════════════════════════ */}
+            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-8">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all border ${
+                                activeTab === tab.key
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-background text-muted-foreground border-border hover:bg-accent"
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="mt-6">
+                    {renderTabContent()}
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════
+                3. Two-Column: Popular Posts + Monthly Performances
+               ══════════════════════════════════════════════════════ */}
+            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left: 게시판 인기게시글 */}
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="text-lg font-bold">{t.home.boardPopular}</h3>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="font-bold text-sm"
+                                    onClick={() => navigate("/board", { state: { sort: "views" } })}
+                                >
+                                    {t.home.more}
+                                </Button>
+                            </div>
+                            <ul className="space-y-3">
+                                {popularPosts.map((post, idx) => (
+                                    <li
+                                        key={post.id}
+                                        className="flex items-center gap-3 cursor-pointer group p-2 hover:bg-accent transition-colors rounded"
+                                        onClick={() => handlePostClick(post.id)}
+                                    >
+                                        <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                                            {idx + 1}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <h6 className="text-sm font-medium group-hover:text-primary/70 transition-colors truncate">
+                                                {post.title}
+                                            </h6>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <span className="text-xs text-muted-foreground">
+                                                    {post.authorName}
+                                                </span>
+                                                <span className="text-muted-foreground/30 text-xs">|</span>
+                                                <span className="text-[11px] text-muted-foreground">
+                                                    {post.createdAt}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <span className="text-[11px] text-muted-foreground font-bold whitespace-nowrap">
+                                            {t.home.views} {post.views}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+
+                    {/* Right: 이달의 공연정보 */}
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="text-lg font-bold">{t.home.monthlyPerformance}</h3>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setPerfSlide((p) => Math.max(0, p - 1))}
+                                        disabled={perfSlide === 0}
+                                        className="p-1 rounded hover:bg-accent disabled:opacity-30 transition-colors"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => setPerfSlide((p) => Math.min(perfMaxSlide, p + 1))}
+                                        disabled={perfSlide === perfMaxSlide}
+                                        className="p-1 rounded hover:bg-accent disabled:opacity-30 transition-colors"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Performance image carousel */}
+                            <div className="overflow-hidden">
+                                <div
+                                    className="flex transition-transform duration-300 gap-3"
+                                    style={{ transform: `translateX(-${perfSlide * 100}%)` }}
+                                >
+                                    {monthlyPerformances.map((perf) => (
+                                        <div
+                                            key={perf.id}
+                                            className="flex-shrink-0 cursor-pointer"
+                                            style={{ width: `calc((100% - 1.5rem) / ${perfPerPage})` }}
+                                            onClick={() => navigate(`/performance/${perf.id}`)}
+                                        >
+                                            <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted group">
+                                                {perf.poster ? (
+                                                    <img
+                                                        src={perf.poster}
+                                                        alt={perf.title}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                                                        <span className="text-xs text-muted-foreground text-center px-2 font-medium">
+                                                            {perf.title}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-xs font-medium mt-2 truncate">{perf.title}</p>
+                                            <p className="text-[11px] text-muted-foreground truncate">{perf.place}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                className="w-full mt-5 font-semibold"
+                                onClick={() => navigate("/performance")}
+                            >
+                                {t.home.morePerformance}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════
+                4. Artist of the Week
+               ══════════════════════════════════════════════════════ */}
+            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12 mb-12">
                 <div className="flex items-center justify-between mb-6">
-                    <h5 className="text-lg font-bold">{title}</h5>
+                    <h3 className="text-xl font-bold">{t.home.artistOfTheWeek}</h3>
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="font-bold"
-                        onClick={() => navigate("/board", { state: { sort: sortType } })}
+                        className="font-bold text-sm"
+                        onClick={() => navigate("/artist")}
                     >
-                        {t.home.more}
+                        {t.home.moreArtist} +
                     </Button>
                 </div>
-                <ul className="space-y-4">
-                    {data.map((post) => (
-                        <li
-                            key={post.id}
-                            className="flex items-center gap-4 cursor-pointer group p-1 hover:bg-accent transition-colors rounded"
-                            onClick={() => handlePostClick(post.id)}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {weeklyArtists.map((artist) => (
+                        <Card
+                            key={artist.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow group relative"
+                            onClick={() => navigate(`/artist/${artist.id}`)}
                         >
-                            {post.images && post.images.length > 0 ? (
-                                <img
-                                    src={post.images[0]}
-                                    alt={post.title}
-                                    className="h-16 w-16 object-cover rounded grayscale group-hover:grayscale-0 transition-all shadow-sm"
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
-                            ) : (
-                                <div className="h-16 w-16 bg-muted flex items-center justify-center rounded border">
-                                    <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
+                            <CardContent className="p-4">
+                                <div className="flex items-center gap-4">
+                                    <img
+                                        src={artist.profileImage}
+                                        alt={artist.name}
+                                        className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
+                                            {artist.name}
+                                        </h6>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {artist.role}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {artist.nationality}
+                                        </p>
+                                    </div>
                                 </div>
-                            )}
-                            <div className="flex-1 overflow-hidden">
-                                <h6 className="font-semibold group-hover:text-primary/70 transition-colors truncate">
-                                    {post.title}
-                                </h6>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground font-medium">
-                                        {post.authorName}
-                                    </span>
-                                    <span className="text-muted-foreground/30 text-xs">|</span>
-                                    <span className="text-[11px] text-muted-foreground">
-                                        {post.createdAt}
-                                    </span>
-                                    {sortType === "views" && (
-                                        <span className="ml-auto text-[11px] text-muted-foreground font-bold">
-                                            {t.home.views} {post.views}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </li>
+                            </CardContent>
+                        </Card>
                     ))}
-                </ul>
-            </CardContent>
-        </Card>
-    );
-
-    return (
-        <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl">
-            <div className="relative h-56 sm:h-72 lg:h-96 w-full overflow-hidden sm:rounded-lg shadow-lg mb-8 lg:mb-12">
-                <img
-                    src={concertHallBaner}
-                    alt="오케스트라 배경"
-                    className="absolute inset-0 h-full w-full object-cover object-center"
-                />
-                <div className="absolute inset-0 bg-black/50 grid place-items-center">
-                    <div className="text-center text-white px-4">
-                        <h1 className="mb-2 text-2xl sm:text-3xl lg:text-5xl font-extrabold">
-                            {t.home.heroTitle1}
-                        </h1>
-                        <h1 className="mb-4 text-2xl sm:text-3xl lg:text-5xl font-extrabold">
-                            {t.home.heroTitle2}
-                        </h1>
-                        <Button size="lg" className="mt-4 sm:mt-6 font-bold" onClick={() => navigate("/login")}>
-                            {t.home.getStarted}
-                        </Button>
-                    </div>
                 </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 lg:gap-8 md:grid-cols-2 px-4 sm:px-0">
-                <PostSection title={t.home.latestNews} data={latestPosts} sortType="latest" />
-                <PostSection title={t.home.popularPosts} data={popularPosts} sortType="views" />
-            </div>
+            </section>
         </div>
     );
 };
