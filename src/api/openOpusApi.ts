@@ -110,6 +110,45 @@ export const fetchComposerGenres = async (composerId: string): Promise<string[]>
     }
 };
 
+/** 이름 첫 글자별 작곡가 목록 */
+export const fetchComposersByLetter = async (letter: string): Promise<OpenOpusComposer[]> => {
+    try {
+        const response = await axios.get<OpenOpusComposerResponse>(
+            `${BASE_URL}/composer/list/name/${encodeURIComponent(letter)}.json`
+        );
+        if (response.data.status?.success === 'true' && response.data.composers) {
+            return response.data.composers;
+        }
+        return [];
+    } catch (error) {
+        console.error('Open Opus 이름별 작곡가 API 호출 중 에러 발생:', error);
+        throw error;
+    }
+};
+
+/** 전체 작곡가 목록 (A-Z 전체 조회) */
+export const fetchAllComposers = async (): Promise<OpenOpusComposer[]> => {
+    try {
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const results = await Promise.all(
+            letters.map(letter =>
+                axios.get<OpenOpusComposerResponse>(
+                    `${BASE_URL}/composer/list/name/${letter}.json`
+                ).then(res => {
+                    if (res.data.status?.success === 'true' && res.data.composers) {
+                        return res.data.composers;
+                    }
+                    return [];
+                }).catch(() => [] as OpenOpusComposer[])
+            )
+        );
+        return results.flat().sort((a, b) => a.complete_name.localeCompare(b.complete_name));
+    } catch (error) {
+        console.error('Open Opus 전체 작곡가 API 호출 중 에러 발생:', error);
+        throw error;
+    }
+};
+
 /** 작곡가의 작품 목록 (장르별) */
 export const fetchWorksByComposer = async (
     composerId: string,

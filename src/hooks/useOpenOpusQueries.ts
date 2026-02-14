@@ -5,6 +5,8 @@ import {
     fetchComposersByEpoch,
     searchComposers,
     fetchComposersByIds,
+    fetchComposersByLetter,
+    fetchAllComposers,
     fetchComposerGenres,
     fetchWorksByComposer,
 } from '../api/openOpusApi';
@@ -70,6 +72,30 @@ export const useComposersByIds = (ids: string[], enabled = true) => {
         staleTime: STALE_TIME,
         gcTime: GC_TIME,
         refetchOnWindowFocus: false,
+    });
+};
+
+/** 이름 첫 글자별 작곡가 */
+export const useComposersByLetter = (letter: string, enabled = true) => {
+    return useQuery<OpenOpusComposer[]>({
+        queryKey: ['openopus', 'composers', 'letter', letter],
+        queryFn: () => fetchComposersByLetter(letter),
+        enabled: enabled && letter.length === 1,
+        staleTime: STALE_TIME,
+        gcTime: GC_TIME,
+        refetchOnWindowFocus: false,
+    });
+};
+
+/** 전체 작곡가 목록 (A-Z) */
+export const useAllComposers = () => {
+    return useQuery<OpenOpusComposer[]>({
+        queryKey: ['openopus', 'composers', 'all'],
+        queryFn: fetchAllComposers,
+        staleTime: STALE_TIME,
+        gcTime: GC_TIME,
+        refetchOnWindowFocus: false,
+        retry: 2,
     });
 };
 
