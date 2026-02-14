@@ -118,19 +118,23 @@ export const useArtistStore = create<ArtistState>((set, get) => ({
     toggleFollow: (artistId: string) => {
         const { followedArtistIds, artists } = get();
         let newFollowed: string[];
-        let newArtists: Artist[];
 
         if (followedArtistIds.includes(artistId)) {
             newFollowed = followedArtistIds.filter(id => id !== artistId);
-            newArtists = artists.map(a =>
-                a.id === artistId ? { ...a, likes: Math.max(0, a.likes - 1) } : a
-            );
         } else {
             newFollowed = [...followedArtistIds, artistId];
-            newArtists = artists.map(a =>
-                a.id === artistId ? { ...a, likes: a.likes + 1 } : a
-            );
         }
+
+        // 로컬 아티스트인 경우 likes 업데이트
+        const isLocalArtist = !artistId.startsWith('composer-');
+        const newArtists = isLocalArtist
+            ? artists.map(a => {
+                if (a.id !== artistId) return a;
+                return followedArtistIds.includes(artistId)
+                    ? { ...a, likes: Math.max(0, a.likes - 1) }
+                    : { ...a, likes: a.likes + 1 };
+            })
+            : artists;
 
         localStorage.setItem('followedArtists', JSON.stringify(newFollowed));
         set({ followedArtistIds: newFollowed, artists: newArtists });
