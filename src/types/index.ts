@@ -74,3 +74,37 @@ export interface CheerMessage {
     message: string;
     createdAt: string;      // ISO date string
 }
+
+// Open Opus API 타입
+export interface OpenOpusComposer {
+    id: string;
+    name: string;           // 성 (예: Bach)
+    complete_name: string;  // 풀네임 (예: Johann Sebastian Bach)
+    birth: string;          // 생년 (예: 1685-01-01)
+    death: string | null;   // 사망년 (null이면 생존)
+    epoch: string;          // 시대 (예: Baroque, Classical, Romantic)
+    portrait: string;       // 초상화 URL
+}
+
+export interface OpenOpusWork {
+    id: string;
+    title: string;          // 작품 제목
+    subtitle: string;       // 부제
+    searchterms: string;    // 검색 키워드
+    popular: string;        // "1" 또는 "0"
+    recommended: string;    // "1" 또는 "0"
+    genre: string;          // 장르 (Orchestral, Chamber, Keyboard 등)
+}
+
+export interface OpenOpusComposerResponse {
+    status: { success: string; rows: number };
+    request: { type: string; item: string };
+    composers: OpenOpusComposer[];
+}
+
+export interface OpenOpusWorkResponse {
+    status: { success: string; rows: number };
+    request: { type: string; item: string };
+    composer: OpenOpusComposer;
+    works: OpenOpusWork[];
+}

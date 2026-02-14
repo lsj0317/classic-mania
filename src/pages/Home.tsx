@@ -1,12 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { posts } from "../data/mockData";
-import { performanceData } from "../data/performanceData";
 import { artistData } from "../data/artistData";
 import { useLanguageStore } from "../stores/languageStore";
+import { useMonthlyPerformances } from "../hooks/usePerformanceQueries";
+import { usePopularComposers } from "../hooks/useOpenOpusQueries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Loader2 } from "lucide-react";
+import type { OpenOpusComposer } from "../types";
+
+// ─── 시대 한국어 매핑 ─────────────────────────────────────────
+const EPOCH_KO: Record<string, string> = {
+    Medieval: "중세",
+    Renaissance: "르네상스",
+    Baroque: "바로크",
+    Classical: "고전주의",
+    "Early Romantic": "초기 낭만",
+    Romantic: "낭만주의",
+    "Late Romantic": "후기 낭만",
+    "20th Century": "20세기",
+    "Post-War": "전후",
+    "21st Century": "21세기",
+};
 
 // ─── Carousel Slides (이벤트 / 공연정보) ─────────────────────────────
 const CAROUSEL_SLIDES = [
@@ -42,15 +58,24 @@ const CAROUSEL_SLIDES = [
 
 const Home = () => {
     const navigate = useNavigate();
-    const { t } = useLanguageStore();
+    const { t, language } = useLanguageStore();
 
-    // ─── Data ──────────────────────────────────────────────
+    // ─── API Data (React Query 캐싱) ─────────────────────────
+    const {
+        data: monthlyPerformances = [],
+        isLoading: perfLoading,
+    } = useMonthlyPerformances();
+
+    const {
+        data: popularComposers = [],
+        isLoading: composersLoading,
+    } = usePopularComposers();
+
+    // ─── Local Data ─────────────────────────────────────────
     const popularPosts = [...posts].sort((a, b) => b.views - a.views).slice(0, 5);
     const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
-    const monthlyPerformances = performanceData
-        .filter((p) => p.status === "공연중" || p.status === "공연예정")
-        .slice(0, 6);
     const weeklyArtists = [...artistData].sort((a, b) => b.likes - a.likes).slice(0, 4);
+    const displayPerformances = monthlyPerformances.slice(0, 6);
 
     // ─── Hero Carousel State ──────────────────────────────
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -71,7 +96,7 @@ const Home = () => {
     // ─── Performance Carousel State ───────────────────────
     const [perfSlide, setPerfSlide] = useState(0);
     const perfPerPage = 3;
-    const perfMaxSlide = Math.max(0, Math.ceil(monthlyPerformances.length / perfPerPage) - 1);
+    const perfMaxSlide = Math.max(0, Math.ceil(displayPerformances.length / perfPerPage) - 1);
 
     // ─── Tab State ────────────────────────────────────────
     const [activeTab, setActiveTab] = useState("all");
@@ -89,13 +114,47 @@ const Home = () => {
         navigate(`/board/${postId}`);
     };
 
+    const isKo = language === "ko";
+
+    // ─── 작곡가 카드 렌더링 헬퍼 ──────────────────────────
+    const renderComposerCard = (composer: OpenOpusComposer) => (
+        <Card
+            key={composer.id}
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate(`/artist/composer-${composer.id}`)}
+        >
+            <CardContent className="p-4 text-center">
+                <img
+                    src={composer.portrait}
+                    alt={composer.complete_name}
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                />
+                <h6 className="font-semibold text-sm">{composer.complete_name}</h6>
+                <p className="text-xs text-muted-foreground">
+                    {isKo ? EPOCH_KO[composer.epoch] || composer.epoch : composer.epoch}
+                </p>
+            </CardContent>
+        </Card>
+    );
+
+    // ─── 로딩 스피너 ─────────────────────────────────────
+    const renderLoadingSpinner = () => (
+        <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-sm text-muted-foreground">
+                {isKo ? "데이터를 불러오는 중..." : "Loading..."}
+            </span>
+        </div>
+    );
+
     // ─── Tab filtered content ─────────────────────────────
     const renderTabContent = () => {
         switch (activeTab) {
             case "performance":
+                if (perfLoading) return renderLoadingSpinner();
                 return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {monthlyPerformances.slice(0, 6).map((perf) => (
+                        {displayPerformances.map((perf) => (
                             <Card
                                 key={perf.id}
                                 className="cursor-pointer hover:shadow-md transition-shadow"
@@ -160,25 +219,30 @@ const Home = () => {
                     </div>
                 );
             case "artist":
+                if (composersLoading) return renderLoadingSpinner();
                 return (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {artistData.slice(0, 8).map((artist) => (
-                            <Card
-                                key={artist.id}
-                                className="cursor-pointer hover:shadow-md transition-shadow"
-                                onClick={() => navigate(`/artist/${artist.id}`)}
-                            >
-                                <CardContent className="p-4 text-center">
-                                    <img
-                                        src={artist.profileImage}
-                                        alt={artist.name}
-                                        className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                                    />
-                                    <h6 className="font-semibold text-sm">{artist.name}</h6>
-                                    <p className="text-xs text-muted-foreground">{artist.role}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
+                        {/* Open Opus 인기 작곡가 */}
+                        {popularComposers.length > 0
+                            ? popularComposers.slice(0, 8).map(renderComposerCard)
+                            : artistData.slice(0, 8).map((artist) => (
+                                <Card
+                                    key={artist.id}
+                                    className="cursor-pointer hover:shadow-md transition-shadow"
+                                    onClick={() => navigate(`/artist/${artist.id}`)}
+                                >
+                                    <CardContent className="p-4 text-center">
+                                        <img
+                                            src={artist.profileImage}
+                                            alt={artist.name}
+                                            className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                                        />
+                                        <h6 className="font-semibold text-sm">{artist.name}</h6>
+                                        <p className="text-xs text-muted-foreground">{artist.role}</p>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        }
                     </div>
                 );
             default:
@@ -207,20 +271,24 @@ const Home = () => {
                         </div>
                         <div>
                             <h4 className="font-bold text-base mb-3">{t.home.monthlyPerformance}</h4>
-                            <ul className="space-y-3">
-                                {monthlyPerformances.slice(0, 3).map((perf) => (
-                                    <li
-                                        key={perf.id}
-                                        className="flex items-center gap-3 cursor-pointer hover:bg-accent rounded p-2 transition-colors"
-                                        onClick={() => navigate(`/performance/${perf.id}`)}
-                                    >
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">{perf.title}</p>
-                                            <p className="text-xs text-muted-foreground">{perf.place}</p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
+                            {perfLoading ? (
+                                renderLoadingSpinner()
+                            ) : (
+                                <ul className="space-y-3">
+                                    {displayPerformances.slice(0, 3).map((perf) => (
+                                        <li
+                                            key={perf.id}
+                                            className="flex items-center gap-3 cursor-pointer hover:bg-accent rounded p-2 transition-colors"
+                                            onClick={() => navigate(`/performance/${perf.id}`)}
+                                        >
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{perf.title}</p>
+                                                <p className="text-xs text-muted-foreground">{perf.place}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 );
@@ -360,7 +428,7 @@ const Home = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Right: 이달의 공연정보 */}
+                    {/* Right: 이달의 공연정보 (API 데이터) */}
                     <Card>
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-5">
@@ -384,39 +452,43 @@ const Home = () => {
                             </div>
 
                             {/* Performance image carousel */}
-                            <div className="overflow-hidden">
-                                <div
-                                    className="flex transition-transform duration-300 gap-3"
-                                    style={{ transform: `translateX(-${perfSlide * 100}%)` }}
-                                >
-                                    {monthlyPerformances.map((perf) => (
-                                        <div
-                                            key={perf.id}
-                                            className="flex-shrink-0 cursor-pointer"
-                                            style={{ width: `calc((100% - 1.5rem) / ${perfPerPage})` }}
-                                            onClick={() => navigate(`/performance/${perf.id}`)}
-                                        >
-                                            <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted group">
-                                                {perf.poster ? (
-                                                    <img
-                                                        src={perf.poster}
-                                                        alt={perf.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
-                                                        <span className="text-xs text-muted-foreground text-center px-2 font-medium">
-                                                            {perf.title}
-                                                        </span>
-                                                    </div>
-                                                )}
+                            {perfLoading ? (
+                                renderLoadingSpinner()
+                            ) : (
+                                <div className="overflow-hidden">
+                                    <div
+                                        className="flex transition-transform duration-300 gap-3"
+                                        style={{ transform: `translateX(-${perfSlide * 100}%)` }}
+                                    >
+                                        {displayPerformances.map((perf) => (
+                                            <div
+                                                key={perf.id}
+                                                className="flex-shrink-0 cursor-pointer"
+                                                style={{ width: `calc((100% - 1.5rem) / ${perfPerPage})` }}
+                                                onClick={() => navigate(`/performance/${perf.id}`)}
+                                            >
+                                                <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted group">
+                                                    {perf.poster ? (
+                                                        <img
+                                                            src={perf.poster}
+                                                            alt={perf.title}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                                                            <span className="text-xs text-muted-foreground text-center px-2 font-medium">
+                                                                {perf.title}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs font-medium mt-2 truncate">{perf.title}</p>
+                                                <p className="text-[11px] text-muted-foreground truncate">{perf.place}</p>
                                             </div>
-                                            <p className="text-xs font-medium mt-2 truncate">{perf.title}</p>
-                                            <p className="text-[11px] text-muted-foreground truncate">{perf.place}</p>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <Button
                                 variant="outline"
@@ -431,9 +503,9 @@ const Home = () => {
             </section>
 
             {/* ══════════════════════════════════════════════════════
-                4. Artist of the Week
+                4. Artist of the Week + 인기 작곡가
                ══════════════════════════════════════════════════════ */}
-            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12 mb-12">
+            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12 mb-4">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold">{t.home.artistOfTheWeek}</h3>
                     <Button
@@ -476,6 +548,61 @@ const Home = () => {
                         </Card>
                     ))}
                 </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════
+                5. 인기 작곡가 (Open Opus API)
+               ══════════════════════════════════════════════════════ */}
+            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-4 mb-12">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold">
+                        {isKo ? "인기 작곡가" : "Popular Composers"}
+                    </h3>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="font-bold text-sm"
+                        onClick={() => navigate("/artist")}
+                    >
+                        {t.home.moreArtist} +
+                    </Button>
+                </div>
+
+                {composersLoading ? (
+                    renderLoadingSpinner()
+                ) : popularComposers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {popularComposers.slice(0, 4).map((composer) => (
+                            <Card
+                                key={composer.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow group relative"
+                                onClick={() => navigate(`/artist/composer-${composer.id}`)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-4">
+                                        <img
+                                            src={composer.portrait}
+                                            alt={composer.complete_name}
+                                            className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
+                                                {composer.complete_name}
+                                            </h6>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {isKo ? EPOCH_KO[composer.epoch] || composer.epoch : composer.epoch}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {composer.birth?.slice(0, 4)}
+                                                {composer.death ? ` - ${composer.death.slice(0, 4)}` : ""}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : null}
             </section>
         </div>
     );

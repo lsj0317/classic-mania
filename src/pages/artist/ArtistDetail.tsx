@@ -21,6 +21,7 @@ import { useArtistStore } from '../../stores/artistStore';
 import { useLanguageStore } from '../../stores/languageStore';
 import { currentUser } from '../../data/mockData';
 import type { NewsItem } from '../../api/newsApi';
+import ComposerDetail from './ComposerDetail';
 
 type TabType = 'performances' | 'news' | 'cheers';
 
@@ -28,6 +29,12 @@ const CHEER_PAGE_SIZE = 10;
 
 const ArtistDetail = () => {
     const { id } = useParams<{ id: string }>();
+
+    // Open Opus 작곡가 라우팅 (composer-{id} 패턴)
+    if (id?.startsWith('composer-')) {
+        const composerId = id.replace('composer-', '');
+        return <ComposerDetail composerId={composerId} />;
+    }
     const navigate = useNavigate();
     const { language } = useLanguageStore();
     const isKo = language === 'ko';

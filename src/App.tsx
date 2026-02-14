@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Board from "./pages/board/Board.tsx";
@@ -19,8 +20,20 @@ import NewsDetail from "./pages/news/NewsDetail.tsx";
 import ArtistList from "./pages/artist/ArtistList.tsx";
 import ArtistDetail from "./pages/artist/ArtistDetail.tsx";
 
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5,
+            gcTime: 1000 * 60 * 30,
+            refetchOnWindowFocus: false,
+            retry: 2,
+        },
+    },
+});
+
 function App() {
     return (
+        <QueryClientProvider client={queryClient}>
         <Router>
             <Routes>
                 <Route path="/" element={<Layout />}>
@@ -46,6 +59,7 @@ function App() {
                 </Route>
             </Routes>
         </Router>
+        </QueryClientProvider>
     );
 }
 
