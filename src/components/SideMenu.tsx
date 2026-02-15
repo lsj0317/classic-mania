@@ -1,5 +1,8 @@
+'use client';
+
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
 import { X, ChevronDown, Globe } from "lucide-react";
@@ -15,7 +18,7 @@ type NavItem =
     | { type: "group"; name: string; children: { name: string; path: string }[] };
 
 const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
-    const { pathname } = useLocation();
+    const pathname = usePathname();
     const { language, t, setLanguage } = useLanguageStore();
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
     const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -90,7 +93,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             </div>
                         </div>
                     ) : (
-                        <Link to="/login" onClick={onClose}>
+                        <Link href="/login" onClick={onClose}>
                             <Button className="w-full">{t.auth.login}</Button>
                         </Link>
                     )}
@@ -104,7 +107,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                             return (
                                 <Link
                                     key={item.path}
-                                    to={item.path}
+                                    href={item.path}
                                     onClick={onClose}
                                     className={`flex items-center px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                                 >
@@ -139,7 +142,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                                             return (
                                                 <Link
                                                     key={child.path}
-                                                    to={child.path}
+                                                    href={child.path}
                                                     onClick={onClose}
                                                     className={`flex items-center px-4 py-2.5 rounded-lg mb-0.5 text-sm font-medium transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                                                 >
@@ -177,7 +180,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 {isLoggedIn && (
                     <div className="p-4 border-t">
                         <Link
-                            to="/mypage"
+                            href="/mypage"
                             onClick={onClose}
                             className={`flex items-center px-4 py-3 rounded-lg mb-1 text-sm font-medium transition-colors ${pathname === "/mypage" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"}`}
                         >

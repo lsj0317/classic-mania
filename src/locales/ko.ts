@@ -78,7 +78,7 @@ const ko = {
         ko: "한국어",
         en: "English",
     },
-} as const;
+};
 
 export type Translations = typeof ko;
 export default ko;

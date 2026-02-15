@@ -1,13 +1,10 @@
 import axios from 'axios';
 import type { Performance, RelatedLink } from '../types';
 
-const API_KEY = import.meta.env.VITE_KOPIS_API_KEY;
-
 /**
  * KOPIS API URL 빌드
- * 개발/배포 모두 동일하게 /api/kopis 프록시 사용
- * - 개발: Vite dev server proxy
- * - 배포: Vercel Serverless Function
+ * /api/kopis Route Handler 프록시 사용
+ * API 키는 서버사이드에서 주입됨
  */
 function buildKopisUrl(path: string, params: Record<string, string | number>): string {
     const searchParams = new URLSearchParams();
@@ -64,7 +61,6 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
             `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 
         const url = buildKopisUrl('/openApi/restful/pblprfr', {
-            service: API_KEY,
             stdate: toYMD(sixMonthsAgo),
             eddate: toYMD(sixMonthsLater),
             cpage: page,
@@ -103,9 +99,7 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
 
 export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Performance | null> => {
     try {
-        const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {
-            service: API_KEY,
-        });
+        const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {});
 
         const response = await axios.get(url);
         const parser = new DOMParser();
@@ -166,9 +160,7 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
 
 export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
     try {
-        const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {
-            service: API_KEY,
-        });
+        const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {});
 
         const response = await axios.get(url);
         const parser = new DOMParser();

@@ -1,10 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
+'use client';
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { posts } from "../data/mockData";
 import { useLanguageStore } from "../stores/languageStore";
 import { Separator } from "./ui/separator";
 
 const Footer = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const { t } = useLanguageStore();
 
     const popularShort = [...posts].sort((a, b) => b.views - a.views).slice(0, 3);
@@ -13,7 +16,7 @@ const Footer = () => {
     const handleFootClick = (id: number) => {
         const target = posts.find(p => p.id === id);
         if (target) target.views += 1;
-        navigate(`/board/${id}`);
+        router.push(`/board/${id}`);
         window.scrollTo(0, 0);
     };
 
@@ -72,12 +75,12 @@ const Footer = () => {
                 <Separator className="bg-gray-800" />
 
                 <div className="flex gap-6 pt-6 text-gray-500 sm:justify-center">
-                    <Link to="/terms">
+                    <Link href="/terms">
                         <span className="text-sm hover:text-white transition-colors cursor-pointer">
                             {t.footer.terms}
                         </span>
                     </Link>
-                    <Link to="/privacy">
+                    <Link href="/privacy">
                         <span className="text-sm font-bold hover:text-white transition-colors cursor-pointer">
                             {t.footer.privacy}
                         </span>

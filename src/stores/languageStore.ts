@@ -14,6 +14,7 @@ interface LanguageState {
 const translations: Record<Language, Translations> = { ko, en };
 
 const getInitialLanguage = (): Language => {
+    if (typeof window === "undefined") return "ko";
     try {
         const saved = localStorage.getItem("language");
         if (saved === "ko" || saved === "en") return saved;

@@ -1,7 +1,6 @@
 {
     "rewrites": [
         { "source": "/api/kopis", "destination": "/api/kopis" },
-        { "source": "/api/naver", "destination": "/api/naver" },
-        { "source": "/((?!api/).*)", "destination": "/index.html" }
+        { "source": "/api/naver", "destination": "/api/naver" }
     ]
 }

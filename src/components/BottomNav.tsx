@@ -1,9 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
+'use client';
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguageStore } from "../stores/languageStore";
 import { Home, LayoutGrid, Map, User } from "lucide-react";
 
 const BottomNav = () => {
-    const { pathname } = useLocation();
+    const pathname = usePathname();
     const { t } = useLanguageStore();
 
     const navItems = [
@@ -18,7 +21,7 @@ const BottomNav = () => {
             {navItems.map((item) => {
                 const isActive = pathname === item.path;
                 return (
-                    <Link key={item.path} to={item.path} className="flex flex-col items-center justify-center w-full h-full gap-1">
+                    <Link key={item.path} href={item.path} className="flex flex-col items-center justify-center w-full h-full gap-1">
                         <item.icon
                             className={`h-6 w-6 transition-colors ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
                             strokeWidth={isActive ? 2 : 1.5}

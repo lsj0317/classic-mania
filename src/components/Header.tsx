@@ -1,5 +1,8 @@
+'use client';
+
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
 import { Button } from "./ui/button";
@@ -24,8 +27,8 @@ type NavItem =
 const Header = ({ onMenuOpen }: HeaderProps) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [openGroup, setOpenGroup] = useState<string | null>(null);
-    const navigate = useNavigate();
-    const { pathname } = useLocation();
+    const router = useRouter();
+    const pathname = usePathname();
     const { language, t, setLanguage } = useLanguageStore();
     const groupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,7 +94,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
             <div className="container mx-auto flex items-center justify-between max-w-screen-xl">
                 {/* 로고 */}
                 <div className="flex-1 flex justify-start">
-                    <Link to="/">
+                    <Link href="/">
                         <span className={`cursor-pointer py-1.5 font-bold text-xl md:text-2xl tracking-tighter transition-colors w-max ${textColor}`}>
                             Classic Mania
                         </span>
@@ -106,7 +109,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                 return (
                                     <li key={item.path}>
                                         <Link
-                                            to={item.path}
+                                            href={item.path}
                                             className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
                                         >
                                             {item.name}
@@ -143,7 +146,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                             {item.children.map((child) => (
                                                 <Link
                                                     key={child.path}
-                                                    to={child.path}
+                                                    href={child.path}
                                                     onClick={() => setOpenGroup(null)}
                                                     className={`block px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent ${pathname === child.path ? "text-primary bg-accent/50" : "text-foreground"}`}
                                                 >
@@ -186,7 +189,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                         </DropdownMenu>
 
                         {!isLoggedIn ? (
-                            <Link to="/login">
+                            <Link href="/login">
                                 <Button size="sm" className={isScrolled ? "" : "bg-white text-black hover:bg-white/90"}>
                                     {t.auth.login}
                                 </Button>
@@ -210,7 +213,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => navigate("/mypage")} className="gap-2">
+                                    <DropdownMenuItem onClick={() => router.push("/mypage")} className="gap-2">
                                         <User className="h-4 w-4" />
                                         {t.auth.mypage}
                                     </DropdownMenuItem>

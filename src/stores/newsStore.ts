@@ -10,12 +10,14 @@ interface NewsState {
     totalResults: number;
     sortBy: string; // 'sim' (정확도순) or 'date' (최신순)
     lastFetched: number; // 마지막으로 데이터를 가져온 시간 (Timestamp)
+    selectedNews: NewsItem | null; // NewsDetail 데이터 전달용
 
     // Actions
     fetchNewsList: () => Promise<void>;
     setKeyword: (keyword: string) => void;
     setCurrentPage: (page: number) => void;
     setSortBy: (sort: string) => void;
+    setSelectedNews: (news: NewsItem | null) => void;
 }
 
 export const useNewsStore = create<NewsState>((set, get) => ({
@@ -27,6 +29,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
     totalResults: 0,
     sortBy: 'sim',
     lastFetched: 0,
+    selectedNews: null,
 
     fetchNewsList: async () => {
         const { keyword, currentPage, sortBy, lastFetched, newsList } = get();
@@ -85,4 +88,5 @@ export const useNewsStore = create<NewsState>((set, get) => ({
     setKeyword: (keyword) => set({ keyword, currentPage: 1 }), // 검색어 변경 시 1페이지로
     setCurrentPage: (page) => set({ currentPage: page }),
     setSortBy: (sort) => set({ sortBy: sort, currentPage: 1 }),
+    setSelectedNews: (news) => set({ selectedNews: news }),
 }));
