@@ -7,8 +7,8 @@ const ko = {
         artist: "아티스트",
         ticket: "티켓정보",
         news: "뉴스",
-        showAndTicket: "공연/티켓",
-        artistAndNews: "아티스트/뉴스",
+        showAndTicket: "클래식공연",
+        artistAndNews: "클래식정보",
     },
 
     // Header & Auth
@@ -16,7 +16,7 @@ const ko = {
         login: "로그인",
         logout: "로그아웃",
         mypage: "마이페이지",
-        welcome: "환영합니다",
+        welcome: "안녕하세요",
         honorific: "님",
     },
 

@@ -7,9 +7,11 @@ import { artistData } from "@/data/artistData";
 import { useLanguageStore } from "@/stores/languageStore";
 import { useMonthlyPerformances } from "@/hooks/usePerformanceQueries";
 import { usePopularComposers } from "@/hooks/useOpenOpusQueries";
+import { useWeeklyArtists } from "@/hooks/useWeeklyArtists";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ImageIcon, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import type { OpenOpusComposer } from "@/types";
 
 const EPOCH_KO: Record<string, string> = {
@@ -56,6 +58,90 @@ const CAROUSEL_SLIDES = [
     },
 ];
 
+// ── 스켈레톤 컴포넌트 ──
+
+const CarouselSkeleton = () => (
+    <div className="relative w-full h-[280px] sm:h-[360px] lg:h-[460px] overflow-hidden bg-black">
+        <Skeleton className="absolute inset-0 rounded-none bg-gray-800" />
+        <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 lg:px-20">
+            <div className="container mx-auto max-w-screen-xl">
+                <Skeleton className="h-6 w-20 rounded-full bg-white/10 mb-3" />
+                <Skeleton className="h-8 sm:h-10 w-3/4 bg-white/10 mb-2" />
+                <Skeleton className="h-4 w-1/2 bg-white/10" />
+            </div>
+        </div>
+    </div>
+);
+
+const PerformanceCardSkeleton = () => (
+    <Card>
+        <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+                <Skeleton className="w-16 h-20 rounded" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-2/3" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const ArtistCardSkeleton = () => (
+    <Card>
+        <CardContent className="p-4 text-center">
+            <Skeleton className="w-20 h-20 rounded-full mx-auto mb-3" />
+            <Skeleton className="h-4 w-24 mx-auto mb-1" />
+            <Skeleton className="h-3 w-16 mx-auto" />
+        </CardContent>
+    </Card>
+);
+
+const WeeklyArtistCardSkeleton = () => (
+    <Card>
+        <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+                <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-3 w-12" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const ComposerRowSkeleton = () => (
+    <Card>
+        <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+                <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-24" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const PerfCarouselSkeleton = () => (
+    <div className="flex gap-3">
+        {[0, 1, 2].map(i => (
+            <div key={i} className="flex-shrink-0" style={{ width: 'calc((100% - 1.5rem) / 3)' }}>
+                <Skeleton className="aspect-[3/4] rounded-lg" />
+                <Skeleton className="h-3 w-3/4 mt-2" />
+                <Skeleton className="h-3 w-1/2 mt-1" />
+            </div>
+        ))}
+    </div>
+);
+
+// ── 메인 컴포넌트 ──
+
 const Home = () => {
     const router = useRouter();
     const { t, language } = useLanguageStore();
@@ -70,12 +156,17 @@ const Home = () => {
         isLoading: composersLoading,
     } = usePopularComposers();
 
+    const {
+        data: weeklyArtists = [],
+        isLoading: weeklyLoading,
+    } = useWeeklyArtists();
+
     const popularPosts = [...posts].sort((a, b) => b.views - a.views).slice(0, 5);
     const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
-    const weeklyArtists = [...artistData].sort((a, b) => b.likes - a.likes).slice(0, 4);
     const displayPerformances = monthlyPerformances.slice(0, 6);
 
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [carouselReady, setCarouselReady] = useState(false);
 
     const nextSlide = useCallback(() => {
         setCurrentSlide((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
@@ -85,10 +176,28 @@ const Home = () => {
         setCurrentSlide((prev) => (prev - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length);
     }, []);
 
+    // 캐러셀 이미지 프리로드
     useEffect(() => {
+        let loaded = 0;
+        const total = CAROUSEL_SLIDES.length;
+        CAROUSEL_SLIDES.forEach((slide) => {
+            const img = new Image();
+            img.onload = img.onerror = () => {
+                loaded++;
+                if (loaded >= total) setCarouselReady(true);
+            };
+            img.src = slide.image;
+        });
+        // 3초 후 강제 표시 (느린 네트워크 대비)
+        const timer = setTimeout(() => setCarouselReady(true), 3000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        if (!carouselReady) return;
         const timer = setInterval(nextSlide, 5000);
         return () => clearInterval(timer);
-    }, [nextSlide]);
+    }, [nextSlide, carouselReady]);
 
     const [perfSlide, setPerfSlide] = useState(0);
     const perfPerPage = 3;
@@ -130,19 +239,14 @@ const Home = () => {
         </Card>
     );
 
-    const renderLoadingSpinner = () => (
-        <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-sm text-muted-foreground">
-                {isKo ? "데이터를 불러오는 중..." : "Loading..."}
-            </span>
-        </div>
-    );
-
     const renderTabContent = () => {
         switch (activeTab) {
             case "performance":
-                if (perfLoading) return renderLoadingSpinner();
+                if (perfLoading) return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[0, 1, 2, 3, 4, 5].map(i => <PerformanceCardSkeleton key={i} />)}
+                    </div>
+                );
                 return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {displayPerformances.map((perf) => (
@@ -210,7 +314,11 @@ const Home = () => {
                     </div>
                 );
             case "artist":
-                if (composersLoading) return renderLoadingSpinner();
+                if (composersLoading) return (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <ArtistCardSkeleton key={i} />)}
+                    </div>
+                );
                 return (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                         {popularComposers.length > 0
@@ -261,7 +369,16 @@ const Home = () => {
                         <div>
                             <h4 className="font-bold text-base mb-3">{t.home.monthlyPerformance}</h4>
                             {perfLoading ? (
-                                renderLoadingSpinner()
+                                <ul className="space-y-3">
+                                    {[0, 1, 2].map(i => (
+                                        <li key={i} className="flex items-center gap-3 p-2">
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-3 w-1/2" />
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
                             ) : (
                                 <ul className="space-y-3">
                                     {displayPerformances.slice(0, 3).map((perf) => (
@@ -286,56 +403,62 @@ const Home = () => {
 
     return (
         <div className="w-full">
-            <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[460px] overflow-hidden bg-black">
-                {CAROUSEL_SLIDES.map((slide, idx) => (
-                    <div
-                        key={slide.id}
-                        className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-                    >
-                        <img
-                            src={slide.image}
-                            alt={slide.title}
-                            className="absolute inset-0 h-full w-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                        <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 lg:px-20">
-                            <div className="container mx-auto max-w-screen-xl">
-                                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white mb-3">
-                                    {slide.tag === "event" ? t.home.carouselEvent : t.home.carouselPerformance}
-                                </span>
-                                <h2 className="text-white text-xl sm:text-2xl lg:text-4xl font-bold mb-1">
-                                    {slide.title}
-                                </h2>
-                                <p className="text-white/80 text-sm sm:text-base">{slide.subtitle}</p>
+            {/* 히어로 캐러셀 */}
+            {!carouselReady ? (
+                <CarouselSkeleton />
+            ) : (
+                <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[460px] overflow-hidden bg-black">
+                    {CAROUSEL_SLIDES.map((slide, idx) => (
+                        <div
+                            key={slide.id}
+                            className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                        >
+                            <img
+                                src={slide.image}
+                                alt={slide.title}
+                                className="absolute inset-0 h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                            <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 lg:px-20">
+                                <div className="container mx-auto max-w-screen-xl">
+                                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white mb-3">
+                                        {slide.tag === "event" ? t.home.carouselEvent : t.home.carouselPerformance}
+                                    </span>
+                                    <h2 className="text-white text-xl sm:text-2xl lg:text-4xl font-bold mb-1">
+                                        {slide.title}
+                                    </h2>
+                                    <p className="text-white/80 text-sm sm:text-base">{slide.subtitle}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-
-                <button
-                    onClick={prevSlide}
-                    className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-                >
-                    <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                    onClick={nextSlide}
-                    className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-                >
-                    <ChevronRight className="h-5 w-5" />
-                </button>
-
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                    {CAROUSEL_SLIDES.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => setCurrentSlide(idx)}
-                            className={`w-2 h-2 rounded-full transition-all ${idx === currentSlide ? "bg-white w-6" : "bg-white/50"}`}
-                        />
                     ))}
-                </div>
-            </section>
 
+                    <button
+                        onClick={prevSlide}
+                        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                    >
+                        <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                        onClick={nextSlide}
+                        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                    >
+                        <ChevronRight className="h-5 w-5" />
+                    </button>
+
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                        {CAROUSEL_SLIDES.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentSlide(idx)}
+                                className={`w-2 h-2 rounded-full transition-all ${idx === currentSlide ? "bg-white w-6" : "bg-white/50"}`}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* 탭 콘텐츠 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-8">
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                     {tabs.map((tab) => (
@@ -357,6 +480,7 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* 인기 게시글 + 이달의 공연 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <Card>
@@ -428,7 +552,7 @@ const Home = () => {
                             </div>
 
                             {perfLoading ? (
-                                renderLoadingSpinner()
+                                <PerfCarouselSkeleton />
                             ) : (
                                 <div className="overflow-hidden">
                                     <div
@@ -477,6 +601,7 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* 금주의 아티스트 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12 mb-4">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold">{t.home.artistOfTheWeek}</h3>
@@ -484,44 +609,57 @@ const Home = () => {
                         variant="ghost"
                         size="sm"
                         className="font-bold text-sm"
-                        onClick={() => router.push("/artist")}
+                        onClick={() => router.push("/artist?tab=performers")}
                     >
                         {t.home.moreArtist} +
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {weeklyArtists.map((artist) => (
-                        <Card
-                            key={artist.id}
-                            className="cursor-pointer hover:shadow-md transition-shadow group relative"
-                            onClick={() => router.push(`/artist/${artist.id}`)}
-                        >
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-4">
-                                    <img
-                                        src={artist.profileImage}
-                                        alt={artist.name}
-                                        className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
-                                            {artist.name}
-                                        </h6>
-                                        <p className="text-xs text-muted-foreground mt-0.5">
-                                            {artist.role}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {artist.nationality}
-                                        </p>
+                {weeklyLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[0, 1, 2, 3].map(i => <WeeklyArtistCardSkeleton key={i} />)}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {weeklyArtists.map((artist) => (
+                            <Card
+                                key={artist.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow group relative"
+                                onClick={() => router.push(`/artist/${artist.id}`)}
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-4">
+                                        {artist.profileImage ? (
+                                            <img
+                                                src={artist.profileImage}
+                                                alt={artist.name}
+                                                className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0 group-hover:ring-2 ring-primary transition-all">
+                                                <span className="text-lg font-bold text-muted-foreground">{artist.name.charAt(0)}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
+                                                {artist.name}
+                                            </h6>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {artist.role}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {artist.nationality}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </section>
 
+            {/* 인기 작곡가 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-4 mb-12">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold">
@@ -531,14 +669,16 @@ const Home = () => {
                         variant="ghost"
                         size="sm"
                         className="font-bold text-sm"
-                        onClick={() => router.push("/artist")}
+                        onClick={() => router.push("/artist?tab=composers")}
                     >
                         {t.home.moreArtist} +
                     </Button>
                 </div>
 
                 {composersLoading ? (
-                    renderLoadingSpinner()
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[0, 1, 2, 3].map(i => <ComposerRowSkeleton key={i} />)}
+                    </div>
                 ) : popularComposers.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {popularComposers.slice(0, 4).map((composer) => (

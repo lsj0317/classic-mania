@@ -108,3 +108,45 @@ export interface OpenOpusWorkResponse {
     composer: OpenOpusComposer;
     works: OpenOpusWork[];
 }
+
+// TheAudioDB API 타입
+export interface AudioDBArtist {
+    idArtist: string;
+    strArtist: string;
+    strArtistThumb: string | null;
+    strBiographyKR: string | null;
+    strBiographyEN: string | null;
+    strCountry: string | null;
+    strGenre: string | null;
+    strStyle: string | null;
+}
+
+export interface AudioDBArtistResponse {
+    artists: AudioDBArtist[] | null;
+}
+
+// YouTube Data API 타입
+export interface YouTubeVideo {
+    videoId: string;
+    title: string;
+    description: string;
+    thumbnail: string;
+    channelTitle: string;
+    publishedAt: string;
+}
+
+// Wikipedia REST API Summary 타입
+export interface WikiSummary {
+    title: string;
+    extract: string;
+    thumbnail?: {
+        source: string;
+        width: number;
+        height: number;
+    };
+    originalimage?: {
+        source: string;
+        width: number;
+        height: number;
+    };
+}

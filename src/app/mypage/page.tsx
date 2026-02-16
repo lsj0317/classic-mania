@@ -40,7 +40,7 @@ const MyPage = () => {
                                             : "text-gray-600 hover:bg-gray-50"
                                     )}
                                 >
-                                    <Icon className="h-5 w-5" />
+                                    {/*<Icon className="h-5 w-5" />*/}
                                     <span className="text-sm">{item.label}</span>
                                 </div>
                             );

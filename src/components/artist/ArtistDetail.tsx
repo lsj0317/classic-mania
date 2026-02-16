@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
     Music,
     Newspaper,
     MessageCircle,
+    Video,
     ChevronLeft,
     ChevronRight,
     ExternalLink,
@@ -23,28 +24,26 @@ import {
 import { useArtistStore } from '@/stores/artistStore';
 import { useLanguageStore } from '@/stores/languageStore';
 import { useNewsStore } from '@/stores/newsStore';
+import { useYoutubeSearch } from '@/hooks/useYoutubeSearch';
 import { currentUser } from '@/data/mockData';
 import type { NewsItem } from '@/api/newsApi';
-import ComposerDetail from '@/components/artist/ComposerDetail';
-import ArtistDetailView from '@/components/artist/ArtistDetail';
-import { useConductors, usePerformers } from '@/hooks/useClassicalArtists';
-import { useWeeklyArtists } from '@/hooks/useWeeklyArtists';
 import type { Artist } from '@/types';
 
-type TabType = 'performances' | 'news' | 'cheers';
+type TabType = 'performances' | 'videos' | 'news' | 'cheers';
 
 const CHEER_PAGE_SIZE = 10;
 
-const ArtistDetail = () => {
-    const params = useParams();
-    const id = params?.id as string | undefined;
+interface ArtistDetailProps {
+    artist: Artist;
+}
+
+const ArtistDetailView = ({ artist }: ArtistDetailProps) => {
     const router = useRouter();
     const { language } = useLanguageStore();
     const { setSelectedNews } = useNewsStore();
     const isKo = language === 'ko';
 
     const {
-        artists,
         followedArtistIds,
         toggleFollow,
         fetchArtistPerformances,
@@ -61,61 +60,20 @@ const ArtistDetail = () => {
         setCheerCurrentPage,
     } = useArtistStore();
 
-    // Open Opus 작곡가 라우팅 (composer-{id} 패턴)
-    if (id?.startsWith('composer-')) {
-        const composerId = id.replace('composer-', '');
-        return <ComposerDetail composerId={composerId} />;
-    }
-
-    // 지휘자/연주자/weekly 아티스트 데이터 조회
-    const { data: conductors = [] } = useConductors();
-    const { data: performers = [] } = usePerformers();
-    const { data: weeklyArtists = [] } = useWeeklyArtists();
-
-    // conductor-N, performer-N, weekly-N 패턴 또는 기존 아티스트 ID로 아티스트 찾기
-    const resolvedArtist: Artist | undefined = (() => {
-        if (!id) return undefined;
-
-        if (id.startsWith('conductor-')) {
-            return conductors.find(a => a.id === id);
-        }
-        if (id.startsWith('performer-')) {
-            return performers.find(a => a.id === id);
-        }
-        if (id.startsWith('weekly-')) {
-            return weeklyArtists.find(a => a.id === id);
-        }
-        return artists.find(a => a.id === id);
-    })();
-
-    // conductor/performer/weekly → ArtistDetailView 컴포넌트 사용
-    if (id?.startsWith('conductor-') || id?.startsWith('performer-') || id?.startsWith('weekly-')) {
-        if (!resolvedArtist) {
-            // 데이터가 아직 로딩 중일 수 있음
-            return (
-                <div className="flex justify-center items-center py-20">
-                    <Spinner size="md" />
-                    <span className="ml-3 text-gray-500 text-sm">
-                        {isKo ? '아티스트 정보를 불러오는 중...' : 'Loading artist...'}
-                    </span>
-                </div>
-            );
-        }
-        return <ArtistDetailView artist={resolvedArtist} />;
-    }
-
-    // 기존 목 데이터 아티스트
     const [activeTab, setActiveTab] = useState<TabType>('performances');
     const [cheerInput, setCheerInput] = useState('');
 
-    const artist = artists.find(a => a.id === id);
-    const isFollowed = followedArtistIds.includes(id || '');
+    const isFollowed = followedArtistIds.includes(artist.id);
+
+    // YouTube 검색
+    const { data: youtubeVideos = [], isLoading: youtubeLoading } = useYoutubeSearch(
+        artist.nameEn,
+        activeTab === 'videos'
+    );
 
     useEffect(() => {
-        if (artist) {
-            fetchArtistPerformances(artist.name);
-            fetchArtistNews(artist.name);
-        }
+        fetchArtistPerformances(artist.name);
+        fetchArtistNews(artist.name);
     }, [artist, fetchArtistPerformances, fetchArtistNews]);
 
     useEffect(() => {
@@ -124,25 +82,12 @@ const ArtistDetail = () => {
         }
     }, [activeTab, setCheerCurrentPage]);
 
-    if (!artist) {
-        return (
-            <div className="container mx-auto px-4 py-20 text-center">
-                <p className="text-gray-500">{isKo ? '아티스트를 찾을 수 없습니다.' : 'Artist not found.'}</p>
-                <Button variant="ghost" className="mt-4" onClick={() => router.push('/artist')}>
-                    {isKo ? '목록으로 돌아가기' : 'Back to list'}
-                </Button>
-            </div>
-        );
-    }
-
-    // 공연 필터링
     const filteredPerformances = artistPerformances.filter(p => {
         if (performanceFilter === 'upcoming') return p.status === '공연예정' || p.status === '공연중';
         if (performanceFilter === 'completed') return p.status === '공연완료';
         return true;
     });
 
-    // 응원 메시지
     const allCheers = getCheerMessages(artist.id);
     const cheerTotalPages = Math.ceil(allCheers.length / CHEER_PAGE_SIZE);
     const paginatedCheers = allCheers.slice(
@@ -193,14 +138,15 @@ const ArtistDetail = () => {
     };
 
     const tabs: { key: TabType; label: string; icon: typeof Music }[] = [
-        { key: 'performances', label: isKo ? '공연정보' : 'Performances', icon: Music },
+        { key: 'performances', label: isKo ? '활동이력' : 'Activities', icon: Music },
+        { key: 'videos', label: isKo ? '영상보기' : 'Videos', icon: Video },
         { key: 'news', label: isKo ? '관련기사' : 'Articles', icon: Newspaper },
-        { key: 'cheers', label: isKo ? '응원의 한마디' : 'Cheers', icon: MessageCircle },
+        { key: 'cheers', label: isKo ? '응원' : 'Cheers', icon: MessageCircle },
     ];
 
     return (
         <div className="container mx-auto px-0 sm:px-4 py-6 lg:py-8 max-w-screen-xl min-h-screen">
-            {/* 상단 헤더 - 뒤로가기 + 이름 */}
+            {/* 상단 헤더 */}
             <div className="flex items-center gap-3 mb-6 lg:mb-8 px-4 sm:px-0">
                 <button
                     onClick={() => router.push('/artist')}
@@ -215,18 +161,22 @@ const ArtistDetail = () => {
 
             {/* 프로필 섹션 */}
             <div className="flex flex-col md:flex-row gap-6 lg:gap-10 mb-8 lg:mb-12 px-4 sm:px-0">
-                {/* 이미지 (좌측) */}
                 <div className="w-full md:w-[280px] lg:w-[320px] flex-shrink-0">
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
-                        <img
-                            src={artist.profileImage}
-                            alt={artist.name}
-                            className="w-full h-full object-cover"
-                        />
+                        {artist.profileImage ? (
+                            <img
+                                src={artist.profileImage}
+                                alt={artist.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                <Music className="h-16 w-16 text-gray-400" />
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* 프로필 정보 (우측) */}
                 <div className="flex-1 flex flex-col justify-between">
                     <div>
                         <div className="flex items-start justify-between mb-4">
@@ -263,7 +213,7 @@ const ArtistDetail = () => {
                             </span>
                         </div>
 
-                        <p className="text-gray-700 text-sm leading-relaxed mb-6">
+                        <p className="text-gray-700 text-sm leading-relaxed mb-6 line-clamp-6">
                             {isKo ? artist.bio : artist.bioEn}
                         </p>
                     </div>
@@ -312,10 +262,9 @@ const ArtistDetail = () => {
 
             {/* 탭 콘텐츠 */}
             <div className="px-4 sm:px-0">
-                {/* 공연정보 탭 */}
+                {/* 활동이력 탭 */}
                 {activeTab === 'performances' && (
                     <div>
-                        {/* 필터 */}
                         <div className="flex gap-2 mb-6">
                             {[
                                 { key: 'all', label: isKo ? '전체' : 'All' },
@@ -398,6 +347,59 @@ const ArtistDetail = () => {
                     </div>
                 )}
 
+                {/* 영상보기 탭 */}
+                {activeTab === 'videos' && (
+                    <div>
+                        {youtubeLoading ? (
+                            <div className="flex items-center justify-center py-20">
+                                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                <span className="ml-2 text-sm text-gray-500">
+                                    {isKo ? '영상을 불러오는 중...' : 'Loading videos...'}
+                                </span>
+                            </div>
+                        ) : youtubeVideos.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {youtubeVideos.map((video) => (
+                                    <Card
+                                        key={video.videoId}
+                                        className="overflow-hidden rounded-none border border-gray-200 shadow-none hover:border-black hover:shadow-md transition-all cursor-pointer group"
+                                        onClick={() => window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank')}
+                                    >
+                                        <div className="relative aspect-video overflow-hidden bg-gray-100">
+                                            <img
+                                                src={video.thumbnail}
+                                                alt={video.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                                <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
+                                                    <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <h4 className="font-bold text-sm text-black leading-tight line-clamp-2 mb-1">
+                                                {video.title}
+                                            </h4>
+                                            <div className="flex items-center justify-between text-xs text-gray-500">
+                                                <span className="truncate">{video.channelTitle}</span>
+                                                <span className="flex-shrink-0 ml-2">{formatDate(video.publishedAt)}</span>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-16 text-center border border-dashed border-gray-300">
+                                <Video className="h-8 w-8 text-gray-300 mx-auto mb-3" />
+                                <p className="text-gray-400 text-sm">
+                                    {isKo ? '관련 영상이 없습니다.' : 'No related videos found.'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* 관련기사 탭 */}
                 {activeTab === 'news' && (
                     <div>
@@ -449,10 +451,9 @@ const ArtistDetail = () => {
                     </div>
                 )}
 
-                {/* 응원의 한마디 탭 */}
+                {/* 응원 탭 */}
                 {activeTab === 'cheers' && (
                     <div>
-                        {/* 응원 메시지 입력 */}
                         <div className="flex gap-3 mb-6 p-4 bg-gray-50 border border-gray-200">
                             <img
                                 src={currentUser.profileImage || '/placeholder-avatar.jpg'}
@@ -479,7 +480,6 @@ const ArtistDetail = () => {
                             </div>
                         </div>
 
-                        {/* 응원 메시지 목록 */}
                         {paginatedCheers.length > 0 ? (
                             <div className="flex flex-col gap-3">
                                 {paginatedCheers.map((cheer) => (
@@ -513,7 +513,6 @@ const ArtistDetail = () => {
                             </div>
                         )}
 
-                        {/* 응원 메시지 페이지네이션 */}
                         {cheerTotalPages > 1 && (
                             <div className="flex items-center justify-center gap-2 mt-8">
                                 <Button
@@ -557,4 +556,4 @@ const ArtistDetail = () => {
     );
 };
 
-export default ArtistDetail;
+export default ArtistDetailView;

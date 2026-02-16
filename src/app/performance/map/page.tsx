@@ -24,6 +24,7 @@ const PerformanceMap = () => {
     const { performances, listLoading, fetchList, fetchLocationsForList } = usePerformanceStore();
     const [selectedPerformance, setSelectedPerformance] = useState<any | null>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [mapError, setMapError] = useState<string | null>(null);
 
     // 1. 네이버 지도 스크립트 동적 로드
     useEffect(() => {
@@ -49,7 +50,17 @@ const PerformanceMap = () => {
         script.id = scriptId;
         script.type = 'text/javascript';
         script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
-        script.onload = () => setMapLoaded(true);
+        script.onload = () => {
+            // 네이버 지도 인증 실패 감지
+            if (window.naver?.maps) {
+                setMapLoaded(true);
+            } else {
+                setMapError('네이버 지도 인증에 실패했습니다. Naver Cloud Platform에서 Web 서비스 URL에 현재 도메인을 등록해주세요.');
+            }
+        };
+        script.onerror = () => {
+            setMapError('네이버 지도 스크립트를 불러올 수 없습니다.');
+        };
         document.head.appendChild(script);
 
         return () => {
@@ -88,10 +99,18 @@ const PerformanceMap = () => {
 
     // 4. 마커 생성 및 이벤트 바인딩
     useEffect(() => {
-        if (!mapLoaded || !mapRef.current || performances.length === 0) return;
+        if (!mapLoaded || !mapRef.current || !window.naver?.maps || performances.length === 0) return;
 
         // 기존 마커 제거
-        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current.forEach(marker => {
+            if (marker && typeof marker.setMap === 'function') {
+                try {
+                    marker.setMap(null);
+                } catch {
+                    // 마커가 이미 해제된 경우 무시
+                }
+            }
+        });
         markersRef.current = [];
 
         const newMarkers: any[] = [];
@@ -100,7 +119,7 @@ const PerformanceMap = () => {
             // 좌표가 있는 경우에만 마커 생성
             if (perf.lat && perf.lng) {
                 const position = new window.naver.maps.LatLng(perf.lat, perf.lng);
-                const markerTitle = perf.title || '';
+                const markerTitle = perf.title || "";
                 const markerPlace = perf.place || '공연장';
 
                 const marker = new window.naver.maps.Marker({
@@ -147,7 +166,13 @@ const PerformanceMap = () => {
             <div className="w-full md:w-[70%] h-[50vh] md:h-full relative bg-gray-100 border-r border-gray-200">
                 <div ref={mapElement} className="w-full h-full outline-none" />
 
-                {!mapLoaded && (
+                {mapError ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 z-10 px-6">
+                        <p className="text-red-500 font-bold mb-2">지도 로드 실패</p>
+                        <p className="text-gray-600 text-sm text-center max-w-md">{mapError}</p>
+                        <p className="text-gray-400 text-xs mt-3 text-center">Naver Cloud Platform → Application → Web 서비스 URL에 <code className="bg-gray-200 px-1">http://localhost:3000</code>을 추가하세요.</p>
+                    </div>
+                ) : !mapLoaded && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
                         <span className="text-gray-500">지도를 불러오는 중...</span>
                     </div>
