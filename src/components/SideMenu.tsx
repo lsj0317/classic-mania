@@ -25,11 +25,9 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
     const [openGroup, setOpenGroup] = useState<string | null>(null);
 
     const NAV_ITEMS: NavItem[] = [
-        { type: "link", name: t.nav.home, path: "/" },
-        { type: "link", name: t.nav.board, path: "/board" },
         {
             type: "group",
-            name: t.nav.showAndTicket,
+            name: "공연",
             children: [
                 { name: t.nav.performance, path: "/performance" },
                 { name: t.nav.ticket, path: "/ticket-info" },
@@ -38,8 +36,9 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
         },
         {
             type: "group",
-            name: "소셜",
+            name: "커뮤니티",
             children: [
+                { name: "게시판", path: "/board" },
                 { name: "동행 구하기", path: "/companion" },
                 { name: "소모임 & 이벤트", path: "/meetup" },
                 { name: "티켓 중고거래", path: "/ticket-trade" },
@@ -47,20 +46,19 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
         },
         {
             type: "group",
-            name: t.nav.artistAndNews,
+            name: "아티스트",
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
-                { name: t.nav.venue, path: "/venue" },
             ],
         },
         {
             type: "group",
-            name: t.nav.contentHub,
+            name: "정보",
             children: [
-                { name: t.nav.learn, path: "/learn" },
-                { name: t.nav.column, path: "/column" },
-                { name: t.nav.album, path: "/album" },
+                { name: "티켓 정보", path: "/ticket-info" },
+                { name: "이용약관", path: "/terms" },
+                { name: "개인정보 처리방침", path: "/privacy" },
             ],
         },
     ];

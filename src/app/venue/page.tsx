@@ -87,7 +87,7 @@ export default function VenuePage() {
                                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             <Users className="h-3 w-3" />
-                                            {venue.totalSeats.toLocaleString()}{isKo ? '석' : ' seats'}
+                                            {venue.totalSeats?.toLocaleString()}{isKo ? '석' : ' seats'}
                                         </span>
                                         <span>{venue.halls.length}{isKo ? '개 홀' : ' halls'}</span>
                                     </div>

@@ -71,7 +71,7 @@ export default function AlbumDetailPage() {
 
                     <div className="flex items-center gap-4 mt-4">
                         <div className="flex items-center gap-2">
-                            <StarRating value={album.averageRating} />
+                            <StarRating value={album.averageRating ?? 0} />
                             <span className="font-bold">{album.averageRating}</span>
                             <span className="text-sm text-muted-foreground">({album.reviewCount}{isKo ? '개 리뷰' : ' reviews'})</span>
                         </div>
@@ -122,7 +122,7 @@ export default function AlbumDetailPage() {
                                 {isKo ? '수록곡' : 'Track List'}
                             </h2>
                             <div className="space-y-0">
-                                {album.tracks.map(track => (
+                                {album.tracks.map((track: { number: number; title: string; duration?: string }) => (
                                     <div key={track.number} className="flex items-center gap-3 py-2.5 border-b last:border-0 hover:bg-accent/50 transition-colors rounded px-2">
                                         <span className="text-xs text-muted-foreground w-6 text-right">{track.number}</span>
                                         <div className="flex-1 min-w-0">

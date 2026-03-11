@@ -100,7 +100,7 @@ export default function ColumnDetailPage() {
             {/* 태그 & 좋아요 */}
             <div className="flex items-center justify-between mt-6">
                 <div className="flex gap-2 flex-wrap">
-                    {column.tags.map(tag => (
+                    {column.tags.map((tag: string) => (
                         <span key={tag} className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                             <Tag className="h-3 w-3" />
                             {tag}

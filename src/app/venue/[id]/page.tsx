@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useVenueStore } from '@/stores/venueStore';
 import { useLanguageStore } from '@/stores/languageStore';
@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, MapPin, Phone, Globe, Users, Car, Bus, Accessibility, Star, Utensils, Coffee, Building } from 'lucide-react';
 
-const SPOT_ICON = { '맛집': Utensils, '카페': Coffee, '문화공간': Building };
+const SPOT_ICON: Record<string, React.ComponentType<{ className?: string }>> = { '맛집': Utensils, '카페': Coffee, '문화공간': Building };
 
 function StarRating({ value }: { value: number }) {
     return (
@@ -81,11 +81,11 @@ export default function VenueDetailPage() {
                                 {isKo ? '공연 홀' : 'Performance Halls'}
                             </h2>
                             <div className="space-y-4">
-                                {venue.halls.map((hall, i) => (
+                                {venue.halls.map((hall: { name: string; capacity?: number; seats?: number; description?: string }, i: number) => (
                                     <div key={i} className="border-b last:border-0 pb-3 last:pb-0">
                                         <div className="flex items-center justify-between">
                                             <h3 className="font-semibold text-sm">{hall.name}</h3>
-                                            <span className="text-xs text-muted-foreground">{hall.seats.toLocaleString()}{isKo ? '석' : ' seats'}</span>
+                                            <span className="text-xs text-muted-foreground">{hall.seats?.toLocaleString()}{isKo ? '석' : ' seats'}</span>
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-1">{hall.description}</p>
                                     </div>
@@ -194,7 +194,7 @@ export default function VenueDetailPage() {
                         <CardContent className="p-5">
                             <h3 className="font-bold text-sm mb-3">{isKo ? '근처 추천 장소' : 'Nearby Spots'}</h3>
                             <div className="space-y-3">
-                                {venue.nearbySpots.map((spot, i) => {
+                                {venue.nearbySpots.map((spot: { type: string; name: string; distance?: string; description?: string; rating?: number }, i: number) => {
                                     const Icon = SPOT_ICON[spot.type] || Building;
                                     return (
                                         <div key={i} className="border-b last:border-0 pb-2.5 last:pb-0">

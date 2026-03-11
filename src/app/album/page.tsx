@@ -23,7 +23,7 @@ export default function AlbumPage() {
     const filteredAlbums = albums.filter(a => {
         const matchesSearch = !searchTerm ||
             a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (a.artist?.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (a.composerName?.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesGenre = genreFilter === '전체' || a.genre === genreFilter;
         return matchesSearch && matchesGenre;
@@ -97,7 +97,7 @@ export default function AlbumPage() {
                             </h3>
                             <p className="text-xs text-muted-foreground mt-1">{album.artist}</p>
                             {album.label && (
-                                <p className="text-[10px] text-muted-foreground">{album.label} · {album.releaseDate.slice(0, 4)}</p>
+                                <p className="text-[10px] text-muted-foreground">{album.label} · {album.releaseDate?.slice(0, 4)}</p>
                             )}
 
                             <div className="flex items-center justify-between mt-3">

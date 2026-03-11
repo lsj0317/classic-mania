@@ -145,7 +145,7 @@ export default function LearnPage() {
                                             {isKo ? '감상 포인트' : 'Listening Points'}
                                         </p>
                                         <ul className="space-y-1">
-                                            {guide.listeningPoints.slice(0, 2).map((point, i) => (
+                                            {(guide.listeningPoints ?? []).slice(0, 2).map((point, i) => (
                                                 <li key={i} className="text-[11px] text-muted-foreground flex gap-1.5">
                                                     <Star className="h-3 w-3 flex-shrink-0 mt-0.5 text-amber-400" />
                                                     <span className="line-clamp-1">{point}</span>

@@ -71,16 +71,17 @@ const Footer = () => {
 
                 <Separator className="bg-gray-800" />
 
-                <div className="flex gap-6 pt-6 text-gray-500 sm:justify-center">
-                    <Link href="/terms">
-                        <span className="text-sm hover:text-white transition-colors cursor-pointer">
-                            {t.footer.terms}
-                        </span>
+                <div className="flex items-center gap-0 pt-6 text-gray-500 sm:justify-center text-sm">
+                    <Link href="/">
+                        <span className="hover:text-white transition-colors cursor-pointer px-3 first:pl-0">홈</span>
                     </Link>
+                    <span className="text-gray-700">|</span>
+                    <Link href="/terms">
+                        <span className="hover:text-white transition-colors cursor-pointer px-3">{t.footer.terms}</span>
+                    </Link>
+                    <span className="text-gray-700">|</span>
                     <Link href="/privacy">
-                        <span className="text-sm font-bold hover:text-white transition-colors cursor-pointer">
-                            {t.footer.privacy}
-                        </span>
+                        <span className="hover:text-white transition-colors cursor-pointer px-3">{t.footer.privacy}</span>
                     </Link>
                 </div>
             </div>

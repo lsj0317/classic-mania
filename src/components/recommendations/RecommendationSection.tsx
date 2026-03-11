@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, ImageIcon, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +31,8 @@ export default function RecommendationSection({ allPerformances }: Props) {
     const { getPreferredEpochs } = useUserStore();
     const { recommendations, isLoading, generateRecommendations } = useRecommendationStore();
 
+    const [mounted, setMounted] = useState(false);
+
     const reviewedPerformanceIds = reviews.map((r) => r.performanceId);
     const preferredEpochs = getPreferredEpochs();
 
@@ -38,6 +40,10 @@ export default function RecommendationSection({ allPerformances }: Props) {
     const followedArtistNames = artists
         .filter((a) => followedArtistIds.includes(a.id))
         .map((a) => a.name);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (allPerformances.length > 0 && recommendations.length === 0) {
@@ -58,6 +64,8 @@ export default function RecommendationSection({ allPerformances }: Props) {
             allPerformances
         );
     };
+
+    if (!mounted) return null;
 
     if (isLoading) {
         return (

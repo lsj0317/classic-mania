@@ -140,9 +140,12 @@ const Home = () => {
     } = useBoxOffice();
 
     const {
-        data: monthlyMusicians = [],
+        data: musiciansResult,
         isLoading: musiciansLoading,
     } = useMonthlyMusicians();
+    const monthlyMusicians = musiciansResult?.musicians ?? [];
+    const musiciansDisplayMonth = musiciansResult?.displayMonth ?? (new Date().getMonth() + 1);
+    const musiciansIsFallback = musiciansResult?.isFallback ?? false;
 
     // Notice store
     const { notices, fetchNotices: loadNotices } = useNoticeStore();
@@ -271,6 +274,7 @@ const Home = () => {
         { key: "all", label: t.home.tabAll },
         { key: "performance", label: t.home.tabPerformance },
         { key: "community", label: t.home.tabCommunity },
+        { key: "artist", label: "아티스트" },
     ];
 
     const handlePostClick = (postId: number) => {
@@ -351,6 +355,58 @@ const Home = () => {
                                 </CardContent>
                             </Card>
                         ))}
+                    </div>
+                );
+            case "artist":
+                return (
+                    <div>
+                        {musiciansLoading ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {[0, 1, 2, 3].map(i => <MusicianCardSkeleton key={i} />)}
+                            </div>
+                        ) : monthlyMusicians.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                {monthlyMusicians.slice(0, 8).map((musician) => (
+                                    <Card
+                                        key={musician.id}
+                                        className="cursor-pointer hover:shadow-md transition-shadow group"
+                                        onClick={() => router.push(`/artist/composer-${musician.id}`)}
+                                    >
+                                        <CardContent className="p-4">
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    src={musician.portrait}
+                                                    alt={musician.completeName}
+                                                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
+                                                        {musician.completeName}
+                                                    </h6>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {isKo ? EPOCH_KO[musician.epoch] || musician.epoch : musician.epoch}
+                                                    </p>
+                                                    <p className="text-xs text-primary/80 font-medium mt-1">
+                                                        {musician.birthMonth}월 {musician.birthDay}일 출생
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-10 text-center text-muted-foreground text-sm">
+                                음악인 정보를 불러올 수 없습니다.
+                            </div>
+                        )}
+                        <Button
+                            variant="outline"
+                            className="w-full mt-5 font-semibold"
+                            onClick={() => router.push("/artist")}
+                        >
+                            아티스트 더보기 +
+                        </Button>
                     </div>
                 );
             default:
@@ -624,7 +680,10 @@ const Home = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <Music className="h-5 w-5 text-primary" />
-                        {isKo ? `${currentMonth}월의 음악인` : `Musicians of ${new Date().toLocaleString('en', { month: 'long' })}`}
+                        {isKo
+                            ? `${musiciansDisplayMonth}월의 음악인${musiciansIsFallback ? ' (다음 달 미리보기)' : ''}`
+                            : `Musicians of ${new Date(2000, musiciansDisplayMonth - 1).toLocaleString('en', { month: 'long' })}`
+                        }
                     </h3>
                     <Button
                         variant="ghost"
@@ -678,12 +737,7 @@ const Home = () => {
                     <Card>
                         <CardContent className="p-8 text-center text-muted-foreground">
                             <Music className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                            <p className="text-sm">
-                                {isKo
-                                    ? `${currentMonth}월에 태어난 음악인 정보를 불러오는 중입니다...`
-                                    : `Loading musicians born in ${new Date().toLocaleString('en', { month: 'long' })}...`
-                                }
-                            </p>
+                            <p className="text-sm">해당 월에 태어난 음악인 정보가 없습니다.</p>
                         </CardContent>
                     </Card>
                 )}

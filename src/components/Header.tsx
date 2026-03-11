@@ -14,8 +14,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { ChevronDown, Globe, User, LogOut, Menu, Calendar } from "lucide-react";
-import NotificationBell from "./community/NotificationBell";
+import { ChevronDown, Globe, User, LogOut, Menu, Bell } from "lucide-react";
+import { useUserStore } from "@/stores/userStore";
 
 interface HeaderProps {
     onMenuOpen: () => void;
@@ -31,14 +31,13 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     const router = useRouter();
     const pathname = usePathname();
     const { language, t, setLanguage } = useLanguageStore();
+    const { unreadCount, notifications, markNotificationRead, markAllRead } = useUserStore();
     const groupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const NAV_MENU: NavItem[] = [
-        { type: "link", name: t.nav.home, path: "/" },
-        { type: "link", name: t.nav.board, path: "/board" },
         {
             type: "group",
-            name: t.nav.showAndTicket,
+            name: "공연",
             children: [
                 { name: t.nav.performance, path: "/performance" },
                 { name: t.nav.ticket, path: "/ticket-info" },
@@ -47,8 +46,9 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         },
         {
             type: "group",
-            name: "소셜",
+            name: "커뮤니티",
             children: [
+                { name: "게시판", path: "/board" },
                 { name: "동행 구하기", path: "/companion" },
                 { name: "소모임 & 이벤트", path: "/meetup" },
                 { name: "티켓 중고거래", path: "/ticket-trade" },
@@ -56,20 +56,19 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         },
         {
             type: "group",
-            name: t.nav.artistAndNews,
+            name: "아티스트",
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
-                { name: t.nav.venue, path: "/venue" },
             ],
         },
         {
             type: "group",
-            name: t.nav.contentHub,
+            name: "정보",
             children: [
-                { name: t.nav.learn, path: "/learn" },
-                { name: t.nav.column, path: "/column" },
-                { name: t.nav.album, path: "/album" },
+                { name: "티켓 정보", path: "/ticket-info" },
+                { name: "이용약관", path: "/terms" },
+                { name: "개인정보 처리방침", path: "/privacy" },
             ],
         },
     ];
@@ -185,20 +184,6 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 {/* 데스크톱 유저 영역 + 언어 선택 */}
                 <div className="hidden md:flex flex-1 justify-end">
                     <div className="flex items-center gap-3">
-                        {/* 캘린더 링크 */}
-                        <Link href="/calendar">
-                            <Button variant="ghost" size="icon" className={`${textColor} hover:bg-white/10`} title="공연 캘린더">
-                                <Calendar className="h-5 w-5" />
-                            </Button>
-                        </Link>
-
-                        {/* 알림 벨 */}
-                        {isLoggedIn && (
-                            <div className={isScrolled ? '' : '[&_button]:text-white [&_button]:hover:bg-white/10'}>
-                                <NotificationBell />
-                            </div>
-                        )}
-
                         {/* 언어 드롭다운 */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -233,24 +218,49 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className={`gap-2 px-2 ${textColor} hover:bg-white/10`}>
-                                        <ProfileAvatar
-                                            name={currentUser.name}
-                                            nickname={currentUser.nickname}
-                                            profileImage={currentUser.profileImage}
-                                            profileIconType={currentUser.profileIconType}
-                                            size="sm"
-                                            className={`border-2 ${isScrolled ? "border-primary" : "border-white"}`}
-                                        />
+                                        {/* 프로필 아이콘 + 알림 배지 */}
+                                        <div className="relative">
+                                            <ProfileAvatar
+                                                name={currentUser.name}
+                                                nickname={currentUser.nickname}
+                                                profileImage={currentUser.profileImage}
+                                                profileIconType={currentUser.profileIconType}
+                                                size="sm"
+                                                className={`border-2 ${isScrolled ? "border-primary" : "border-white"}`}
+                                            />
+                                            {unreadCount > 0 && (
+                                                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                                </span>
+                                            )}
+                                        </div>
                                         <span className="text-sm font-semibold">
                                             {currentUser.userId} {t.auth.honorific}
                                         </span>
                                         <ChevronDown className="h-3 w-3" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent align="end" className="min-w-[180px]">
                                     <DropdownMenuItem onClick={() => router.push("/mypage")} className="gap-2">
                                         <User className="h-4 w-4" />
                                         {t.auth.mypage}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="gap-2 justify-between"
+                                        onClick={() => {
+                                            markAllRead();
+                                            router.push("/mypage");
+                                        }}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Bell className="h-4 w-4" />
+                                            알림
+                                        </div>
+                                        {unreadCount > 0 && (
+                                            <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">
+                                                +{unreadCount}
+                                            </span>
+                                        )}
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => window.location.reload()} className="gap-2">
