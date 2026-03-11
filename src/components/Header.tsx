@@ -51,6 +51,16 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
+                { name: t.nav.venue, path: "/venue" },
+            ],
+        },
+        {
+            type: "group",
+            name: t.nav.contentHub,
+            children: [
+                { name: t.nav.learn, path: "/learn" },
+                { name: t.nav.column, path: "/column" },
+                { name: t.nav.album, path: "/album" },
             ],
         },
     ];

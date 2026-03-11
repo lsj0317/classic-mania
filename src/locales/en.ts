@@ -11,6 +11,11 @@ const en: Translations = {
         news: "News",
         showAndTicket: "Shows & Booking",
         artistAndNews: "Classic Lounge",
+        learn: "Learning Hub",
+        column: "Columns",
+        venue: "Venue Guide",
+        album: "Album Reviews",
+        contentHub: "Content",
     },
 
     // Header & Auth

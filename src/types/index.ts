@@ -243,6 +243,160 @@ export interface Notice {
     thumbnail?: string;
 }
 
+// ── Phase 3: 콘텐츠 차별화 타입 ──
+
+// 3.1 학습 허브 타입
+export type DifficultyLevel = '입문' | '초급' | '중급' | '고급';
+
+export interface WorkGuide {
+    id: string;
+    composerId: string;
+    composerName: string;
+    title: string;
+    subtitle?: string;
+    epoch: string;
+    difficulty: DifficultyLevel;
+    duration: string;
+    genre: string;
+    background: string;
+    structure: string;
+    listeningPoints: string[];
+    youtubeVideoId?: string;
+    thumbnail?: string;
+}
+
+export interface CuratedPlaylist {
+    id: string;
+    title: string;
+    description: string;
+    category: '입문' | '시대별' | '분위기별' | '장르별';
+    thumbnail: string;
+    tracks: PlaylistTrack[];
+    createdAt: string;
+}
+
+export interface PlaylistTrack {
+    id: string;
+    composerName: string;
+    title: string;
+    performer?: string;
+    duration: string;
+    youtubeVideoId?: string;
+    spotifyUrl?: string;
+}
+
+// 3.2 칼럼 & 인터뷰 타입
+export type ColumnCategory = '인터뷰' | '공연비평' | '음반리뷰' | '에디터추천' | '유저기고';
+
+export interface Column {
+    id: string;
+    title: string;
+    excerpt: string;
+    content: string;
+    category: ColumnCategory;
+    authorName: string;
+    authorRole?: string;
+    authorImage?: string;
+    thumbnail?: string;
+    tags: string[];
+    createdAt: string;
+    views: number;
+    likes: number;
+    relatedPerformanceId?: string;
+}
+
+// 3.3 공연장 가이드 타입
+export interface Venue {
+    id: string;
+    name: string;
+    address: string;
+    area: string;
+    phone?: string;
+    website?: string;
+    thumbnail?: string;
+    images: string[];
+    totalSeats: number;
+    halls: VenueHall[];
+    nearbySpots: NearbySpot[];
+    accessibility: AccessibilityInfo;
+    transportInfo: string;
+    parkingInfo: string;
+}
+
+export interface VenueHall {
+    name: string;
+    seats: number;
+    description: string;
+}
+
+export interface NearbySpot {
+    name: string;
+    type: '맛집' | '카페' | '문화공간';
+    distance: string;
+    description: string;
+    rating?: number;
+}
+
+export interface AccessibilityInfo {
+    wheelchair: boolean;
+    elevator: boolean;
+    disabledParking: boolean;
+    disabledRestroom: boolean;
+    hearingAid: boolean;
+    braille: boolean;
+    notes?: string;
+}
+
+export interface VenueReview {
+    id: string;
+    venueId: string;
+    userId: string;
+    userName: string;
+    seatInfo?: string;
+    soundRating: number;
+    viewRating: number;
+    comfortRating: number;
+    content: string;
+    createdAt: string;
+}
+
+// 3.4 음반/음원 타입
+export interface Album {
+    id: string;
+    title: string;
+    artist: string;
+    composerName?: string;
+    label?: string;
+    releaseDate: string;
+    genre: string;
+    coverImage?: string;
+    trackCount: number;
+    tracks: AlbumTrack[];
+    averageRating: number;
+    reviewCount: number;
+    spotifyUrl?: string;
+    appleMusicUrl?: string;
+    youtubeMusicUrl?: string;
+}
+
+export interface AlbumTrack {
+    number: number;
+    title: string;
+    duration: string;
+}
+
+export interface AlbumReview {
+    id: string;
+    albumId: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    title: string;
+    content: string;
+    createdAt: string;
+    likes: number;
+}
+
 // Wikipedia REST API Summary 타입
 export interface WikiSummary {
     title: string;
