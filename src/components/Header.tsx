@@ -47,6 +47,15 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         },
         {
             type: "group",
+            name: "소셜",
+            children: [
+                { name: "동행 구하기", path: "/companion" },
+                { name: "소모임 & 이벤트", path: "/meetup" },
+                { name: "티켓 중고거래", path: "/ticket-trade" },
+            ],
+        },
+        {
+            type: "group",
             name: t.nav.artistAndNews,
             children: [
                 { name: t.nav.artist, path: "/artist" },

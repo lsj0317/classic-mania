@@ -243,6 +243,125 @@ export interface Notice {
     thumbnail?: string;
 }
 
+// 동행 구하기 타입
+export type CompanionStatus = '모집중' | '모집완료';
+export type CompanionGender = '무관' | '남성' | '여성';
+
+export interface CompanionPost {
+    id: number;
+    performanceId?: string;
+    performanceTitle: string;
+    performanceDate: string;    // 공연 날짜
+    venue: string;              // 공연장
+    area: string;               // 지역
+    title: string;
+    content: string;
+    authorId: string;
+    authorName: string;
+    authorNickname?: string;
+    preferGender: CompanionGender;
+    maxCompanions: number;      // 모집 인원
+    currentCompanions: number;  // 현재 신청 인원
+    status: CompanionStatus;
+    createdAt: string;
+    views: number;
+    ageRange?: string;          // 연령대 (예: "20대", "무관")
+}
+
+export interface CompanionRequest {
+    id: string;
+    postId: number;
+    userId: string;
+    userName: string;
+    message: string;
+    status: 'pending' | 'accepted' | 'rejected';
+    createdAt: string;
+}
+
+export interface DirectMessage {
+    id: string;
+    roomId: string;             // conversationId (sorted user ids joined)
+    senderId: string;
+    senderName: string;
+    receiverId: string;
+    message: string;
+    isRead: boolean;
+    createdAt: string;
+}
+
+// 소모임 타입
+export type MeetupType = '정기모임' | '번개' | '온라인';
+export type MeetupStatus = '모집중' | '모집완료' | '종료';
+
+export interface Meetup {
+    id: number;
+    title: string;
+    description: string;
+    type: MeetupType;
+    status: MeetupStatus;
+    hostId: string;
+    hostName: string;
+    location: string;           // 장소 (온라인이면 "온라인")
+    area: string;               // 지역
+    meetDate: string;           // 모임 날짜 (YYYY-MM-DD)
+    meetTime: string;           // 모임 시간 (HH:mm)
+    maxMembers: number;
+    currentMembers: number;
+    memberIds: string[];
+    genre?: string;             // 감상 장르/주제
+    createdAt: string;
+    thumbnail?: string;
+    isOnline: boolean;
+}
+
+export interface MeetupComment {
+    id: string;
+    meetupId: number;
+    userId: string;
+    userName: string;
+    content: string;
+    createdAt: string;
+}
+
+// 티켓 중고거래 타입
+export type TicketTradeType = '양도' | '구매';
+export type TicketTradeStatus = '거래가능' | '예약중' | '거래완료';
+export type TicketVerifyStatus = 'unverified' | 'verified' | 'pending';
+
+export interface TicketTrade {
+    id: number;
+    type: TicketTradeType;
+    status: TicketTradeStatus;
+    performanceId?: string;
+    performanceTitle: string;
+    performanceDate: string;
+    venue: string;
+    area: string;
+    seatInfo: string;           // 좌석 정보 (예: "R석 A구역 15열 22번")
+    originalPrice: number;      // 정가
+    tradePrice: number;         // 거래가
+    quantity: number;           // 수량
+    sellerId: string;
+    sellerName: string;
+    sellerNickname?: string;
+    sellerRating: number;       // 판매자 신뢰도 (0~5)
+    verifyStatus: TicketVerifyStatus;  // 티켓 인증 상태
+    description: string;
+    images: string[];
+    createdAt: string;
+    views: number;
+}
+
+export interface TicketTradeRequest {
+    id: string;
+    tradeId: number;
+    buyerId: string;
+    buyerName: string;
+    message: string;
+    status: 'pending' | 'accepted' | 'rejected';
+    createdAt: string;
+}
+
 // Wikipedia REST API Summary 타입
 export interface WikiSummary {
     title: string;
