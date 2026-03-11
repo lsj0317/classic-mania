@@ -7,6 +7,7 @@ import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
 import { X, ChevronDown, Globe } from "lucide-react";
 import { Button } from "./ui/button";
+import ProfileAvatar from "./user/ProfileAvatar";
 
 interface SideMenuProps {
     isOpen: boolean;
@@ -82,10 +83,13 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 <div className="p-5 border-b">
                     {isLoggedIn ? (
                         <div className="flex items-center gap-3">
-                            <img
-                                src={currentUser.profileImage || "/placeholder-avatar.jpg"}
-                                alt={currentUser.name}
-                                className="w-11 h-11 rounded-full object-cover border-2 border-border"
+                            <ProfileAvatar
+                                name={currentUser.name}
+                                nickname={currentUser.nickname}
+                                profileImage={currentUser.profileImage}
+                                profileIconType={currentUser.profileIconType}
+                                size="md"
+                                className="border-2 border-border"
                             />
                             <div>
                                 <div className="font-bold text-sm">{currentUser.userId} {t.auth.honorific}</div>

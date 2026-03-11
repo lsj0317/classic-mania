@@ -119,7 +119,7 @@ const PostEdit = () => {
                                             <img
                                                 src={src}
                                                 alt={`첨부이미지 ${index + 1}`}
-                                                className="h-full w-full object-cover border rounded grayscale group-hover:grayscale-0 transition-all"
+                                                className="h-full w-full object-cover border rounded transition-all"
                                             />
                                             <button
                                                 type="button"

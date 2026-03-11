@@ -12,6 +12,7 @@ import StatsDashboard from "@/components/user/StatsDashboard";
 import { cn } from "@/lib/utils";
 import { currentUser } from "@/data/mockData";
 import { useRouter } from "next/navigation";
+import ProfileAvatar from "@/components/user/ProfileAvatar";
 
 const MyPage = () => {
     const [activeTab, setActiveTab] = useState("posts");
@@ -32,15 +33,13 @@ const MyPage = () => {
                 <CardContent className="p-4">
                     {/* 프로필 미니 */}
                     <div className="flex items-center gap-3 px-4 py-3 mb-2">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                            {currentUser.profileImage ? (
-                                <img src={currentUser.profileImage} alt={currentUser.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
-                                    {currentUser.name.charAt(0)}
-                                </div>
-                            )}
-                        </div>
+                        <ProfileAvatar
+                            name={currentUser.name}
+                            nickname={currentUser.nickname}
+                            profileImage={currentUser.profileImage}
+                            profileIconType={currentUser.profileIconType}
+                            size="md"
+                        />
                         <div className="flex-1 min-w-0">
                             <p className="font-bold text-sm truncate">{currentUser.nickname || currentUser.name}</p>
                             <button

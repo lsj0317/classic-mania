@@ -7,7 +7,8 @@ export const currentUser: User = {
     // userId: "", // 위의 두줄을 주석처리 후 주석처리된 두줄을 해제하면 로그아웃 상태로 테스트를 해 볼 수 있습니다
     // name: "손님",
     nickname: "뮤주키",
-    profileImage: "https://docs.material-tailwind.com/img/face-2.jpg",
+    profileImage: "",
+    profileIconType: "initial",
 };
 
 // 게시글 데이터 20개

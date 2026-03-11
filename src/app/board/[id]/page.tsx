@@ -4,11 +4,67 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ImageIcon } from "lucide-react";
 import { posts, currentUser } from "@/data/mockData";
+import type { MentionedPerformance } from "@/types";
 import ShareButtons from "@/components/share/ShareButtons";
 import JsonLd, { createArticleJsonLd } from "@/components/seo/JsonLd";
 import EmojiReactions from "@/components/community/EmojiReactions";
+
+// @멘션된 공연 포스터를 본문에 인라인으로 보여주는 함수
+function renderContentWithMentions(
+    content: string,
+    mentionedPerformances?: MentionedPerformance[],
+    router?: { push: (url: string) => void }
+) {
+    if (!mentionedPerformances || mentionedPerformances.length === 0) {
+        return <p className="whitespace-pre-wrap">{content}</p>;
+    }
+
+    // @공연제목 패턴 찾기
+    const mentionMap = new Map(mentionedPerformances.map(m => [m.title, m]));
+    const pattern = mentionedPerformances
+        .map(m => `@${m.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+        .join('|');
+    const regex = new RegExp(`(${pattern})`, 'g');
+    const parts = content.split(regex);
+
+    return (
+        <div className="whitespace-pre-wrap">
+            {parts.map((part, i) => {
+                if (part.startsWith('@')) {
+                    const title = part.substring(1);
+                    const perf = mentionMap.get(title);
+                    if (perf) {
+                        return (
+                            <span key={i}>
+                                <span
+                                    className="text-blue-600 font-semibold cursor-pointer hover:underline"
+                                    onClick={() => router?.push(`/performance/${perf.id}`)}
+                                >
+                                    {part}
+                                </span>
+                                {perf.poster && (
+                                    <span
+                                        className="inline-block mx-1 align-middle cursor-pointer"
+                                        onClick={() => router?.push(`/performance/${perf.id}`)}
+                                    >
+                                        <img
+                                            src={perf.poster}
+                                            alt={perf.title}
+                                            className="inline-block w-20 h-28 object-cover rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow my-2"
+                                        />
+                                    </span>
+                                )}
+                            </span>
+                        );
+                    }
+                }
+                return <span key={i}>{part}</span>;
+            })}
+        </div>
+    );
+}
 
 const PostDetail = () => {
     const params = useParams();
@@ -74,7 +130,10 @@ const PostDetail = () => {
                             <span className="text-xs text-gray-500">조회수 {post.views}</span>
                         </div>
                     </div>
-                    <p className="text-lg text-gray-700 leading-relaxed mb-12 whitespace-pre-wrap min-h-[150px]">{post.content}</p>
+                    {/* 본문 내용 - @멘션 공연 포스터 인라인 렌더링 */}
+                    <div className="text-lg text-gray-700 leading-relaxed mb-12 min-h-[150px]">
+                        {renderContentWithMentions(post.content, post.mentionedPerformances, router)}
+                    </div>
                     {post.images.length > 0 && (
                         <div className={`grid gap-4 ${post.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                             {post.images.map((img, i) => (
