@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchKopisPerformances, fetchKopisPerformanceDetail } from '../api/kopisApi';
+import { fetchKopisPerformances, fetchKopisPerformanceDetail, fetchKopisBoxOffice } from '../api/kopisApi';
 import { performanceData } from '../data/performanceData';
 import type { Performance } from '../types';
 
@@ -42,6 +42,25 @@ export const usePerformanceDetail = (id: string | undefined) => {
         staleTime: 1000 * 60 * 15,      // 15분간 fresh
         gcTime: 1000 * 60 * 60,          // 1시간 캐시 유지
         refetchOnWindowFocus: false,
+    });
+};
+
+/** KOPIS 박스오피스 (예매율 순위) */
+export const useBoxOffice = () => {
+    return useQuery<Performance[]>({
+        queryKey: ['performances', 'boxoffice'],
+        queryFn: async () => {
+            try {
+                return await fetchKopisBoxOffice();
+            } catch {
+                console.warn('KOPIS 박스오피스 API 실패');
+                return [];
+            }
+        },
+        staleTime: 1000 * 60 * 30,
+        gcTime: 1000 * 60 * 60,
+        refetchOnWindowFocus: false,
+        retry: 2,
     });
 };
 
