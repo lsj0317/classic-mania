@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, ImageIcon, Calendar } from "lucide-react";
 import type { OpenOpusComposer, Performance } from "@/types";
 import RecommendationSection from "@/components/recommendations/RecommendationSection";
+import { useNoticeStore } from "@/stores/noticeStore";
 
 // 날짜 파싱 (YYYY.MM.DD or YYYY-MM-DD)
 function parseDateStr(str: string): Date | null {
@@ -47,36 +48,7 @@ const EPOCH_KO: Record<string, string> = {
     "21st Century": "21세기",
 };
 
-const CAROUSEL_SLIDES = [
-    {
-        id: 1,
-        image: "https://images.unsplash.com/photo-1465847899078-b413929f7120?q=80&w=1200&auto=format&fit=crop",
-        title: "2026 빈 필하모닉 내한 공연",
-        subtitle: "세계 최고의 오케스트라가 서울에 옵니다",
-        tag: "event",
-    },
-    {
-        id: 2,
-        image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1200&auto=format&fit=crop",
-        title: "베토벤 합창 교향곡",
-        subtitle: "예술의전당 | 2026.02.01 ~ 2026.02.02",
-        tag: "performance",
-    },
-    {
-        id: 3,
-        image: "https://images.unsplash.com/photo-1514782390807-73d762e58c97?q=80&w=1200&auto=format&fit=crop",
-        title: "조성진 피아노 리사이틀",
-        subtitle: "롯데콘서트홀 | 2026.02.15",
-        tag: "performance",
-    },
-    {
-        id: 4,
-        image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1200&auto=format&fit=crop",
-        title: "신규회원 가입 이벤트",
-        subtitle: "가입만 해도 공연 할인 쿠폰 증정!",
-        tag: "event",
-    },
-];
+// 슬라이드는 이제 동적으로 생성됨
 
 // ── 스켈레톤 컴포넌트 ──
 
@@ -181,43 +153,114 @@ const Home = () => {
         isLoading: weeklyLoading,
     } = useWeeklyArtists();
 
+    // Notice store
+    const { notices, fetchNotices: loadNotices } = useNoticeStore();
+
+    useEffect(() => {
+        loadNotices();
+    }, [loadNotices]);
+
     const popularPosts = [...posts].sort((a, b) => b.views - a.views).slice(0, 5);
     const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
     const displayPerformances = monthlyPerformances.slice(0, 6);
 
+    // 동적 캐러셀 슬라이드 생성
+    const carouselSlides = useMemo(() => {
+        const slides: { id: string; image: string; title: string; subtitle: string; badge: string; badgeColor: string; link: string }[] = [];
+
+        // 슬라이드 1: 이번 주 공연 (포스터가 있는 첫 번째 공연)
+        const thisWeekPerf = monthlyPerformances.find(p => p.poster);
+        if (thisWeekPerf) {
+            slides.push({
+                id: 'weekly',
+                image: thisWeekPerf.poster!,
+                title: thisWeekPerf.title,
+                subtitle: `${thisWeekPerf.place} | ${thisWeekPerf.period}`,
+                badge: '이번주 공연',
+                badgeColor: 'bg-blue-500/80',
+                link: `/performance/${thisWeekPerf.id}`,
+            });
+        }
+
+        // 슬라이드 2: 인기 TOP 공연 (조회수 기반 - 두 번째 포스터 있는 공연)
+        const topPerf = monthlyPerformances.filter(p => p.poster).slice(1, 2)[0];
+        if (topPerf) {
+            slides.push({
+                id: 'top',
+                image: topPerf.poster!,
+                title: topPerf.title,
+                subtitle: `${topPerf.place} | ${topPerf.period}`,
+                badge: '인기TOP공연',
+                badgeColor: 'bg-red-500/80',
+                link: `/performance/${topPerf.id}`,
+            });
+        }
+
+        // 슬라이드 3: 신규 기능 소개 (첫 번째 공지사항)
+        const featureNotice = notices.find(n => n.badge === '신규기능') || notices[0];
+        if (featureNotice) {
+            slides.push({
+                id: 'feature',
+                image: featureNotice.thumbnail || 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?q=80&w=600&auto=format&fit=crop',
+                title: featureNotice.title,
+                subtitle: '새로운 기능을 확인해 보세요!',
+                badge: '신규기능',
+                badgeColor: 'bg-emerald-500/80',
+                link: `/board/notice/${featureNotice.id}`,
+            });
+        }
+
+        // 슬라이드가 없으면 기본 슬라이드
+        if (slides.length === 0) {
+            slides.push({
+                id: 'default',
+                image: 'https://images.unsplash.com/photo-1465847899078-b413929f7120?q=80&w=1200&auto=format&fit=crop',
+                title: 'Classic Mania',
+                subtitle: '클래식 음악 커뮤니티에 오신 것을 환영합니다',
+                badge: '환영',
+                badgeColor: 'bg-white/20',
+                link: '/',
+            });
+        }
+
+        return slides;
+    }, [monthlyPerformances, notices]);
+
     const [currentSlide, setCurrentSlide] = useState(0);
     const [carouselReady, setCarouselReady] = useState(false);
 
+    const slideCount = carouselSlides.length;
+
     const nextSlide = useCallback(() => {
-        setCurrentSlide((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
-    }, []);
+        setCurrentSlide((prev) => (prev + 1) % Math.max(slideCount, 1));
+    }, [slideCount]);
 
     const prevSlide = useCallback(() => {
-        setCurrentSlide((prev) => (prev - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length);
-    }, []);
+        setCurrentSlide((prev) => (prev - 1 + Math.max(slideCount, 1)) % Math.max(slideCount, 1));
+    }, [slideCount]);
 
     // 캐러셀 이미지 프리로드
     useEffect(() => {
+        if (carouselSlides.length === 0) return;
         let loaded = 0;
-        const total = CAROUSEL_SLIDES.length;
-        CAROUSEL_SLIDES.forEach((slide) => {
-            const img = new Image();
+        const total = carouselSlides.length;
+        carouselSlides.forEach((slide) => {
+            const img = new window.Image();
             img.onload = img.onerror = () => {
                 loaded++;
                 if (loaded >= total) setCarouselReady(true);
             };
             img.src = slide.image;
         });
-        // 3초 후 강제 표시 (느린 네트워크 대비)
         const timer = setTimeout(() => setCarouselReady(true), 3000);
         return () => clearTimeout(timer);
-    }, []);
+    }, [carouselSlides]);
 
     useEffect(() => {
-        if (!carouselReady) return;
+        if (!carouselReady || slideCount <= 1) return;
         const timer = setInterval(nextSlide, 5000);
         return () => clearInterval(timer);
-    }, [nextSlide, carouselReady]);
+    }, [nextSlide, carouselReady, slideCount]);
 
     const [perfSlide, setPerfSlide] = useState(0);
     const perfPerPage = 3;
@@ -229,12 +272,15 @@ const Home = () => {
         [monthlyPerformances]
     );
 
+    const isKo = language === "ko";
+
     const [activeTab, setActiveTab] = useState("all");
     const tabs = [
         { key: "all", label: t.home.tabAll },
         { key: "performance", label: t.home.tabPerformance },
         { key: "community", label: t.home.tabCommunity },
         { key: "artist", label: t.home.tabArtist },
+        { key: "composer", label: isKo ? "작곡가" : "Composers" },
     ];
 
     const handlePostClick = (postId: number) => {
@@ -242,8 +288,6 @@ const Home = () => {
         if (targetPost) targetPost.views += 1;
         router.push(`/board/${postId}`);
     };
-
-    const isKo = language === "ko";
 
     const renderComposerCard = (composer: OpenOpusComposer) => (
         <Card
@@ -340,15 +384,37 @@ const Home = () => {
                     </div>
                 );
             case "artist":
-                if (composersLoading) return (
+                if (weeklyLoading) return (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                         {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <ArtistCardSkeleton key={i} />)}
                     </div>
                 );
                 return (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {popularComposers.length > 0
-                            ? popularComposers.slice(0, 8).map(renderComposerCard)
+                        {weeklyArtists.length > 0
+                            ? weeklyArtists.slice(0, 8).map((artist) => (
+                                <Card
+                                    key={artist.id}
+                                    className="cursor-pointer hover:shadow-md transition-shadow"
+                                    onClick={() => router.push(`/artist/${artist.id}`)}
+                                >
+                                    <CardContent className="p-4 text-center">
+                                        {artist.profileImage ? (
+                                            <img
+                                                src={artist.profileImage}
+                                                alt={artist.name}
+                                                className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
+                                            />
+                                        ) : (
+                                            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                                                <span className="text-lg font-bold text-muted-foreground">{artist.name.charAt(0)}</span>
+                                            </div>
+                                        )}
+                                        <h6 className="font-semibold text-sm">{artist.name}</h6>
+                                        <p className="text-xs text-muted-foreground">{artist.role}</p>
+                                    </CardContent>
+                                </Card>
+                            ))
                             : artistData.slice(0, 8).map((artist) => (
                                 <Card
                                     key={artist.id}
@@ -366,6 +432,20 @@ const Home = () => {
                                     </CardContent>
                                 </Card>
                             ))
+                        }
+                    </div>
+                );
+            case "composer":
+                if (composersLoading) return (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <ArtistCardSkeleton key={i} />)}
+                    </div>
+                );
+                return (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {popularComposers.length > 0
+                            ? popularComposers.slice(0, 8).map(renderComposerCard)
+                            : null
                         }
                     </div>
                 );
@@ -434,10 +514,11 @@ const Home = () => {
                 <CarouselSkeleton />
             ) : (
                 <section className="relative w-full h-[280px] sm:h-[360px] lg:h-[460px] overflow-hidden bg-black">
-                    {CAROUSEL_SLIDES.map((slide, idx) => (
+                    {carouselSlides.map((slide, idx) => (
                         <div
                             key={slide.id}
-                            className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                            className={`absolute inset-0 transition-opacity duration-700 cursor-pointer ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                            onClick={() => router.push(slide.link)}
                         >
                             <img
                                 src={slide.image}
@@ -445,11 +526,14 @@ const Home = () => {
                                 className="absolute inset-0 h-full w-full object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                            {/* 뱃지 - 상단 우측 */}
+                            <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+                                <span className={`inline-block px-3 py-1.5 ${slide.badgeColor} backdrop-blur-sm rounded-full text-xs font-bold text-white shadow-lg`}>
+                                    {slide.badge}
+                                </span>
+                            </div>
                             <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 lg:px-20">
                                 <div className="container mx-auto max-w-screen-xl">
-                                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white mb-3">
-                                        {slide.tag === "event" ? t.home.carouselEvent : t.home.carouselPerformance}
-                                    </span>
                                     <h2 className="text-white text-xl sm:text-2xl lg:text-4xl font-bold mb-1">
                                         {slide.title}
                                     </h2>
@@ -459,28 +543,32 @@ const Home = () => {
                         </div>
                     ))}
 
-                    <button
-                        onClick={prevSlide}
-                        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-                    >
-                        <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    <button
-                        onClick={nextSlide}
-                        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
-                    >
-                        <ChevronRight className="h-5 w-5" />
-                    </button>
-
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                        {CAROUSEL_SLIDES.map((_, idx) => (
+                    {slideCount > 1 && (
+                        <>
                             <button
-                                key={idx}
-                                onClick={() => setCurrentSlide(idx)}
-                                className={`w-2 h-2 rounded-full transition-all ${idx === currentSlide ? "bg-white w-6" : "bg-white/50"}`}
-                            />
-                        ))}
-                    </div>
+                                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
+                            >
+                                <ChevronRight className="h-5 w-5" />
+                            </button>
+
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                                {carouselSlides.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => { e.stopPropagation(); setCurrentSlide(idx); }}
+                                        className={`w-2 h-2 rounded-full transition-all ${idx === currentSlide ? "bg-white w-6" : "bg-white/50"}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </section>
             )}
 

@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { posts, currentUser } from "@/data/mockData";
-import type { Post } from "@/types";
-import { ImageIcon } from "lucide-react";
+import type { Post, MentionedPerformance } from "@/types";
+import { ImageIcon, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { usePerformanceStore } from "@/stores/performanceStore";
 
 const PostWrite = () => {
     const router = useRouter();
@@ -18,6 +18,22 @@ const PostWrite = () => {
     const [content, setContent] = useState("");
     const [category, setCategory] = useState<string>("자유");
     const [previewImages, setPreviewImages] = useState<string[]>([]);
+    const [mentionedPerformances, setMentionedPerformances] = useState<MentionedPerformance[]>([]);
+
+    // @mention state
+    const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+    const [mentionQuery, setMentionQuery] = useState("");
+    const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+    const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Performance store
+    const { performances, fetchList } = usePerformanceStore();
+
+    useEffect(() => {
+        fetchList();
+    }, [fetchList]);
 
     useEffect(() => {
         if (!currentUser || currentUser.userId === "guest" || !currentUser.userId) {
@@ -25,6 +41,91 @@ const PostWrite = () => {
             router.push("/login");
         }
     }, [router]);
+
+    // Filter performances based on mention query
+    const filteredPerformances = mentionQuery.length >= 2
+        ? performances.filter(p =>
+            p.title.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+            p.place.toLowerCase().includes(mentionQuery.toLowerCase())
+        ).slice(0, 8)
+        : [];
+
+    const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        const cursorPos = e.target.selectionStart;
+        setContent(value);
+
+        // Check if we should show the mention dropdown
+        const textBeforeCursor = value.substring(0, cursorPos);
+        const atIndex = textBeforeCursor.lastIndexOf('@');
+
+        if (atIndex >= 0) {
+            const textAfterAt = textBeforeCursor.substring(atIndex + 1);
+            // Only trigger if there's no space in the text after @
+            if (!textAfterAt.includes('\n') && textAfterAt.length >= 2) {
+                setMentionQuery(textAfterAt);
+                setMentionStartIndex(atIndex);
+                setShowMentionDropdown(true);
+                setSelectedMentionIndex(0);
+                return;
+            }
+        }
+
+        setShowMentionDropdown(false);
+        setMentionQuery("");
+    };
+
+    const handleMentionSelect = useCallback((perf: typeof performances[0]) => {
+        const beforeMention = content.substring(0, mentionStartIndex);
+        const afterMention = content.substring(mentionStartIndex + mentionQuery.length + 1);
+        const mentionText = `@${perf.title}`;
+        const newContent = beforeMention + mentionText + ' ' + afterMention;
+
+        setContent(newContent);
+        setShowMentionDropdown(false);
+        setMentionQuery("");
+
+        // Add to mentioned performances
+        const alreadyMentioned = mentionedPerformances.some(m => m.id === perf.id);
+        if (!alreadyMentioned) {
+            setMentionedPerformances(prev => [...prev, {
+                id: perf.id,
+                title: perf.title,
+                poster: perf.poster,
+                position: mentionStartIndex,
+            }]);
+        }
+
+        // Focus back on textarea
+        setTimeout(() => {
+            if (textareaRef.current) {
+                const newPos = beforeMention.length + mentionText.length + 1;
+                textareaRef.current.focus();
+                textareaRef.current.setSelectionRange(newPos, newPos);
+            }
+        }, 0);
+    }, [content, mentionStartIndex, mentionQuery, mentionedPerformances]);
+
+    const handleContentKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (!showMentionDropdown || filteredPerformances.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedMentionIndex(prev => Math.min(prev + 1, filteredPerformances.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedMentionIndex(prev => Math.max(prev - 1, 0));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            handleMentionSelect(filteredPerformances[selectedMentionIndex]);
+        } else if (e.key === 'Escape') {
+            setShowMentionDropdown(false);
+        }
+    };
+
+    const removeMention = (perfId: string) => {
+        setMentionedPerformances(prev => prev.filter(m => m.id !== perfId));
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -52,6 +153,7 @@ const PostWrite = () => {
             images: previewImages,
             createdAt: new Date().toISOString().split("T")[0],
             views: 0,
+            mentionedPerformances: mentionedPerformances.length > 0 ? mentionedPerformances : undefined,
         };
 
         posts.unshift(newPost);
@@ -95,15 +197,85 @@ const PostWrite = () => {
                                 />
                             </div>
 
-                            <div>
+                            <div className="relative">
                                 <Label className="mb-2 block">내용</Label>
-                                <Textarea
-                                    placeholder="내용을 입력하세요"
+                                <p className="text-xs text-muted-foreground mb-2">
+                                    공연후기 작성 시 <span className="font-bold text-primary">@공연명</span>을 입력하면 공연 정보를 태그할 수 있습니다.
+                                </p>
+                                <textarea
+                                    ref={textareaRef}
+                                    placeholder="내용을 입력하세요 (@ 입력 후 2글자 이상 입력하면 공연 정보를 검색할 수 있습니다)"
                                     rows={12}
                                     value={content}
-                                    onChange={(e) => setContent(e.target.value)}
+                                    onChange={handleContentChange}
+                                    onKeyDown={handleContentKeyDown}
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
+
+                                {/* @mention dropdown */}
+                                {showMentionDropdown && filteredPerformances.length > 0 && (
+                                    <div
+                                        ref={dropdownRef}
+                                        className="absolute z-50 left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-xl max-h-64 overflow-y-auto"
+                                    >
+                                        <div className="p-2 border-b border-border">
+                                            <p className="text-xs text-muted-foreground font-semibold">공연 검색 결과</p>
+                                        </div>
+                                        {filteredPerformances.map((perf, idx) => (
+                                            <div
+                                                key={perf.id}
+                                                className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
+                                                    idx === selectedMentionIndex ? 'bg-accent' : 'hover:bg-accent/50'
+                                                }`}
+                                                onClick={() => handleMentionSelect(perf)}
+                                            >
+                                                {perf.poster ? (
+                                                    <img
+                                                        src={perf.poster}
+                                                        alt={perf.title}
+                                                        className="w-10 h-13 object-cover rounded flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-13 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                                                        <ImageIcon className="h-4 w-4 text-muted-foreground/30" />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium truncate">{perf.title}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">{perf.place} | {perf.period}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
+
+                            {/* 태그된 공연 목록 */}
+                            {mentionedPerformances.length > 0 && (
+                                <div className="mt-2">
+                                    <Label className="mb-2 block text-sm font-bold">태그된 공연</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {mentionedPerformances.map((perf) => (
+                                            <div
+                                                key={perf.id}
+                                                className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5"
+                                            >
+                                                {perf.poster && (
+                                                    <img src={perf.poster} alt="" className="w-5 h-5 rounded object-cover" />
+                                                )}
+                                                <span className="text-xs font-medium text-blue-700">{perf.title}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeMention(perf.id)}
+                                                    className="text-blue-400 hover:text-blue-600"
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* 이미지 업로드 영역 */}
                             <div className="mt-4">
@@ -115,7 +287,7 @@ const PostWrite = () => {
                                             <img
                                                 src={src}
                                                 alt={`첨부이미지 ${index + 1}`}
-                                                className="h-full w-full object-cover border rounded grayscale group-hover:grayscale-0 transition-all"
+                                                className="h-full w-full object-cover border rounded transition-all"
                                             />
                                             <button
                                                 type="button"

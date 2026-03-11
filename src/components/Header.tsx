@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { currentUser } from "../data/mockData";
 import { useLanguageStore, type Language } from "../stores/languageStore";
 import { Button } from "./ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+import ProfileAvatar from "./user/ProfileAvatar";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -112,7 +112,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     <li key={item.path}>
                                         <Link
                                             href={item.path}
-                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
+                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none ${textColor}`}
                                         >
                                             {item.name}
                                         </Link>
@@ -131,7 +131,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     onMouseLeave={handleGroupLeave}
                                 >
                                     <button
-                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${hasActive ? "text-primary" : textColor}`}
+                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none focus:outline-none ${hasActive ? "text-primary" : textColor}`}
                                         onClick={() => setOpenGroup(isOpen ? null : item.name)}
                                     >
                                         {item.name}
@@ -150,7 +150,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                                     key={child.path}
                                                     href={child.path}
                                                     onClick={() => setOpenGroup(null)}
-                                                    className={`block px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent ${pathname === child.path ? "text-primary bg-accent/50" : "text-foreground"}`}
+                                                    className={`block px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent select-none ${pathname === child.path ? "text-primary bg-accent/50" : "text-foreground"}`}
                                                 >
                                                     {child.name}
                                                 </Link>
@@ -214,14 +214,14 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className={`gap-2 px-2 ${textColor} hover:bg-white/10`}>
-                                        {currentUser.profileImage ? (
-                                            <Avatar className={`h-8 w-8 border-2 ${isScrolled ? "border-primary" : "border-white"}`}>
-                                                <AvatarImage src={currentUser.profileImage} alt={currentUser.name} />
-                                                <AvatarFallback>{currentUser.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                        ) : (
-                                            <User className={`h-8 w-8 ${isScrolled ? "text-primary" : "text-white"}`} />
-                                        )}
+                                        <ProfileAvatar
+                                            name={currentUser.name}
+                                            nickname={currentUser.nickname}
+                                            profileImage={currentUser.profileImage}
+                                            profileIconType={currentUser.profileIconType}
+                                            size="sm"
+                                            className={`border-2 ${isScrolled ? "border-primary" : "border-white"}`}
+                                        />
                                         <span className="text-sm font-semibold">
                                             {currentUser.userId} {t.auth.honorific}
                                         </span>

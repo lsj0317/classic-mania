@@ -1,9 +1,12 @@
 // src/types/index.ts
+export type ProfileIconType = 'default' | 'initial' | 'image';
+
 export interface User {
     userId: string;
     name: string;
     nickname?: string;
     profileImage?: string;
+    profileIconType?: ProfileIconType;
 }
 
 // 활동 배지
@@ -89,6 +92,13 @@ export interface RecommendedPerformance {
     score: number;
 }
 
+export interface MentionedPerformance {
+    id: string;
+    title: string;
+    poster?: string;
+    position: number; // character index in content where the mention was inserted
+}
+
 export interface Post {
     id: number;
     title: string;
@@ -99,6 +109,7 @@ export interface Post {
     images: string[];
     createdAt: string;
     views: number;
+    mentionedPerformances?: MentionedPerformance[];
 }
 
 export interface RelatedLink {
@@ -216,6 +227,20 @@ export interface YouTubeVideo {
     thumbnail: string;
     channelTitle: string;
     publishedAt: string;
+}
+
+// 공지사항 타입
+export type NoticeBadge = '신규기능' | '기능개선' | '공지사항' | '긴급공지';
+
+export interface Notice {
+    id: number;
+    title: string;
+    content: string;
+    badge: NoticeBadge;
+    authorName: string;
+    createdAt: string;
+    views: number;
+    thumbnail?: string;
 }
 
 // Wikipedia REST API Summary 타입

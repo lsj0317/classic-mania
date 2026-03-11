@@ -1,23 +1,25 @@
-// src/pages/user/UserManage.tsx
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { currentUser } from "../../data/mockData";
 import { useRouter } from "next/navigation";
-import { PenSquare } from "lucide-react";
+import { PenSquare, User, Type, ImageIcon, Check } from "lucide-react";
+import ProfileAvatar from "./ProfileAvatar";
+import type { ProfileIconType } from "@/types";
 
 const UserManage = () => {
     const router = useRouter();
 
-    // 현재 로그인된 유저 정보를 초기값으로 설정
-    const [nickName, setNickName] = useState(currentUser.name);
+    const [nickName, setNickName] = useState(currentUser.nickname || currentUser.name);
     const [password, setPassword] = useState("");
+    const [profileIconType, setProfileIconType] = useState<ProfileIconType>(
+        currentUser.profileIconType || "default"
+    );
+    const [profilePreview, setProfilePreview] = useState(currentUser.profileImage || "");
 
-    // 정보 수정 핸들러
     const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
         if (!nickName) {
@@ -25,37 +27,36 @@ const UserManage = () => {
             return;
         }
 
-        // 목업 데이터 업데이트
-        currentUser.name = nickName;
+        currentUser.nickname = nickName;
+        currentUser.profileIconType = profileIconType;
+        if (profileIconType === "image") {
+            currentUser.profileImage = profilePreview;
+        } else {
+            currentUser.profileImage = "";
+        }
         alert("회원 정보가 수정되었습니다.");
-        window.location.reload(); // 헤더 반영을 위한 새로고침
+        window.location.reload();
     };
 
-    // 1. 이미지 미리보기를 위한 상태 추가
-    const [profilePreview, setProfilePreview] = useState(currentUser.profileImage);
-
-    // 2. 파일 선택 시 실행될 핸들러 함수
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const result = reader.result as string;
-                setProfilePreview(result); // 화면에 미리보기 표시
-                currentUser.profileImage = result; // 목업 데이터에 임시 저장
+                setProfilePreview(result);
+                setProfileIconType("image");
             };
             reader.readAsDataURL(file);
         }
     };
 
-    // 회원 탈퇴 핸들러
     const handleWithdrawal = () => {
         const confirmFirst = window.confirm("정말로 탈퇴하시겠습니까?");
         if (confirmFirst) {
             const confirmSecond = window.confirm("탈퇴 시 모든 데이터가 삭제됩니다. 계속하시겠습니까?");
             if (confirmSecond) {
                 alert("그동안 Classic Mania를 이용해 주셔서 감사합니다.");
-                // 유저 정보 초기화 후 홈으로 이동
                 currentUser.userId = "";
                 currentUser.name = "";
                 router.push("/");
@@ -63,6 +64,27 @@ const UserManage = () => {
             }
         }
     };
+
+    const profileOptions: { type: ProfileIconType; label: string; description: string; icon: React.ReactNode }[] = [
+        {
+            type: "default",
+            label: "기본 아이콘",
+            description: "기본 유저 아이콘을 사용합니다",
+            icon: <User className="h-5 w-5" />,
+        },
+        {
+            type: "initial",
+            label: "이니셜",
+            description: `닉네임의 첫 글자 (${nickName ? nickName.charAt(0).toUpperCase() : "?"})`,
+            icon: <Type className="h-5 w-5" />,
+        },
+        {
+            type: "image",
+            label: "이미지 업로드",
+            description: "원하는 이미지를 프로필로 사용합니다",
+            icon: <ImageIcon className="h-5 w-5" />,
+        },
+    ];
 
     return (
         <Card className="shadow-sm border border-gray-100 bg-white">
@@ -74,59 +96,109 @@ const UserManage = () => {
                     Classic Mania에서 사용하는 내 정보를 관리합니다.
                 </p>
 
-                <form onSubmit={handleUpdate} className="flex flex-col gap-6 max-w-md">
-                    {/* 아이디 (수정 불가 처리) */}
-                    <div className="space-y-2">
-                        <Label className="font-bold text-gray-800">
-                            아이디
+                <form onSubmit={handleUpdate} className="flex flex-col gap-8">
+                    {/* 프로필 미리보기 */}
+                    <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-xl">
+                        <ProfileAvatar
+                            name={currentUser.name}
+                            nickname={nickName}
+                            profileImage={profilePreview}
+                            profileIconType={profileIconType}
+                            size="xl"
+                            className="ring-4 ring-white shadow-lg"
+                        />
+                        <div className="text-center">
+                            <p className="font-bold text-lg">{nickName || currentUser.name}</p>
+                            <p className="text-sm text-gray-500">@{currentUser.userId}</p>
+                        </div>
+                    </div>
+
+                    {/* 프로필 아이콘 설정 */}
+                    <div>
+                        <Label className="font-bold text-gray-800 mb-3 block text-base">
+                            프로필 아이콘 설정
                         </Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {profileOptions.map((opt) => (
+                                <button
+                                    key={opt.type}
+                                    type="button"
+                                    onClick={() => setProfileIconType(opt.type)}
+                                    className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                                        profileIconType === opt.type
+                                            ? "border-blue-500 bg-blue-50 shadow-sm"
+                                            : "border-gray-200 hover:border-gray-300 bg-white"
+                                    }`}
+                                >
+                                    {profileIconType === opt.type && (
+                                        <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                                            <Check className="h-3 w-3 text-white" />
+                                        </div>
+                                    )}
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                        profileIconType === opt.type ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500"
+                                    }`}>
+                                        {opt.icon}
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-bold">{opt.label}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">{opt.description}</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 이미지 업로드 (이미지 타입 선택 시) */}
+                        {profileIconType === "image" && (
+                            <div className="mt-4 flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                                    {profilePreview ? (
+                                        <img src={profilePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                                            <ImageIcon className="h-6 w-6 text-gray-300" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label
+                                        htmlFor="profile-upload"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-gray-800 transition-colors"
+                                    >
+                                        <PenSquare className="h-4 w-4" />
+                                        이미지 선택
+                                        <input
+                                            id="profile-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                        />
+                                    </label>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        권장: 정사각형 이미지, 최대 5MB
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <Separator />
+
+                    {/* 아이디 */}
+                    <div className="space-y-2 max-w-md">
+                        <Label className="font-bold text-gray-800">아이디</Label>
                         <Input
                             disabled
                             value={currentUser.userId}
                             className="h-11 bg-gray-50"
                         />
-                        <p className="text-sm text-gray-500">
-                            아이디는 변경할 수 없습니다.
-                        </p>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="font-bold text-gray-800">
-                            프로필 이미지
-                        </Label>
-                        <div className="relative group w-fit">
-                            <Avatar className="h-20 w-20 border-4 border-gray-100 shadow-xl">
-                                <AvatarImage
-                                    src={profilePreview || "https://docs.material-tailwind.com/img/face-2.jpg"}
-                                    alt="Profile Preview"
-                                    className="object-cover"
-                                />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
-                            <label
-                                htmlFor="profile-upload"
-                                className="absolute bottom-0 right-0 bg-black p-2 rounded-full cursor-pointer hover:bg-gray-800 transition-colors shadow-lg"
-                            >
-                                <PenSquare className="h-4 w-4 text-white" />
-                                <input
-                                    id="profile-upload"
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleImageChange}
-                                />
-                            </label>
-                        </div>
-                        <p className="text-sm text-gray-500 font-medium">
-                            우측 버튼을 눌러서 이미지를 변경하세요.
-                        </p>
+                        <p className="text-sm text-gray-500">아이디는 변경할 수 없습니다.</p>
                     </div>
 
                     {/* 닉네임 수정 */}
-                    <div className="space-y-2">
-                        <Label className="font-bold text-gray-800">
-                            닉네임
-                        </Label>
+                    <div className="space-y-2 max-w-md">
+                        <Label className="font-bold text-gray-800">닉네임</Label>
                         <Input
                             placeholder="변경할 닉네임을 입력하세요"
                             value={nickName}
@@ -135,11 +207,9 @@ const UserManage = () => {
                         />
                     </div>
 
-                    {/* 비밀번호 확인 (가상) */}
-                    <div className="space-y-2">
-                        <Label className="font-bold text-gray-800">
-                            새 비밀번호 (선택)
-                        </Label>
+                    {/* 비밀번호 */}
+                    <div className="space-y-2 max-w-md">
+                        <Label className="font-bold text-gray-800">새 비밀번호 (선택)</Label>
                         <Input
                             type="password"
                             placeholder="********"
@@ -149,7 +219,7 @@ const UserManage = () => {
                         />
                     </div>
 
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex gap-4 mt-4 max-w-md">
                         <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white">
                             변경사항 저장
                         </Button>
@@ -161,9 +231,7 @@ const UserManage = () => {
                 {/* 회원 탈퇴 섹션 */}
                 <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 border border-red-100">
                     <div>
-                        <h6 className="text-base font-bold text-red-600">
-                            회원탈퇴
-                        </h6>
+                        <h6 className="text-base font-bold text-red-600">회원탈퇴</h6>
                         <p className="text-sm text-gray-700">
                             회원탈퇴를 하시면 모든 정보가 삭제됩니다 정말로 탈퇴 하시겠습니까?
                         </p>
