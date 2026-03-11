@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { posts, currentUser } from "@/data/mockData";
+import ShareButtons from "@/components/share/ShareButtons";
+import JsonLd, { createArticleJsonLd } from "@/components/seo/JsonLd";
 
 const PostDetail = () => {
     const params = useParams();
@@ -44,6 +46,26 @@ const PostDetail = () => {
                         <span className="text-sm text-gray-400">{post.createdAt}</span>
                     </div>
                     <h1 className="text-3xl font-bold text-gray-800 mb-4 leading-tight">{post.title}</h1>
+
+                    {/* 공유 버튼 */}
+                    <div className="mb-4">
+                        <ShareButtons
+                            title={post.title}
+                            description={post.content.slice(0, 100)}
+                        />
+                    </div>
+
+                    {/* JSON-LD */}
+                    <JsonLd
+                        data={createArticleJsonLd({
+                            headline: post.title,
+                            author: post.authorName,
+                            datePublished: post.createdAt,
+                            description: post.content.slice(0, 200),
+                            image: post.images[0],
+                        })}
+                    />
+
                     <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-100">
                         <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">{post.authorName.charAt(0)}</div>
                         <div>

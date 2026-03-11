@@ -30,6 +30,8 @@ import ArtistDetailView from '@/components/artist/ArtistDetail';
 import { useConductors, usePerformers } from '@/hooks/useClassicalArtists';
 import { useWeeklyArtists } from '@/hooks/useWeeklyArtists';
 import type { Artist } from '@/types';
+import ShareButtons from '@/components/share/ShareButtons';
+import JsonLd, { createPersonJsonLd } from '@/components/seo/JsonLd';
 
 type TabType = 'performances' | 'news' | 'cheers';
 
@@ -267,6 +269,24 @@ const ArtistDetail = () => {
                             {isKo ? artist.bio : artist.bioEn}
                         </p>
                     </div>
+
+                    {/* 공유 버튼 */}
+                    <ShareButtons
+                        title={isKo ? artist.name : artist.nameEn}
+                        description={`${isKo ? artist.role : artist.roleEn} | ${artist.nationality}`}
+                        className="mb-4"
+                    />
+
+                    {/* JSON-LD */}
+                    <JsonLd
+                        data={createPersonJsonLd({
+                            name: artist.nameEn || artist.name,
+                            image: artist.profileImage,
+                            description: isKo ? artist.bio : artist.bioEn,
+                            jobTitle: artist.roleEn || artist.role,
+                            nationality: artist.nationality,
+                        })}
+                    />
 
                     <div className="flex items-center gap-6 pt-4 border-t border-gray-200">
                         <div className="text-center">
