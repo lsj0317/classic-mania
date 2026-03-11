@@ -30,6 +30,8 @@ import ShareButtons from "@/components/share/ShareButtons";
 import JsonLd, { createMusicEventJsonLd } from "@/components/seo/JsonLd";
 import { Star } from "lucide-react";
 import { useReviewStore } from "@/stores/reviewStore";
+import LiveChat from "@/components/community/LiveChat";
+import { currentUser } from "@/data/mockData";
 
 /* ───── 출연진 파싱 헬퍼 ───── */
 const parseCastMembers = (cast: string, genre?: string): { name: string; searchQuery: string }[] => {
@@ -624,6 +626,16 @@ const PerformanceDetail = () => {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            {/* 공연 실황 라이브 채팅 */}
+            {id && (
+                <LiveChat
+                    performanceId={id}
+                    userId={currentUser.userId}
+                    userName={currentUser.nickname || currentUser.name}
+                    userProfileImage={currentUser.profileImage}
+                />
+            )}
         </div>
     );
 };

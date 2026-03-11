@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { posts } from "@/data/mockData";
 import { artistData } from "@/data/artistData";
@@ -11,8 +11,28 @@ import { useWeeklyArtists } from "@/hooks/useWeeklyArtists";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
-import type { OpenOpusComposer } from "@/types";
+import { ChevronLeft, ChevronRight, ImageIcon, Calendar } from "lucide-react";
+import type { OpenOpusComposer, Performance } from "@/types";
+import RecommendationSection from "@/components/recommendations/RecommendationSection";
+
+// 날짜 파싱 (YYYY.MM.DD or YYYY-MM-DD)
+function parseDateStr(str: string): Date | null {
+    if (!str) return null;
+    const clean = str.trim().replace(/\./g, '-');
+    const d = new Date(clean);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function isOnToday(perf: Performance): boolean {
+    const today = new Date();
+    const start = parseDateStr(perf.startDate || perf.period?.split('~')[0]?.trim() || '');
+    const end = parseDateStr(perf.endDate || perf.period?.split('~')[1]?.trim() || perf.period || '');
+    if (!start) return false;
+    const endDate = end || start;
+    const t = new Date(today); t.setHours(0,0,0,0);
+    start.setHours(0,0,0,0); endDate.setHours(0,0,0,0);
+    return t >= start && t <= endDate;
+}
 
 const EPOCH_KO: Record<string, string> = {
     Medieval: "중세",
@@ -202,6 +222,12 @@ const Home = () => {
     const [perfSlide, setPerfSlide] = useState(0);
     const perfPerPage = 3;
     const perfMaxSlide = Math.max(0, Math.ceil(displayPerformances.length / perfPerPage) - 1);
+
+    // 오늘의 공연
+    const todayPerformances = useMemo(
+        () => monthlyPerformances.filter(isOnToday),
+        [monthlyPerformances]
+    );
 
     const [activeTab, setActiveTab] = useState("all");
     const tabs = [
@@ -658,6 +684,58 @@ const Home = () => {
                     </div>
                 )}
             </section>
+
+            {/* 오늘의 공연 위젯 */}
+            {todayPerformances.length > 0 && (
+                <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12">
+                    <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100">
+                        <CardContent className="p-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-bold text-base flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                    오늘의 공연
+                                    <span className="text-sm font-normal text-muted-foreground">
+                                        ({todayPerformances.length}건)
+                                    </span>
+                                </h3>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-sm flex items-center gap-1"
+                                    onClick={() => router.push('/calendar')}
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    캘린더 보기
+                                </Button>
+                            </div>
+                            <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                                {todayPerformances.slice(0, 6).map((perf) => (
+                                    <div
+                                        key={perf.id}
+                                        className="flex-shrink-0 w-40 cursor-pointer"
+                                        onClick={() => router.push(`/performance/${perf.id}`)}
+                                    >
+                                        <div className="w-full h-24 rounded-lg overflow-hidden bg-muted">
+                                            {perf.poster ? (
+                                                <img src={perf.poster} alt={perf.title} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
+                                                    <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="text-xs font-medium mt-1 line-clamp-2 leading-tight">{perf.title}</p>
+                                        <p className="text-[11px] text-muted-foreground truncate">{perf.place}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section>
+            )}
+
+            {/* 개인화 추천 섹션 */}
+            <RecommendationSection allPerformances={monthlyPerformances} />
 
             {/* 인기 작곡가 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-4 mb-12">

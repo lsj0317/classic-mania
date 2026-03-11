@@ -14,7 +14,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { ChevronDown, Globe, User, LogOut, Menu } from "lucide-react";
+import { ChevronDown, Globe, User, LogOut, Menu, Calendar } from "lucide-react";
+import NotificationBell from "./community/NotificationBell";
 
 interface HeaderProps {
     onMenuOpen: () => void;
@@ -41,6 +42,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
             children: [
                 { name: t.nav.performance, path: "/performance" },
                 { name: t.nav.ticket, path: "/ticket-info" },
+                { name: "공연 캘린더", path: "/calendar" },
             ],
         },
         {
@@ -164,6 +166,20 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                 {/* 데스크톱 유저 영역 + 언어 선택 */}
                 <div className="hidden md:flex flex-1 justify-end">
                     <div className="flex items-center gap-3">
+                        {/* 캘린더 링크 */}
+                        <Link href="/calendar">
+                            <Button variant="ghost" size="icon" className={`${textColor} hover:bg-white/10`} title="공연 캘린더">
+                                <Calendar className="h-5 w-5" />
+                            </Button>
+                        </Link>
+
+                        {/* 알림 벨 */}
+                        {isLoggedIn && (
+                            <div className={isScrolled ? '' : '[&_button]:text-white [&_button]:hover:bg-white/10'}>
+                                <NotificationBell />
+                            </div>
+                        )}
+
                         {/* 언어 드롭다운 */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
