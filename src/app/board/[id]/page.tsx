@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { posts, currentUser } from "@/data/mockData";
 import ShareButtons from "@/components/share/ShareButtons";
 import JsonLd, { createArticleJsonLd } from "@/components/seo/JsonLd";
+import EmojiReactions from "@/components/community/EmojiReactions";
 
 const PostDetail = () => {
     const params = useParams();
@@ -81,6 +82,12 @@ const PostDetail = () => {
                             ))}
                         </div>
                     )}
+
+                    {/* 이모지 리액션 */}
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">이 글에 반응하기</p>
+                        <EmojiReactions postId={post.id} userId={currentUser.userId} />
+                    </div>
                 </CardContent>
                 <CardFooter className="bg-gray-50/50 p-6 flex flex-wrap items-center justify-between gap-4">
                     <Button variant="ghost" className="flex items-center gap-2 text-gray-600" onClick={() => router.push("/board")}>

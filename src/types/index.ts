@@ -6,6 +6,89 @@ export interface User {
     profileImage?: string;
 }
 
+// 활동 배지
+export type BadgeId =
+    | 'first_review'
+    | 'first_follow'
+    | 'review_10'
+    | 'review_50'
+    | 'follow_5'
+    | 'follow_10'
+    | 'post_10'
+    | 'best_reviewer'
+    | 'attendance_7'
+    | 'attendance_30';
+
+export interface Badge {
+    id: BadgeId;
+    name: string;
+    description: string;
+    icon: string;   // 이모지
+    color: string;  // tailwind bg color
+    earnedAt?: string; // ISO date string
+}
+
+// 유저 활동 기록
+export interface UserActivity {
+    userId: string;
+    reviewCount: number;
+    followCount: number;
+    postCount: number;
+    earnedBadges: BadgeId[];
+    followerIds: string[];
+    followingIds: string[];
+    // 장르별 관람 통계 (공연 장르 → 횟수)
+    genreStats: Record<string, number>;
+    // 월별 관람 통계 (YYYY-MM → 횟수)
+    monthlyStats: Record<string, number>;
+    // 지역별 관람 통계 (지역명 → 횟수)
+    areaStats: Record<string, number>;
+    // 선호 시대 (epoch → 횟수)
+    epochStats: Record<string, number>;
+}
+
+// 이모지 리액션
+export interface Reaction {
+    emoji: string;
+    label: string;
+    count: number;
+    reactedByCurrentUser: boolean;
+}
+
+export interface PostReactions {
+    postId: number;
+    reactions: Reaction[];
+}
+
+// 라이브 채팅 메시지
+export interface LiveChatMessage {
+    id: string;
+    performanceId: string;
+    userId: string;
+    userName: string;
+    userProfileImage?: string;
+    message: string;
+    createdAt: string;
+}
+
+// 알림
+export interface Notification {
+    id: string;
+    type: 'new_performance' | 'new_follower' | 'post_reaction' | 'new_post';
+    title: string;
+    body: string;
+    link?: string;
+    isRead: boolean;
+    createdAt: string;
+}
+
+// 추천 아이템
+export interface RecommendedPerformance {
+    performance: Performance;
+    reason: string; // 추천 이유
+    score: number;
+}
+
 export interface Post {
     id: number;
     title: string;
