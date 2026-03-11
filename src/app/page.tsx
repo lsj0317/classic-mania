@@ -3,16 +3,14 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { posts } from "@/data/mockData";
-import { artistData } from "@/data/artistData";
 import { useLanguageStore } from "@/stores/languageStore";
-import { useMonthlyPerformances } from "@/hooks/usePerformanceQueries";
-import { usePopularComposers } from "@/hooks/useOpenOpusQueries";
-import { useWeeklyArtists } from "@/hooks/useWeeklyArtists";
+import { useMonthlyPerformances, useBoxOffice } from "@/hooks/usePerformanceQueries";
+import { useMonthlyMusicians } from "@/hooks/useMonthlyMusicians";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, ImageIcon, Calendar } from "lucide-react";
-import type { OpenOpusComposer, Performance } from "@/types";
+import { ChevronLeft, ChevronRight, ImageIcon, Calendar, Music } from "lucide-react";
+import type { Performance } from "@/types";
 import RecommendationSection from "@/components/recommendations/RecommendationSection";
 import { useNoticeStore } from "@/stores/noticeStore";
 
@@ -35,6 +33,32 @@ function isOnToday(perf: Performance): boolean {
     return t >= start && t <= endDate;
 }
 
+/** 이번 달에 해당하고, 아직 끝나지 않은 공연인지 확인 */
+function isCurrentMonthUpcoming(perf: Performance): boolean {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    now.setHours(0, 0, 0, 0);
+
+    const end = parseDateStr(perf.endDate || perf.period?.split('~')[1]?.trim() || perf.period?.split('~')[0]?.trim() || '');
+    const start = parseDateStr(perf.startDate || perf.period?.split('~')[0]?.trim() || '');
+
+    if (!start) return false;
+
+    // 이미 종료된 공연 제외
+    const endDate = end || start;
+    const endCheck = new Date(endDate); endCheck.setHours(0, 0, 0, 0);
+    if (endCheck < now) return false;
+
+    // 시작일이 이번 달이거나, 현재 진행중인 공연
+    const startCheck = new Date(start); startCheck.setHours(0, 0, 0, 0);
+    if (startCheck.getMonth() === currentMonth && startCheck.getFullYear() === currentYear) return true;
+    // 이미 시작했지만 아직 끝나지 않은 공연도 포함
+    if (startCheck <= now && endCheck >= now) return true;
+
+    return false;
+}
+
 const EPOCH_KO: Record<string, string> = {
     Medieval: "중세",
     Renaissance: "르네상스",
@@ -47,8 +71,6 @@ const EPOCH_KO: Record<string, string> = {
     "Post-War": "전후",
     "21st Century": "21세기",
 };
-
-// 슬라이드는 이제 동적으로 생성됨
 
 // ── 스켈레톤 컴포넌트 ──
 
@@ -80,42 +102,12 @@ const PerformanceCardSkeleton = () => (
     </Card>
 );
 
-const ArtistCardSkeleton = () => (
+const MusicianCardSkeleton = () => (
     <Card>
         <CardContent className="p-4 text-center">
             <Skeleton className="w-20 h-20 rounded-full mx-auto mb-3" />
             <Skeleton className="h-4 w-24 mx-auto mb-1" />
             <Skeleton className="h-3 w-16 mx-auto" />
-        </CardContent>
-    </Card>
-);
-
-const WeeklyArtistCardSkeleton = () => (
-    <Card>
-        <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-                <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-3 w-12" />
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-);
-
-const ComposerRowSkeleton = () => (
-    <Card>
-        <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-                <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-3 w-24" />
-                </div>
-            </div>
         </CardContent>
     </Card>
 );
@@ -144,14 +136,13 @@ const Home = () => {
     } = useMonthlyPerformances();
 
     const {
-        data: popularComposers = [],
-        isLoading: composersLoading,
-    } = usePopularComposers();
+        data: boxOfficePerfs = [],
+    } = useBoxOffice();
 
     const {
-        data: weeklyArtists = [],
-        isLoading: weeklyLoading,
-    } = useWeeklyArtists();
+        data: monthlyMusicians = [],
+        isLoading: musiciansLoading,
+    } = useMonthlyMusicians();
 
     // Notice store
     const { notices, fetchNotices: loadNotices } = useNoticeStore();
@@ -164,26 +155,29 @@ const Home = () => {
     const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
     const displayPerformances = monthlyPerformances.slice(0, 6);
 
+    const currentMonth = new Date().getMonth() + 1;
+    const isKo = language === "ko";
+
     // 동적 캐러셀 슬라이드 생성
     const carouselSlides = useMemo(() => {
         const slides: { id: string; image: string; title: string; subtitle: string; badge: string; badgeColor: string; link: string }[] = [];
 
-        // 슬라이드 1: 이번 주 공연 (포스터가 있는 첫 번째 공연)
-        const thisWeekPerf = monthlyPerformances.find(p => p.poster);
-        if (thisWeekPerf) {
+        // 슬라이드 1: 이번 달 공연 (현재 월에 해당하고 아직 끝나지 않은 공연)
+        const thisMonthPerf = monthlyPerformances.find(p => p.poster && isCurrentMonthUpcoming(p));
+        if (thisMonthPerf) {
             slides.push({
-                id: 'weekly',
-                image: thisWeekPerf.poster!,
-                title: thisWeekPerf.title,
-                subtitle: `${thisWeekPerf.place} | ${thisWeekPerf.period}`,
-                badge: '이번주 공연',
+                id: 'monthly',
+                image: thisMonthPerf.poster!,
+                title: thisMonthPerf.title,
+                subtitle: `${thisMonthPerf.place} | ${thisMonthPerf.period}`,
+                badge: isKo ? `${currentMonth}월 공연` : `${new Date().toLocaleString('en', { month: 'long' })} Performance`,
                 badgeColor: 'bg-blue-500/80',
-                link: `/performance/${thisWeekPerf.id}`,
+                link: `/performance/${thisMonthPerf.id}`,
             });
         }
 
-        // 슬라이드 2: 인기 TOP 공연 (조회수 기반 - 두 번째 포스터 있는 공연)
-        const topPerf = monthlyPerformances.filter(p => p.poster).slice(1, 2)[0];
+        // 슬라이드 2: 인기 TOP 공연 (박스오피스 1위)
+        const topPerf = boxOfficePerfs.find(p => p.poster) || monthlyPerformances.filter(p => p.poster && p.id !== thisMonthPerf?.id)[0];
         if (topPerf) {
             slides.push({
                 id: 'top',
@@ -224,7 +218,7 @@ const Home = () => {
         }
 
         return slides;
-    }, [monthlyPerformances, notices]);
+    }, [monthlyPerformances, boxOfficePerfs, notices, isKo, currentMonth]);
 
     const [currentSlide, setCurrentSlide] = useState(0);
     const [carouselReady, setCarouselReady] = useState(false);
@@ -272,15 +266,11 @@ const Home = () => {
         [monthlyPerformances]
     );
 
-    const isKo = language === "ko";
-
     const [activeTab, setActiveTab] = useState("all");
     const tabs = [
         { key: "all", label: t.home.tabAll },
         { key: "performance", label: t.home.tabPerformance },
         { key: "community", label: t.home.tabCommunity },
-        { key: "artist", label: t.home.tabArtist },
-        { key: "composer", label: isKo ? "작곡가" : "Composers" },
     ];
 
     const handlePostClick = (postId: number) => {
@@ -288,26 +278,6 @@ const Home = () => {
         if (targetPost) targetPost.views += 1;
         router.push(`/board/${postId}`);
     };
-
-    const renderComposerCard = (composer: OpenOpusComposer) => (
-        <Card
-            key={composer.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => router.push(`/artist/composer-${composer.id}`)}
-        >
-            <CardContent className="p-4 text-center">
-                <img
-                    src={composer.portrait}
-                    alt={composer.complete_name}
-                    className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                />
-                <h6 className="font-semibold text-sm">{composer.complete_name}</h6>
-                <p className="text-xs text-muted-foreground">
-                    {isKo ? EPOCH_KO[composer.epoch] || composer.epoch : composer.epoch}
-                </p>
-            </CardContent>
-        </Card>
-    );
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -381,72 +351,6 @@ const Home = () => {
                                 </CardContent>
                             </Card>
                         ))}
-                    </div>
-                );
-            case "artist":
-                if (weeklyLoading) return (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <ArtistCardSkeleton key={i} />)}
-                    </div>
-                );
-                return (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {weeklyArtists.length > 0
-                            ? weeklyArtists.slice(0, 8).map((artist) => (
-                                <Card
-                                    key={artist.id}
-                                    className="cursor-pointer hover:shadow-md transition-shadow"
-                                    onClick={() => router.push(`/artist/${artist.id}`)}
-                                >
-                                    <CardContent className="p-4 text-center">
-                                        {artist.profileImage ? (
-                                            <img
-                                                src={artist.profileImage}
-                                                alt={artist.name}
-                                                className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                                            />
-                                        ) : (
-                                            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-                                                <span className="text-lg font-bold text-muted-foreground">{artist.name.charAt(0)}</span>
-                                            </div>
-                                        )}
-                                        <h6 className="font-semibold text-sm">{artist.name}</h6>
-                                        <p className="text-xs text-muted-foreground">{artist.role}</p>
-                                    </CardContent>
-                                </Card>
-                            ))
-                            : artistData.slice(0, 8).map((artist) => (
-                                <Card
-                                    key={artist.id}
-                                    className="cursor-pointer hover:shadow-md transition-shadow"
-                                    onClick={() => router.push(`/artist/${artist.id}`)}
-                                >
-                                    <CardContent className="p-4 text-center">
-                                        <img
-                                            src={artist.profileImage}
-                                            alt={artist.name}
-                                            className="w-20 h-20 rounded-full object-cover mx-auto mb-3"
-                                        />
-                                        <h6 className="font-semibold text-sm">{artist.name}</h6>
-                                        <p className="text-xs text-muted-foreground">{artist.role}</p>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        }
-                    </div>
-                );
-            case "composer":
-                if (composersLoading) return (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <ArtistCardSkeleton key={i} />)}
-                    </div>
-                );
-                return (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {popularComposers.length > 0
-                            ? popularComposers.slice(0, 8).map(renderComposerCard)
-                            : null
-                        }
                     </div>
                 );
             default:
@@ -715,54 +619,54 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* 금주의 아티스트 */}
+            {/* 이달의 음악인 */}
             <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-12 mb-4">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">{t.home.artistOfTheWeek}</h3>
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                        <Music className="h-5 w-5 text-primary" />
+                        {isKo ? `${currentMonth}월의 음악인` : `Musicians of ${new Date().toLocaleString('en', { month: 'long' })}`}
+                    </h3>
                     <Button
                         variant="ghost"
                         size="sm"
                         className="font-bold text-sm"
-                        onClick={() => router.push("/artist?tab=performers")}
+                        onClick={() => router.push("/artist?tab=composers")}
                     >
                         {t.home.moreArtist} +
                     </Button>
                 </div>
 
-                {weeklyLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[0, 1, 2, 3].map(i => <WeeklyArtistCardSkeleton key={i} />)}
+                {musiciansLoading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {[0, 1, 2, 3].map(i => <MusicianCardSkeleton key={i} />)}
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {weeklyArtists.map((artist) => (
+                ) : monthlyMusicians.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {monthlyMusicians.slice(0, 8).map((musician) => (
                             <Card
-                                key={artist.id}
-                                className="cursor-pointer hover:shadow-md transition-shadow group relative"
-                                onClick={() => router.push(`/artist/${artist.id}`)}
+                                key={musician.id}
+                                className="cursor-pointer hover:shadow-md transition-shadow group relative overflow-hidden"
+                                onClick={() => router.push(`/artist/composer-${musician.id}`)}
                             >
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-4">
-                                        {artist.profileImage ? (
-                                            <img
-                                                src={artist.profileImage}
-                                                alt={artist.name}
-                                                className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
-                                            />
-                                        ) : (
-                                            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0 group-hover:ring-2 ring-primary transition-all">
-                                                <span className="text-lg font-bold text-muted-foreground">{artist.name.charAt(0)}</span>
-                                            </div>
-                                        )}
+                                        <img
+                                            src={musician.portrait}
+                                            alt={musician.completeName}
+                                            className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                        />
                                         <div className="flex-1 min-w-0">
-                                            <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
-                                                {artist.name}
+                                            <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
+                                                {musician.completeName}
                                             </h6>
                                             <p className="text-xs text-muted-foreground mt-0.5">
-                                                {artist.role}
+                                                {isKo ? EPOCH_KO[musician.epoch] || musician.epoch : musician.epoch}
                                             </p>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {artist.nationality}
+                                            <p className="text-xs text-primary/80 font-medium mt-1">
+                                                {isKo
+                                                    ? `${musician.birthMonth}월 ${musician.birthDay}일 출생`
+                                                    : `Born ${new Date(musician.birth).toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
+                                                }
                                             </p>
                                         </div>
                                     </div>
@@ -770,6 +674,18 @@ const Home = () => {
                             </Card>
                         ))}
                     </div>
+                ) : (
+                    <Card>
+                        <CardContent className="p-8 text-center text-muted-foreground">
+                            <Music className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                            <p className="text-sm">
+                                {isKo
+                                    ? `${currentMonth}월에 태어난 음악인 정보를 불러오는 중입니다...`
+                                    : `Loading musicians born in ${new Date().toLocaleString('en', { month: 'long' })}...`
+                                }
+                            </p>
+                        </CardContent>
+                    </Card>
                 )}
             </section>
 
@@ -824,61 +740,6 @@ const Home = () => {
 
             {/* 개인화 추천 섹션 */}
             <RecommendationSection allPerformances={monthlyPerformances} />
-
-            {/* 인기 작곡가 */}
-            <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 mt-4 mb-12">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">
-                        {isKo ? "인기 작곡가" : "Popular Composers"}
-                    </h3>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="font-bold text-sm"
-                        onClick={() => router.push("/artist?tab=composers")}
-                    >
-                        {t.home.moreArtist} +
-                    </Button>
-                </div>
-
-                {composersLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[0, 1, 2, 3].map(i => <ComposerRowSkeleton key={i} />)}
-                    </div>
-                ) : popularComposers.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {popularComposers.slice(0, 4).map((composer) => (
-                            <Card
-                                key={composer.id}
-                                className="cursor-pointer hover:shadow-md transition-shadow group relative"
-                                onClick={() => router.push(`/artist/composer-${composer.id}`)}
-                            >
-                                <CardContent className="p-4">
-                                    <div className="flex items-center gap-4">
-                                        <img
-                                            src={composer.portrait}
-                                            alt={composer.complete_name}
-                                            className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <h6 className="font-bold text-sm group-hover:text-primary transition-colors">
-                                                {composer.complete_name}
-                                            </h6>
-                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                                {isKo ? EPOCH_KO[composer.epoch] || composer.epoch : composer.epoch}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {composer.birth?.slice(0, 4)}
-                                                {composer.death ? ` - ${composer.death.slice(0, 4)}` : ""}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : null}
-            </section>
         </div>
     );
 };

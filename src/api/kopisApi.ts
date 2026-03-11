@@ -158,6 +158,44 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
     }
 };
 
+/** KOPIS 박스오피스 (예매율 순위) */
+export const fetchKopisBoxOffice = async (): Promise<Performance[]> => {
+    try {
+        const today = new Date();
+        const toYMD = (d: Date) =>
+            `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+
+        const url = buildKopisUrl('/openApi/restful/boxoffice', {
+            ststype: 'week',
+            date: toYMD(today),
+            catecode: 'CCCA',
+            rows: 10,
+        });
+
+        const response = await axios.get(url);
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(response.data, 'text/xml');
+        const items = xml.getElementsByTagName('boxof');
+
+        if (items.length === 0) return [];
+
+        return Array.from(items).map((item) => ({
+            id: getTagText(item, 'mt20id'),
+            title: getTagText(item, 'prfnm') || '제목 없음',
+            place: getTagText(item, 'prfplcnm') || '장소 미정',
+            period: `${formatDate(getTagText(item, 'prfpdfrom'))} ~ ${formatDate(getTagText(item, 'prfpdto'))}`,
+            startDate: formatDate(getTagText(item, 'prfpdfrom')),
+            endDate: formatDate(getTagText(item, 'prfpdto')),
+            area: extractArea(getTagText(item, 'area')),
+            poster: getTagText(item, 'poster') || undefined,
+            status: '공연중',
+        }));
+    } catch (error) {
+        console.error('KOPIS 박스오피스 API 호출 중 에러 발생:', error);
+        throw error;
+    }
+};
+
 export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
     try {
         const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {});

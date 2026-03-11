@@ -60,6 +60,16 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
+                { name: t.nav.venue, path: "/venue" },
+            ],
+        },
+        {
+            type: "group",
+            name: t.nav.contentHub,
+            children: [
+                { name: t.nav.learn, path: "/learn" },
+                { name: t.nav.column, path: "/column" },
+                { name: t.nav.album, path: "/album" },
             ],
         },
     ];
@@ -71,7 +81,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     }, []);
 
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
-    const textColor = isScrolled ? "text-foreground" : "text-white";
+    const textColor = isScrolled ? "text-foreground" : "text-white active:text-white focus:text-white";
     const navBg = isScrolled
         ? "bg-background/90 backdrop-blur-md shadow-sm border-b"
         : "bg-black/95";
@@ -121,7 +131,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     <li key={item.path}>
                                         <Link
                                             href={item.path}
-                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none ${textColor}`}
+                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none active:opacity-80 ${textColor}`}
                                         >
                                             {item.name}
                                         </Link>
@@ -140,7 +150,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     onMouseLeave={handleGroupLeave}
                                 >
                                     <button
-                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none focus:outline-none ${hasActive ? "text-primary" : textColor}`}
+                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none focus:outline-none active:opacity-80 ${hasActive ? "text-primary" : textColor}`}
                                         onClick={() => setOpenGroup(isOpen ? null : item.name)}
                                     >
                                         {item.name}

@@ -51,6 +51,16 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
+                { name: t.nav.venue, path: "/venue" },
+            ],
+        },
+        {
+            type: "group",
+            name: t.nav.contentHub,
+            children: [
+                { name: t.nav.learn, path: "/learn" },
+                { name: t.nav.column, path: "/column" },
+                { name: t.nav.album, path: "/album" },
             ],
         },
     ];
@@ -148,7 +158,7 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
 
                                 {/* 하위 메뉴 (아코디언 콘텐츠) */}
                                 <div
-                                    className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+                                    className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}
                                 >
                                     <div className="ml-4 pl-4 border-l-2 border-border">
                                         {item.children.map((child) => {

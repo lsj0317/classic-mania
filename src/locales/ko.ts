@@ -7,8 +7,13 @@ const ko = {
         artist: "아티스트",
         ticket: "티켓정보",
         news: "뉴스",
-        showAndTicket: "클래식공연",
-        artistAndNews: "클래식정보",
+        showAndTicket: "공연관람/예매",
+        artistAndNews: "클래식라운지",
+        learn: "학습 허브",
+        column: "칼럼/인터뷰",
+        venue: "공연장 가이드",
+        album: "음반 리뷰",
+        contentHub: "콘텐츠",
     },
 
     // Header & Auth

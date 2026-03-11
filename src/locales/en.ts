@@ -9,8 +9,13 @@ const en: Translations = {
         artist: "Artists",
         ticket: "Tickets",
         news: "News",
-        showAndTicket: "Shows & Tickets",
-        artistAndNews: "Artists & News",
+        showAndTicket: "Shows & Booking",
+        artistAndNews: "Classic Lounge",
+        learn: "Learning Hub",
+        column: "Columns",
+        venue: "Venue Guide",
+        album: "Album Reviews",
+        contentHub: "Content",
     },
 
     // Header & Auth
