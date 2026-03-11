@@ -81,6 +81,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
 
     const isLoggedIn = currentUser && currentUser.userId !== "" && currentUser.userId !== "guest";
     const textColor = isScrolled ? "text-foreground" : "text-white active:text-white focus:text-white";
+    const hoverColor = isScrolled ? "hover:text-foreground/70" : "hover:text-white/70";
     const navBg = isScrolled
         ? "bg-background/90 backdrop-blur-md shadow-sm border-b"
         : "bg-black/95";
@@ -130,7 +131,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     <li key={item.path}>
                                         <Link
                                             href={item.path}
-                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none active:opacity-80 ${textColor}`}
+                                            className={`text-sm font-semibold transition-colors ${hoverColor} whitespace-nowrap select-none active:opacity-80 ${textColor}`}
                                         >
                                             {item.name}
                                         </Link>
@@ -149,7 +150,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     onMouseLeave={handleGroupLeave}
                                 >
                                     <button
-                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap select-none focus:outline-none active:opacity-80 ${hasActive ? "text-primary" : textColor}`}
+                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors ${hoverColor} whitespace-nowrap select-none focus:outline-none active:opacity-80 ${hasActive ? "text-primary" : textColor}`}
                                         onClick={() => setOpenGroup(isOpen ? null : item.name)}
                                     >
                                         {item.name}
