@@ -56,9 +56,10 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
             type: "group",
             name: "정보",
             children: [
+                { name: "학습허브", path: "/learn" },
+                { name: "칼럼", path: "/column" },
+                { name: "공연장 가이드", path: "/venue" },
                 { name: "티켓 정보", path: "/ticket-info" },
-                { name: "이용약관", path: "/terms" },
-                { name: "개인정보 처리방침", path: "/privacy" },
             ],
         },
     ];
