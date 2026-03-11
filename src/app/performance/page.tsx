@@ -65,7 +65,7 @@ const PerformanceMain = () => {
                 <img
                     src={src}
                     alt={alt}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                    className="w-full h-full object-cover"
                 />
             ) : (
                 <div className="flex flex-col items-center gap-1">

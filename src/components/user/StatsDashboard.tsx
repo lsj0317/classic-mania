@@ -3,9 +3,10 @@
 import { useUserStore } from '@/stores/userStore';
 import { useReviewStore } from '@/stores/reviewStore';
 import { Card, CardContent } from '@/components/ui/card';
+import { Theater, CalendarDays, MapPin, Music, Star, BarChart2 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
+    PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar, Legend,
 } from 'recharts';
 
 const CHART_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
@@ -27,7 +28,6 @@ export default function StatsDashboard() {
 
     const myReviews = reviews.filter((r) => r.userId === 'mujuki');
 
-    // 샘플 데이터 (activity에 데이터가 없을 때)
     const genreStats = Object.keys(activity.genreStats || {}).length
         ? activity.genreStats
         : { '클래식': 8, '오페라': 3, '발레': 2, '실내악': 4 };
@@ -44,7 +44,6 @@ export default function StatsDashboard() {
         ? activity.epochStats
         : { Romantic: 10, Classical: 7, Baroque: 4, '20th Century': 3 };
 
-    // 차트 데이터 변환
     const genreData = Object.entries(genreStats)
         .map(([name, value]) => ({ name, value: value as number }))
         .sort((a, b) => b.value - a.value);
@@ -74,31 +73,42 @@ export default function StatsDashboard() {
         ? (myReviews.reduce((sum, r) => sum + r.rating, 0) / myReviews.length).toFixed(1)
         : '4.2';
 
+    const summaryCards = [
+        { label: '총 관람 횟수', value: `${totalReviews}회`, icon: Theater },
+        { label: '평균 별점', value: `${avgRating}점`, icon: Star },
+        { label: '선호 장르', value: genreData[0]?.name || '-', icon: Music },
+        { label: '주 활동 지역', value: areaData[0]?.name || '-', icon: MapPin },
+    ];
+
     return (
         <Card className="shadow-sm border border-gray-100">
             <CardContent className="p-6">
-                <h3 className="text-lg font-bold mb-5">관람 통계 대시보드</h3>
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-2">
+                    <BarChart2 className="h-5 w-5 text-muted-foreground" />
+                    관람 통계 대시보드
+                </h3>
 
                 {/* 요약 카드 */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-                    {[
-                        { label: '총 관람 횟수', value: `${totalReviews}회`, emoji: '🎭' },
-                        { label: '평균 별점', value: `${avgRating}점`, emoji: '⭐' },
-                        { label: '선호 장르', value: genreData[0]?.name || '-', emoji: '🎵' },
-                        { label: '주 활동 지역', value: areaData[0]?.name || '-', emoji: '📍' },
-                    ].map((item) => (
-                        <div key={item.label} className="bg-gray-50 rounded-xl p-3 text-center">
-                            <p className="text-2xl mb-1">{item.emoji}</p>
-                            <p className="text-base font-bold">{item.value}</p>
-                            <p className="text-xs text-muted-foreground">{item.label}</p>
-                        </div>
-                    ))}
+                    {summaryCards.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <div key={item.label} className="bg-gray-50 rounded-xl p-3 text-center">
+                                <Icon className="h-5 w-5 mx-auto mb-2 text-indigo-500" />
+                                <p className="text-base font-bold">{item.value}</p>
+                                <p className="text-xs text-muted-foreground">{item.label}</p>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* 월별 관람 */}
                     <div>
-                        <h4 className="text-sm font-semibold mb-3 text-gray-700">📅 월별 관람 현황</h4>
+                        <h4 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-1.5">
+                            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                            월별 관람 현황
+                        </h4>
                         <ResponsiveContainer width="100%" height={180}>
                             <BarChart data={monthlyData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
                                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
@@ -111,7 +121,10 @@ export default function StatsDashboard() {
 
                     {/* 장르별 분포 */}
                     <div>
-                        <h4 className="text-sm font-semibold mb-3 text-gray-700">🎭 장르별 분포</h4>
+                        <h4 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-1.5">
+                            <Theater className="h-4 w-4 text-muted-foreground" />
+                            장르별 분포
+                        </h4>
                         <ResponsiveContainer width="100%" height={180}>
                             <PieChart>
                                 <Pie
@@ -129,13 +142,17 @@ export default function StatsDashboard() {
                                     ))}
                                 </Pie>
                                 <Tooltip />
+                                <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* 지역별 */}
                     <div>
-                        <h4 className="text-sm font-semibold mb-3 text-gray-700">📍 지역별 관람</h4>
+                        <h4 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            지역별 관람
+                        </h4>
                         <ResponsiveContainer width="100%" height={180}>
                             <BarChart data={areaData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
                                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
@@ -148,7 +165,10 @@ export default function StatsDashboard() {
 
                     {/* 시대별 선호도 */}
                     <div>
-                        <h4 className="text-sm font-semibold mb-3 text-gray-700">🎼 시대별 선호도</h4>
+                        <h4 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-1.5">
+                            <Music className="h-4 w-4 text-muted-foreground" />
+                            시대별 선호도
+                        </h4>
                         {epochData.length > 2 ? (
                             <ResponsiveContainer width="100%" height={180}>
                                 <RadarChart cx="50%" cy="50%" outerRadius={60} data={epochData}>

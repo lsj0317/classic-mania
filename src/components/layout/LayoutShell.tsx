@@ -6,6 +6,7 @@ import Header from "../Header";
 import Footer from "../Footer";
 import SideMenu from "../SideMenu";
 import BottomNav from "../BottomNav";
+import Breadcrumb from "./Breadcrumb";
 
 const LayoutShell = ({ children }: { children: React.ReactNode }) => {
     const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ const LayoutShell = ({ children }: { children: React.ReactNode }) => {
             <div className="flex min-h-screen flex-col">
                 <Header onMenuOpen={openSideMenu} />
                 <main className={isHome ? "flex-grow" : "flex-grow container mx-auto px-4 py-6 lg:py-8 max-w-screen-xl"}>
+                    {!isHome && <Breadcrumb />}
                     <div className="page-transition page-enter">
                         {children}
                     </div>

@@ -3,6 +3,7 @@
 import { useUserStore, ALL_BADGES } from '@/stores/userStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Award, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ActivityBadges() {
@@ -14,7 +15,10 @@ export default function ActivityBadges() {
         <Card className="shadow-sm border border-gray-100">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                    <h3 className="text-lg font-bold">활동 배지</h3>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                        <Award className="h-5 w-5 text-muted-foreground" />
+                        활동 배지
+                    </h3>
                     <Badge variant="secondary" className="text-sm">
                         {earned.length} / {ALL_BADGES.length}
                     </Badge>
@@ -56,7 +60,7 @@ export default function ActivityBadges() {
                                     title={badge.description}
                                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm bg-gray-100 text-gray-400 cursor-help opacity-60"
                                 >
-                                    <span className="text-lg grayscale">{badge.icon}</span>
+                                    <Lock className="h-4 w-4 flex-shrink-0" />
                                     <div>
                                         <p className="font-semibold leading-none">{badge.name}</p>
                                         <p className="text-[10px] mt-0.5">{badge.description}</p>

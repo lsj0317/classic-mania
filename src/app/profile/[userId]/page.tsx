@@ -8,7 +8,7 @@ import { posts, currentUser } from '@/data/mockData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, UserPlus, UserCheck, Star } from 'lucide-react';
+import { ArrowLeft, UserPlus, UserCheck, Star, Award, Theater, CalendarDays, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -174,7 +174,8 @@ export default function ProfilePage() {
                 <Card>
                     <CardContent className="p-5">
                         <h2 className="font-bold mb-4 flex items-center gap-2">
-                            🏅 활동 배지
+                            <Award className="h-4 w-4 text-muted-foreground" />
+                            활동 배지
                             <Badge variant="secondary">{displayBadges.length}/{ALL_BADGES.length}</Badge>
                         </h2>
                         {displayBadges.length === 0 ? (
@@ -202,7 +203,7 @@ export default function ProfilePage() {
                 {/* 장르별 통계 */}
                 <Card>
                     <CardContent className="p-5">
-                        <h2 className="font-bold mb-4">🎭 장르별 관람 통계</h2>
+                        <h2 className="font-bold mb-4 flex items-center gap-2"><Theater className="h-4 w-4 text-muted-foreground" />장르별 관람 통계</h2>
                         {displayGenreData.length === 0 ? (
                             <p className="text-sm text-muted-foreground">관람 기록이 없습니다</p>
                         ) : (
@@ -232,7 +233,7 @@ export default function ProfilePage() {
                 {/* 월별 통계 */}
                 <Card>
                     <CardContent className="p-5">
-                        <h2 className="font-bold mb-4">📅 월별 관람 통계</h2>
+                        <h2 className="font-bold mb-4 flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" />월별 관람 통계</h2>
                         {displayMonthlyData.length === 0 ? (
                             <p className="text-sm text-muted-foreground">관람 기록이 없습니다</p>
                         ) : (
@@ -251,7 +252,7 @@ export default function ProfilePage() {
                 {/* 최근 게시글 */}
                 <Card>
                     <CardContent className="p-5">
-                        <h2 className="font-bold mb-4">📝 최근 게시글</h2>
+                        <h2 className="font-bold mb-4 flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />최근 게시글</h2>
                         {userPosts.length === 0 ? (
                             <p className="text-sm text-muted-foreground">작성한 게시글이 없습니다</p>
                         ) : (
@@ -281,7 +282,7 @@ export default function ProfilePage() {
             {userReviews.length > 0 && (
                 <Card className="mt-6">
                     <CardContent className="p-5">
-                        <h2 className="font-bold mb-4">⭐ 최근 공연 리뷰</h2>
+                        <h2 className="font-bold mb-4 flex items-center gap-2"><Star className="h-4 w-4 text-muted-foreground" />최근 공연 리뷰</h2>
                         <div className="space-y-3">
                             {userReviews.map((review) => (
                                 <div key={review.id} className="border border-gray-100 rounded-lg p-3">

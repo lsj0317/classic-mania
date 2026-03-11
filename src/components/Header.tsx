@@ -112,7 +112,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     <li key={item.path}>
                                         <Link
                                             href={item.path}
-                                            className={`text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${textColor}`}
+                                            className={`text-sm font-semibold hover:opacity-70 whitespace-nowrap ${textColor}`}
                                         >
                                             {item.name}
                                         </Link>
@@ -131,7 +131,7 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                     onMouseLeave={handleGroupLeave}
                                 >
                                     <button
-                                        className={`flex items-center gap-1 text-sm font-semibold transition-colors hover:text-primary/70 whitespace-nowrap ${hasActive ? "text-primary" : textColor}`}
+                                        className={`flex items-center gap-1 text-sm font-semibold hover:opacity-70 whitespace-nowrap ${hasActive ? "text-primary" : textColor}`}
                                         onClick={() => setOpenGroup(isOpen ? null : item.name)}
                                     >
                                         {item.name}
