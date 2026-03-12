@@ -16,13 +16,7 @@ import {
 } from '@/hooks/useOpenOpusQueries';
 import { useConductors, usePerformers } from '@/hooks/useClassicalArtists';
 import type { Artist } from '@/types';
-
-const EPOCH_KO: Record<string, string> = {
-    Medieval: "중세", Renaissance: "르네상스", Baroque: "바로크",
-    Classical: "고전주의", "Early Romantic": "초기 낭만", Romantic: "낭만주의",
-    "Late Romantic": "후기 낭만", "20th Century": "20세기",
-    "Post-War": "전후", "21st Century": "21세기",
-};
+import { EPOCH_KO } from '@/lib/constants';
 
 const EPOCH_FILTERS = [
     { key: 'popular', labelKo: '인기', labelEn: 'Popular' },

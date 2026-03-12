@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, ImageIcon, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -131,12 +132,15 @@ export default function RecommendationSection({ allPerformances }: Props) {
                         onClick={() => router.push(`/performance/${performance.id}`)}
                     >
                         <CardContent className="p-0">
-                            <div className="relative aspect-[3/4] bg-muted">
+                            <div className="relative aspect-[3/4] bg-muted overflow-hidden">
                                 {performance.poster ? (
-                                    <img
+                                    <Image
                                         src={performance.poster}
                                         alt={performance.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        unoptimized
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">

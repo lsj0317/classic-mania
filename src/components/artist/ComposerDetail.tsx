@@ -7,13 +7,7 @@ import { ArrowLeft, Music, BookOpen, Video, Loader2 } from "lucide-react";
 import { useComposersByIds, useComposerWorks, useComposerGenres } from '../../hooks/useOpenOpusQueries';
 import { useYoutubeSearch } from '../../hooks/useYoutubeSearch';
 import { useLanguageStore } from '../../stores/languageStore';
-
-const EPOCH_KO: Record<string, string> = {
-    Medieval: "중세", Renaissance: "르네상스", Baroque: "바로크",
-    Classical: "고전주의", "Early Romantic": "초기 낭만", Romantic: "낭만주의",
-    "Late Romantic": "후기 낭만", "20th Century": "20세기",
-    "Post-War": "전후", "21st Century": "21세기",
-};
+import { EPOCH_KO } from '@/lib/constants';
 
 const GENRE_KO: Record<string, string> = {
     Popular: "인기 작품", Recommended: "추천 작품", all: "전체",

@@ -1,17 +1,19 @@
 # Tech Stack (Current)
-- **Core:** React 18, TypeScript, Vite
-- **Routing:** React Router DOM v6
-- **State:** Zustand (Store-based)
-- **UI & Icons:** Material Tailwind, Tailwind CSS, Lucide-react, Heroicons
+- **Framework:** Next.js 15 (App Router), React 18, TypeScript
+- **State:** Zustand (Store-based), TanStack React Query (Server state)
+- **UI & Icons:** Radix UI, Tailwind CSS, Lucide-react
 - **Charts:** Recharts (Data viz)
 - **Network:** Axios
-- **Misc:** React-daum-postcode (Address search)
+- **Misc:** React-daum-postcode (Address search), fast-xml-parser
 
 # Technical Preferences
 - Use Tailwind utility classes over inline styles.
 - Prefer Lucide-react for iconography.
-- Implement responsive design compatible with Material Tailwind.
+- Use `next/image` Image component instead of raw `<img>` tags.
 - Keep Zustand stores modular and typesafe.
+- Shared constants go in `src/lib/constants.ts` (e.g., EPOCH_KO, toYMD).
+- API layer files are in `src/api/`, hooks in `src/hooks/`.
+- Avoid console.log/console.error in production code — let errors propagate naturally.
 
 # Slash Commands Guide
 - `/clear` — 새로운 작업을 시작할 때 사용. 이전 컨텍스트를 초기화하여 토큰 낭비를 방지한다.

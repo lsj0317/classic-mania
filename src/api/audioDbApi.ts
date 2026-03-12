@@ -15,8 +15,7 @@ export const searchAudioDBArtist = async (name: string): Promise<AudioDBArtist |
             return response.data.artists[0];
         }
         return null;
-    } catch (error) {
-        console.error(`AudioDB 아티스트 검색 실패 (${name}):`, error);
+    } catch {
         return null;
     }
 };
@@ -36,8 +35,7 @@ export const fetchWikiSummary = async (title: string): Promise<WikiSummary | nul
             return response.data;
         }
         return null;
-    } catch (error) {
-        console.error(`Wikipedia 요약 조회 실패 (${title}):`, error);
+    } catch {
         return null;
     }
 };
