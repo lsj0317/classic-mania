@@ -200,6 +200,7 @@ interface UserStoreState {
     addNotification: (notif: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => void;
     markNotificationRead: (id: string) => void;
     markAllRead: () => void;
+    clearAllNotifications: () => void;
     getActivityByUserId: (userId: string) => UserActivity;
     getPreferredEpochs: () => string[];
 }
@@ -342,9 +343,14 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     },
 
     markAllRead: () => {
-        const updated = get().notifications.map((n) => ({ ...n, isRead: true }));
+        const updated = get().notifications.map((n: Notification) => ({ ...n, isRead: true }));
         saveNotifications(updated);
         set({ notifications: updated, unreadCount: 0 });
+    },
+
+    clearAllNotifications: () => {
+        saveNotifications([]);
+        set({ notifications: [], unreadCount: 0 });
     },
 
     getActivityByUserId: (userId) => {
