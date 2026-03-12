@@ -16,6 +16,7 @@ import {
 } from "./ui/dropdown-menu";
 import { ChevronDown, Globe, User, LogOut, Menu, Bell } from "lucide-react";
 import { useUserStore } from "@/stores/userStore";
+import NotificationModal from "./NotificationModal";
 
 interface HeaderProps {
     onMenuOpen: () => void;
@@ -31,8 +32,9 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     const router = useRouter();
     const pathname = usePathname();
     const { language, t, setLanguage } = useLanguageStore();
-    const { unreadCount, notifications, markNotificationRead, markAllRead } = useUserStore();
+    const { unreadCount } = useUserStore();
     const groupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [notifModalOpen, setNotifModalOpen] = useState(false);
 
     const NAV_MENU: NavItem[] = [
         {
@@ -217,11 +219,25 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                 </Button>
                             </Link>
                         ) : (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className={`gap-2 px-2 ${textColor} hover:bg-white/10`}>
-                                        {/* 프로필 아이콘 + 알림 배지 */}
-                                        <div className="relative">
+                            <>
+                                {/* 알림 벨 버튼 */}
+                                <button
+                                    onClick={() => setNotifModalOpen(true)}
+                                    className={`relative p-2 rounded-full transition-colors hover:bg-white/10 ${textColor}`}
+                                    aria-label="알림"
+                                >
+                                    <Bell className="h-5 w-5" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* 유저 드롭다운 */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className={`gap-2 px-2 ${textColor} hover:bg-white/10`}>
                                             <ProfileAvatar
                                                 name={currentUser.name}
                                                 nickname={currentUser.nickname}
@@ -230,47 +246,28 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
                                                 size="sm"
                                                 className={`border-2 ${isScrolled ? "border-primary" : "border-white"}`}
                                             />
-                                            {unreadCount > 0 && (
-                                                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
-                                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className="text-sm font-semibold">
-                                            {currentUser.userId} {t.auth.honorific}
-                                        </span>
-                                        <ChevronDown className="h-3 w-3" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="min-w-[180px]">
-                                    <DropdownMenuItem onClick={() => router.push("/mypage")} className="gap-2">
-                                        <User className="h-4 w-4" />
-                                        {t.auth.mypage}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="gap-2 justify-between"
-                                        onClick={() => {
-                                            markAllRead();
-                                            router.push("/mypage");
-                                        }}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Bell className="h-4 w-4" />
-                                            알림
-                                        </div>
-                                        {unreadCount > 0 && (
-                                            <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">
-                                                +{unreadCount}
+                                            <span className="text-sm font-semibold">
+                                                {currentUser.userId} {t.auth.honorific}
                                             </span>
-                                        )}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => window.location.reload()} className="gap-2">
-                                        <LogOut className="h-4 w-4" />
-                                        {t.auth.logout}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                            <ChevronDown className="h-3 w-3" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="min-w-[180px]">
+                                        <DropdownMenuItem onClick={() => router.push("/mypage")} className="gap-2">
+                                            <User className="h-4 w-4" />
+                                            {t.auth.mypage}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => window.location.reload()} className="gap-2">
+                                            <LogOut className="h-4 w-4" />
+                                            {t.auth.logout}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+                                {/* 알림 모달 */}
+                                <NotificationModal open={notifModalOpen} onOpenChange={setNotifModalOpen} />
+                            </>
                         )}
                     </div>
                 </div>

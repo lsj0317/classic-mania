@@ -124,6 +124,35 @@ const PerfCarouselSkeleton = () => (
     </div>
 );
 
+const CommunityCardSkeleton = () => (
+    <Card>
+        <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+                <Skeleton className="w-14 h-14 rounded" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const PostListSkeleton = () => (
+    <ul className="space-y-3">
+        {[0, 1, 2].map(i => (
+            <li key={i} className="flex items-center gap-3 p-2">
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/3" />
+                </div>
+                <Skeleton className="h-3 w-12" />
+            </li>
+        ))}
+    </ul>
+);
+
 // ── 메인 컴포넌트 ──
 
 const Home = () => {
@@ -324,6 +353,11 @@ const Home = () => {
                     </div>
                 );
             case "community":
+                if (latestPosts.length === 0) return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[0, 1, 2, 3].map(i => <CommunityCardSkeleton key={i} />)}
+                    </div>
+                );
                 return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {latestPosts.map((post) => (
