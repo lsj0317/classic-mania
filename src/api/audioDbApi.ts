@@ -1,6 +1,9 @@
 import axios from 'axios';
 import type { AudioDBArtist, AudioDBArtistResponse, WikiSummary } from '../types';
 
+/** API 요청 타임아웃 (8초) */
+const API_TIMEOUT = 8000;
+
 /**
  * TheAudioDB 프록시 경유 아티스트 검색
  * CORS 미지원 → Next.js API Route 프록시 사용
@@ -9,7 +12,7 @@ export const searchAudioDBArtist = async (name: string): Promise<AudioDBArtist |
     try {
         const response = await axios.get<AudioDBArtistResponse>(
             `/api/audiodb`,
-            { params: { s: name } }
+            { params: { s: name }, timeout: API_TIMEOUT }
         );
         if (response.data.artists && response.data.artists.length > 0) {
             return response.data.artists[0];
@@ -29,7 +32,7 @@ export const fetchWikiSummary = async (title: string): Promise<WikiSummary | nul
     try {
         const response = await axios.get<WikiSummary>(
             `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-            { validateStatus: (status) => status < 500 }
+            { validateStatus: (status) => status < 500, timeout: API_TIMEOUT }
         );
         if (response.status === 200) {
             return response.data;

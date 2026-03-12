@@ -2,6 +2,9 @@ import axios from 'axios';
 import type { Performance, RelatedLink } from '../types';
 import { toYMD } from '../lib/constants';
 
+/** API 요청 타임아웃 (10초) */
+const API_TIMEOUT = 10000;
+
 /**
  * KOPIS API URL 빌드
  * /api/kopis Route Handler 프록시 사용
@@ -66,7 +69,7 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
             shcate: 'CCCA',
         });
 
-        const response = await axios.get(url);
+        const response = await axios.get(url, { timeout: API_TIMEOUT });
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
@@ -98,7 +101,7 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
     try {
         const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {});
 
-        const response = await axios.get(url);
+        const response = await axios.get(url, { timeout: API_TIMEOUT });
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
@@ -166,7 +169,7 @@ export const fetchKopisBoxOffice = async (): Promise<Performance[]> => {
             rows: 10,
         });
 
-        const response = await axios.get(url);
+        const response = await axios.get(url, { timeout: API_TIMEOUT });
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('boxof');
@@ -193,7 +196,7 @@ export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: n
     try {
         const url = buildKopisUrl(`/openApi/restful/prfplc/${mt10id}`, {});
 
-        const response = await axios.get(url);
+        const response = await axios.get(url, { timeout: API_TIMEOUT });
         const parser = new DOMParser();
         const xml = parser.parseFromString(response.data, 'text/xml');
         const items = xml.getElementsByTagName('db');
