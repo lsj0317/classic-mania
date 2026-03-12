@@ -16,6 +16,18 @@ const en: Translations = {
         venue: "Venue Guide",
         album: "Album Reviews",
         contentHub: "Content",
+        // Nav group names
+        performanceGroup: "Shows",
+        communityGroup: "Community",
+        artistGroup: "Artists",
+        infoGroup: "Info",
+        // Community sub-menu
+        companion: "Find Companion",
+        meetup: "Meetups & Events",
+        ticketTrade: "Ticket Resale",
+        // Performance sub-menu
+        calendar: "Performance Calendar",
+        ticketInfo: "Ticket Info",
     },
 
     // Header & Auth

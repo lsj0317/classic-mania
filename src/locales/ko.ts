@@ -9,11 +9,23 @@ const ko = {
         news: "뉴스",
         showAndTicket: "공연관람/예매",
         artistAndNews: "클래식라운지",
-        learn: "학습 허브",
-        column: "칼럼/인터뷰",
+        learn: "학습허브",
+        column: "칼럼",
         venue: "공연장 가이드",
         album: "음반 리뷰",
         contentHub: "콘텐츠",
+        // 네비바 그룹명
+        performanceGroup: "공연",
+        communityGroup: "커뮤니티",
+        artistGroup: "아티스트",
+        infoGroup: "정보",
+        // 커뮤니티 하위 메뉴
+        companion: "동행 구하기",
+        meetup: "소모임 & 이벤트",
+        ticketTrade: "티켓 중고거래",
+        // 공연 하위 메뉴
+        calendar: "공연 캘린더",
+        ticketInfo: "티켓 정보",
     },
 
     // Header & Auth

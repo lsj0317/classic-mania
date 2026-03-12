@@ -10,20 +10,31 @@ import {
     fetchComposerGenres,
     fetchWorksByComposer,
 } from '../api/openOpusApi';
+import { fallbackComposers } from '../data/composerData';
 import type { OpenOpusComposer, OpenOpusWork } from '../types';
 
 const STALE_TIME = 1000 * 60 * 30;   // 30분 fresh
 const GC_TIME = 1000 * 60 * 60 * 2;  // 2시간 캐시 유지
 
+/** API 호출 후 빈 결과 시 폴백 적용하는 래퍼 */
+const withFallback = (fetcher: () => Promise<OpenOpusComposer[]>) => async (): Promise<OpenOpusComposer[]> => {
+    try {
+        const result = await fetcher();
+        return result.length > 0 ? result : fallbackComposers;
+    } catch {
+        return fallbackComposers;
+    }
+};
+
 /** 인기 작곡가 목록 */
 export const usePopularComposers = () => {
     return useQuery<OpenOpusComposer[]>({
         queryKey: ['openopus', 'composers', 'popular'],
-        queryFn: fetchPopularComposers,
+        queryFn: withFallback(fetchPopularComposers),
         staleTime: STALE_TIME,
         gcTime: GC_TIME,
         refetchOnWindowFocus: false,
-        retry: 2,
+        retry: 1,
     });
 };
 
@@ -31,11 +42,11 @@ export const usePopularComposers = () => {
 export const useEssentialComposers = () => {
     return useQuery<OpenOpusComposer[]>({
         queryKey: ['openopus', 'composers', 'essential'],
-        queryFn: fetchEssentialComposers,
+        queryFn: withFallback(fetchEssentialComposers),
         staleTime: STALE_TIME,
         gcTime: GC_TIME,
         refetchOnWindowFocus: false,
-        retry: 2,
+        retry: 1,
     });
 };
 

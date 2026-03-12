@@ -39,26 +39,26 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
     const NAV_MENU: NavItem[] = [
         {
             type: "group",
-            name: "공연",
+            name: t.nav.performanceGroup,
             children: [
                 { name: t.nav.performance, path: "/performance" },
                 { name: t.nav.ticket, path: "/ticket-info" },
-                { name: "공연 캘린더", path: "/calendar" },
+                { name: t.nav.calendar, path: "/calendar" },
             ],
         },
         {
             type: "group",
-            name: "커뮤니티",
+            name: t.nav.communityGroup,
             children: [
-                { name: "게시판", path: "/board" },
-                { name: "동행 구하기", path: "/companion" },
-                { name: "소모임 & 이벤트", path: "/meetup" },
-                { name: "티켓 중고거래", path: "/ticket-trade" },
+                { name: t.nav.board, path: "/board" },
+                { name: t.nav.companion, path: "/companion" },
+                { name: t.nav.meetup, path: "/meetup" },
+                { name: t.nav.ticketTrade, path: "/ticket-trade" },
             ],
         },
         {
             type: "group",
-            name: "아티스트",
+            name: t.nav.artistGroup,
             children: [
                 { name: t.nav.artist, path: "/artist" },
                 { name: t.nav.news, path: "/news" },
@@ -66,12 +66,12 @@ const Header = ({ onMenuOpen }: HeaderProps) => {
         },
         {
             type: "group",
-            name: "정보",
+            name: t.nav.infoGroup,
             children: [
-                { name: "학습허브", path: "/learn" },
-                { name: "칼럼", path: "/column" },
-                { name: "공연장 가이드", path: "/venue" },
-                { name: "티켓 정보", path: "/ticket-info" },
+                { name: t.nav.learn, path: "/learn" },
+                { name: t.nav.column, path: "/column" },
+                { name: t.nav.venue, path: "/venue" },
+                { name: t.nav.ticketInfo, path: "/ticket-info" },
             ],
         },
     ];
