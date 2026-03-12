@@ -70,8 +70,7 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
         try {
             const data = await fetchKopisPerformances();
             set({ performances: data, listFetched: true, listLoading: false });
-        } catch (err) {
-            console.error('API 실패, 더미 데이터로 대체:', err);
+        } catch {
             set({
                 performances: performanceData,
                 listFetched: true,
@@ -106,8 +105,7 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
                     set({ detailLoading: false, detailError: '공연 정보를 찾을 수 없습니다.' });
                 }
             }
-        } catch (err) {
-            console.error('상세 API 실패, 더미 데이터로 대체:', err);
+        } catch {
             const fallback = performanceData.find((p) => p.id === id);
             if (fallback) {
                 set((state) => ({
@@ -154,8 +152,8 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
                             return { detailCache: newCache, performances: newPerformances };
                         });
                     }
-                } catch (e) {
-                    console.error(`Failed to fetch price for ${id}`, e);
+                } catch {
+                    // price fetch 실패 무시
                 }
             }));
         }
@@ -220,8 +218,8 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
                         }));
                     }
 
-                } catch (e) {
-                    console.error(`Failed to fetch location for ${perf.id}`, e);
+                } catch {
+                    // location fetch 실패 무시
                 }
             }));
         }

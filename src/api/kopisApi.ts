@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Performance, RelatedLink } from '../types';
+import { toYMD } from '../lib/constants';
 
 /**
  * KOPIS API URL 빌드
@@ -57,9 +58,6 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
         const sixMonthsLater = new Date(today);
         sixMonthsLater.setMonth(today.getMonth() + 6);
 
-        const toYMD = (d: Date) =>
-            `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-
         const url = buildKopisUrl('/openApi/restful/pblprfr', {
             stdate: toYMD(sixMonthsAgo),
             eddate: toYMD(sixMonthsLater),
@@ -92,7 +90,6 @@ export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Perf
             };
         });
     } catch (error) {
-        console.error('KOPIS 공연 목록 API 호출 중 에러 발생:', error);
         throw error;
     }
 };
@@ -153,7 +150,6 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
             bookingUrl: foundBookingUrl,
         };
     } catch (error) {
-        console.error('KOPIS 공연 상세 API 호출 중 에러 발생:', error);
         throw error;
     }
 };
@@ -162,8 +158,6 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
 export const fetchKopisBoxOffice = async (): Promise<Performance[]> => {
     try {
         const today = new Date();
-        const toYMD = (d: Date) =>
-            `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 
         const url = buildKopisUrl('/openApi/restful/boxoffice', {
             ststype: 'week',
@@ -191,7 +185,6 @@ export const fetchKopisBoxOffice = async (): Promise<Performance[]> => {
             status: '공연중',
         }));
     } catch (error) {
-        console.error('KOPIS 박스오피스 API 호출 중 에러 발생:', error);
         throw error;
     }
 };
@@ -213,8 +206,7 @@ export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: n
 
         if (isNaN(lat) || isNaN(lng)) return null;
         return { lat, lng };
-    } catch (error) {
-        console.error('KOPIS 공연시설 상세 API 호출 중 에러 발생:', error);
+    } catch {
         return null;
     }
 };

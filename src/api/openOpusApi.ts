@@ -16,137 +16,97 @@ const BASE_URL = 'https://api.openopus.org';
 
 /** 인기 작곡가 목록 (상위 23명) */
 export const fetchPopularComposers = async (): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/pop.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 인기 작곡가 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/pop.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** 추천 작곡가 목록 (77명) */
 export const fetchEssentialComposers = async (): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/rec.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 추천 작곡가 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/rec.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** 시대별 작곡가 목록 */
 export const fetchComposersByEpoch = async (epoch: string): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/epoch/${encodeURIComponent(epoch)}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 시대별 작곡가 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/epoch/${encodeURIComponent(epoch)}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** 작곡가 이름 검색 */
 export const searchComposers = async (query: string): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/search/${encodeURIComponent(query)}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 작곡가 검색 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/search/${encodeURIComponent(query)}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** ID로 작곡가 조회 (여러 ID 쉼표 구분) */
 export const fetchComposersByIds = async (ids: string[]): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/ids/${ids.join(',')}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 작곡가 ID 조회 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/ids/${ids.join(',')}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** 작곡가의 장르 목록 */
 export const fetchComposerGenres = async (composerId: string): Promise<string[]> => {
-    try {
-        const response = await axios.get(
-            `${BASE_URL}/genre/list/composer/${composerId}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.genres) {
-            return response.data.genres;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 장르 목록 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get(
+        `${BASE_URL}/genre/list/composer/${composerId}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.genres) {
+        return response.data.genres;
     }
+    return [];
 };
 
 /** 이름 첫 글자별 작곡가 목록 */
 export const fetchComposersByLetter = async (letter: string): Promise<OpenOpusComposer[]> => {
-    try {
-        const response = await axios.get<OpenOpusComposerResponse>(
-            `${BASE_URL}/composer/list/name/${encodeURIComponent(letter)}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.composers) {
-            return response.data.composers;
-        }
-        return [];
-    } catch (error) {
-        console.error('Open Opus 이름별 작곡가 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusComposerResponse>(
+        `${BASE_URL}/composer/list/name/${encodeURIComponent(letter)}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.composers) {
+        return response.data.composers;
     }
+    return [];
 };
 
 /** 전체 작곡가 목록 (A-Z 전체 조회) */
 export const fetchAllComposers = async (): Promise<OpenOpusComposer[]> => {
-    try {
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        const results = await Promise.all(
-            letters.map(letter =>
-                axios.get<OpenOpusComposerResponse>(
-                    `${BASE_URL}/composer/list/name/${letter}.json`
-                ).then(res => {
-                    if (res.data.status?.success === 'true' && res.data.composers) {
-                        return res.data.composers;
-                    }
-                    return [];
-                }).catch(() => [] as OpenOpusComposer[])
-            )
-        );
-        return results.flat().sort((a, b) => a.complete_name.localeCompare(b.complete_name));
-    } catch (error) {
-        console.error('Open Opus 전체 작곡가 API 호출 중 에러 발생:', error);
-        throw error;
-    }
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const results = await Promise.all(
+        letters.map(letter =>
+            axios.get<OpenOpusComposerResponse>(
+                `${BASE_URL}/composer/list/name/${letter}.json`
+            ).then(res => {
+                if (res.data.status?.success === 'true' && res.data.composers) {
+                    return res.data.composers;
+                }
+                return [];
+            }).catch(() => [] as OpenOpusComposer[])
+        )
+    );
+    return results.flat().sort((a, b) => a.complete_name.localeCompare(b.complete_name));
 };
 
 /** 작곡가의 작품 목록 (장르별) */
@@ -154,19 +114,14 @@ export const fetchWorksByComposer = async (
     composerId: string,
     genre: string = 'Popular'
 ): Promise<{ composer: OpenOpusComposer | null; works: OpenOpusWork[] }> => {
-    try {
-        const response = await axios.get<OpenOpusWorkResponse>(
-            `${BASE_URL}/work/list/composer/${composerId}/genre/${encodeURIComponent(genre)}.json`
-        );
-        if (response.data.status?.success === 'true' && response.data.works) {
-            return {
-                composer: response.data.composer || null,
-                works: response.data.works,
-            };
-        }
-        return { composer: null, works: [] };
-    } catch (error) {
-        console.error('Open Opus 작품 목록 API 호출 중 에러 발생:', error);
-        throw error;
+    const response = await axios.get<OpenOpusWorkResponse>(
+        `${BASE_URL}/work/list/composer/${composerId}/genre/${encodeURIComponent(genre)}.json`
+    );
+    if (response.data.status?.success === 'true' && response.data.works) {
+        return {
+            composer: response.data.composer || null,
+            works: response.data.works,
+        };
     }
+    return { composer: null, works: [] };
 };

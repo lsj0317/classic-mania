@@ -8,18 +8,9 @@ import {
     PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 
-const CHART_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+import { EPOCH_KO } from '@/lib/constants';
 
-const EPOCH_KO: Record<string, string> = {
-    Baroque: '바로크',
-    Classical: '고전주의',
-    Romantic: '낭만주의',
-    'Early Romantic': '초기 낭만',
-    'Late Romantic': '후기 낭만',
-    '20th Century': '20세기',
-    'Post-War': '전후',
-    '21st Century': '21세기',
-};
+const CHART_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
 
 export default function StatsDashboard() {
     const { activity } = useUserStore();

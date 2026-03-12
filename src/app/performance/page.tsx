@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,26 +38,31 @@ const PerformanceMain = () => {
         fetchList();
     }, [fetchList]);
 
-    // 삼중 필터링: 상태 탭 + 지역 + 검색어
-    const filteredData = performances.filter((p) => {
-        const matchesStatus =
-            selectedTab === "전체" || selectedTab === "지역별" || p.status === selectedTab;
+    // 삼중 필터링: 상태 탭 + 지역 + 검색어 (메모이제이션)
+    const filteredData = useMemo(() => {
+        const lowerSearch = searchTerm.toLowerCase();
+        return performances.filter((p) => {
+            const matchesStatus =
+                selectedTab === "전체" || selectedTab === "지역별" || p.status === selectedTab;
 
-        const matchesArea =
-            selectedTab !== "지역별" || selectedArea === "전체 지역" || p.area.includes(selectedArea);
+            const matchesArea =
+                selectedTab !== "지역별" || selectedArea === "전체 지역" || p.area.includes(selectedArea);
 
-        const matchesSearch =
-            p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.place.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch =
+                p.title.toLowerCase().includes(lowerSearch) ||
+                p.place.toLowerCase().includes(lowerSearch);
 
-        return matchesStatus && matchesArea && matchesSearch;
-    });
+            return matchesStatus && matchesArea && matchesSearch;
+        });
+    }, [performances, selectedTab, selectedArea, searchTerm]);
 
     // 페이징 계산
     const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-    const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = useMemo(() => {
+        const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+        const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+        return filteredData.slice(indexOfFirstItem, indexOfLastItem);
+    }, [filteredData, currentPage]);
 
     const PerformanceThumbnail = ({ src, alt }: { src?: string; alt: string }) => (
         <div className="w-16 h-20 bg-gray-50 flex items-center justify-center border border-gray-100 relative overflow-hidden group flex-shrink-0">

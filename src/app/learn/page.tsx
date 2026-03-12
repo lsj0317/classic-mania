@@ -8,18 +8,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Music, ListMusic, Play, ChevronRight, Star, Youtube } from 'lucide-react';
 import type { DifficultyLevel } from '@/types';
+import { EPOCH_KO } from '@/lib/constants';
 
 const DIFFICULTY_COLOR: Record<DifficultyLevel, string> = {
     '입문': 'bg-green-100 text-green-700',
     '초급': 'bg-blue-100 text-blue-700',
     '중급': 'bg-orange-100 text-orange-700',
     '고급': 'bg-red-100 text-red-700',
-};
-
-const EPOCH_KO: Record<string, string> = {
-    Medieval: '중세', Renaissance: '르네상스', Baroque: '바로크',
-    Classical: '고전주의', 'Early Romantic': '초기 낭만', Romantic: '낭만주의',
-    'Late Romantic': '후기 낭만', '20th Century': '20세기',
 };
 
 export default function LearnPage() {

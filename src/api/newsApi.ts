@@ -43,7 +43,6 @@ export const fetchNews = async (query: string, start = 1, display = 10, sort = '
         const response = await axios.get(url);
         return response.data;
     } catch (error) {
-        console.error('네이버 뉴스 API 호출 중 에러 발생:', error);
         throw error;
     }
 };

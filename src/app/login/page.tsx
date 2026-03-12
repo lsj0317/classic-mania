@@ -31,8 +31,6 @@ const Login = () => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // 일반 로그인 로직 (데모)
-        console.log("Login with:", email, password);
         alert("로그인 되었습니다. (데모)");
         router.push("/");
     };

@@ -12,7 +12,6 @@ export const usePerformanceList = () => {
                 const data = await fetchKopisPerformances();
                 return data.length > 0 ? data : performanceData;
             } catch {
-                console.warn('KOPIS API 실패, 더미 데이터로 대체');
                 return performanceData;
             }
         },
@@ -53,7 +52,6 @@ export const useBoxOffice = () => {
             try {
                 return await fetchKopisBoxOffice();
             } catch {
-                console.warn('KOPIS 박스오피스 API 실패');
                 return [];
             }
         },

@@ -10,9 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, ImageIcon, Calendar, Music } from "lucide-react";
+import Image from "next/image";
 import type { Performance } from "@/types";
 import RecommendationSection from "@/components/recommendations/RecommendationSection";
 import { useNoticeStore } from "@/stores/noticeStore";
+import { EPOCH_KO } from "@/lib/constants";
 
 // 날짜 파싱 (YYYY.MM.DD or YYYY-MM-DD)
 function parseDateStr(str: string): Date | null {
@@ -58,19 +60,6 @@ function isCurrentMonthUpcoming(perf: Performance): boolean {
 
     return false;
 }
-
-const EPOCH_KO: Record<string, string> = {
-    Medieval: "중세",
-    Renaissance: "르네상스",
-    Baroque: "바로크",
-    Classical: "고전주의",
-    "Early Romantic": "초기 낭만",
-    Romantic: "낭만주의",
-    "Late Romantic": "후기 낭만",
-    "20th Century": "20세기",
-    "Post-War": "전후",
-    "21st Century": "21세기",
-};
 
 // ── 스켈레톤 컴포넌트 ──
 
@@ -183,9 +172,9 @@ const Home = () => {
         loadNotices();
     }, [loadNotices]);
 
-    const popularPosts = [...posts].sort((a, b) => b.views - a.views).slice(0, 5);
-    const latestPosts = [...posts].sort((a, b) => b.id - a.id).slice(0, 5);
-    const displayPerformances = monthlyPerformances.slice(0, 6);
+    const popularPosts = useMemo(() => [...posts].sort((a, b) => b.views - a.views).slice(0, 5), []);
+    const latestPosts = useMemo(() => [...posts].sort((a, b) => b.id - a.id).slice(0, 5), []);
+    const displayPerformances = useMemo(() => monthlyPerformances.slice(0, 6), [monthlyPerformances]);
 
     const currentMonth = new Date().getMonth() + 1;
     const isKo = language === "ko";
@@ -331,13 +320,18 @@ const Home = () => {
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-3">
                                         {perf.poster ? (
-                                            <img
-                                                src={perf.poster}
-                                                alt={perf.title}
-                                                className="w-16 h-20 object-cover rounded"
-                                            />
+                                            <div className="relative w-16 h-20 flex-shrink-0">
+                                                <Image
+                                                    src={perf.poster}
+                                                    alt={perf.title}
+                                                    fill
+                                                    className="object-cover rounded"
+                                                    sizes="64px"
+                                                    unoptimized
+                                                />
+                                            </div>
                                         ) : (
-                                            <div className="w-16 h-20 bg-muted rounded flex items-center justify-center">
+                                            <div className="w-16 h-20 bg-muted rounded flex items-center justify-center flex-shrink-0">
                                                 <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
                                             </div>
                                         )}
@@ -369,13 +363,18 @@ const Home = () => {
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-3">
                                         {post.images?.[0] ? (
-                                            <img
-                                                src={post.images[0]}
-                                                alt={post.title}
-                                                className="w-14 h-14 object-cover rounded"
-                                            />
+                                            <div className="relative w-14 h-14 flex-shrink-0">
+                                                <Image
+                                                    src={post.images[0]}
+                                                    alt={post.title}
+                                                    fill
+                                                    className="object-cover rounded"
+                                                    sizes="56px"
+                                                    unoptimized
+                                                />
+                                            </div>
                                         ) : (
-                                            <div className="w-14 h-14 bg-muted rounded flex items-center justify-center">
+                                            <div className="w-14 h-14 bg-muted rounded flex items-center justify-center flex-shrink-0">
                                                 <ImageIcon className="h-5 w-5 text-muted-foreground/30" />
                                             </div>
                                         )}
@@ -408,10 +407,13 @@ const Home = () => {
                                     >
                                         <CardContent className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <img
+                                                <Image
                                                     src={musician.portrait}
                                                     alt={musician.completeName}
+                                                    width={56}
+                                                    height={56}
                                                     className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                                                    unoptimized
                                                 />
                                                 <div className="flex-1 min-w-0">
                                                     <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
@@ -514,10 +516,14 @@ const Home = () => {
                             className={`absolute inset-0 transition-opacity duration-700 cursor-pointer ${idx === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                             onClick={() => router.push(slide.link)}
                         >
-                            <img
+                            <Image
                                 src={slide.image}
                                 alt={slide.title}
-                                className="absolute inset-0 h-full w-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="100vw"
+                                priority={idx === 0}
+                                unoptimized
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                             {/* 뱃지 - 상단 우측 */}
@@ -674,12 +680,15 @@ const Home = () => {
                                                 style={{ width: `calc((100% - 1.5rem) / ${perfPerPage})` }}
                                                 onClick={() => router.push(`/performance/${perf.id}`)}
                                             >
-                                                <div className="aspect-[3/4] rounded-lg overflow-hidden bg-muted group">
+                                                <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted group">
                                                     {perf.poster ? (
-                                                        <img
+                                                        <Image
                                                             src={perf.poster}
                                                             alt={perf.title}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            fill
+                                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            sizes="(max-width: 768px) 33vw, 200px"
+                                                            unoptimized
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
@@ -743,10 +752,13 @@ const Home = () => {
                             >
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-4">
-                                        <img
+                                        <Image
                                             src={musician.portrait}
                                             alt={musician.completeName}
+                                            width={64}
+                                            height={64}
                                             className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                            unoptimized
                                         />
                                         <div className="flex-1 min-w-0">
                                             <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
@@ -807,9 +819,9 @@ const Home = () => {
                                         className="flex-shrink-0 w-40 cursor-pointer"
                                         onClick={() => router.push(`/performance/${perf.id}`)}
                                     >
-                                        <div className="w-full h-24 rounded-lg overflow-hidden bg-muted">
+                                        <div className="relative w-full h-24 rounded-lg overflow-hidden bg-muted">
                                             {perf.poster ? (
-                                                <img src={perf.poster} alt={perf.title} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                                                <Image src={perf.poster} alt={perf.title} fill className="object-cover hover:scale-105 transition-transform" sizes="160px" unoptimized />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100">
                                                     <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
