@@ -53,8 +53,7 @@ export async function fetchPerformanceMeta(mt20id: string): Promise<KopisPerform
             status: db.prfstate || undefined,
             area: db.area || undefined,
         };
-    } catch (error) {
-        console.error('Server-side KOPIS metadata fetch failed:', error);
+    } catch {
         return null;
     }
 }

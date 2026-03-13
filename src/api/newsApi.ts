@@ -32,17 +32,13 @@ export interface NewsResponse {
 }
 
 export const fetchNews = async (query: string, start = 1, display = 10, sort = 'sim'): Promise<NewsResponse> => {
-    try {
-        const url = buildNaverUrl('v1/search/news.json', {
-            query: query,
-            display: display,
-            start: start,
-            sort: sort,
-        });
+    const url = buildNaverUrl('v1/search/news.json', {
+        query: query,
+        display: display,
+        start: start,
+        sort: sort,
+    });
 
-        const response = await axios.get(url);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await axios.get(url);
+    return response.data;
 };

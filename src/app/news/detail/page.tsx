@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Link as LinkIcon } from "lucide-react";
 import { useNewsStore } from '@/stores/newsStore';
+import { formatDateYMD, decodeHtml } from '@/lib/utils';
 
 const NewsDetail = () => {
     const router = useRouter();
@@ -14,28 +15,11 @@ const NewsDetail = () => {
     // 데이터 없이 접근 시 목록으로 리다이렉트
     useEffect(() => {
         if (!news) {
-            alert("잘못된 접근입니다.");
-            router.push('/news');
+            router.replace('/news');
         }
     }, [news, router]);
 
     if (!news) return null;
-
-    // 날짜 포맷팅
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}.${month}.${day}`;
-    };
-
-    // HTML 엔티티 디코딩
-    const decodeHtml = (html: string) => {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value.replace(/<[^>]*>?/gm, '');
-    };
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-screen-md min-h-screen">
@@ -57,7 +41,7 @@ const NewsDetail = () => {
                         </span>
                         <div className="flex items-center gap-1 text-gray-500 text-xs">
                             <Calendar className="h-3 w-3" />
-                            <span>{formatDate(news.pubDate)}</span>
+                            <span>{formatDateYMD(news.pubDate)}</span>
                         </div>
                     </div>
                     <h3 className="text-2xl font-bold text-black leading-tight">

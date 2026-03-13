@@ -18,7 +18,6 @@ import {
     Send,
     Calendar,
     MapPin,
-    Loader2,
 } from "lucide-react";
 import { useArtistStore } from '@/stores/artistStore';
 import { useLanguageStore } from '@/stores/languageStore';
@@ -32,6 +31,7 @@ import { useWeeklyArtists } from '@/hooks/useWeeklyArtists';
 import type { Artist } from '@/types';
 import ShareButtons from '@/components/share/ShareButtons';
 import JsonLd, { createPersonJsonLd } from '@/components/seo/JsonLd';
+import { formatDateYMD, decodeHtml } from '@/lib/utils';
 
 type TabType = 'performances' | 'news' | 'cheers';
 
@@ -63,54 +63,30 @@ const ArtistDetail = () => {
         setCheerCurrentPage,
     } = useArtistStore();
 
-    // Open Opus 작곡가 라우팅 (composer-{id} 패턴)
-    if (id?.startsWith('composer-')) {
-        const composerId = id.replace('composer-', '');
-        return <ComposerDetail composerId={composerId} />;
-    }
-
-    // 지휘자/연주자/weekly 아티스트 데이터 조회
+    // ALL hooks must be called unconditionally before any conditional returns
     const { data: conductors = [] } = useConductors();
     const { data: performers = [] } = usePerformers();
     const { data: weeklyArtists = [] } = useWeeklyArtists();
 
-    // conductor-N, performer-N, weekly-N 패턴 또는 기존 아티스트 ID로 아티스트 찾기
-    const resolvedArtist: Artist | undefined = (() => {
-        if (!id) return undefined;
-
-        if (id.startsWith('conductor-')) {
-            return conductors.find(a => a.id === id);
-        }
-        if (id.startsWith('performer-')) {
-            return performers.find(a => a.id === id);
-        }
-        if (id.startsWith('weekly-')) {
-            return weeklyArtists.find(a => a.id === id);
-        }
-        return artists.find(a => a.id === id);
-    })();
-
-    // conductor/performer/weekly → ArtistDetailView 컴포넌트 사용
-    if (id?.startsWith('conductor-') || id?.startsWith('performer-') || id?.startsWith('weekly-')) {
-        if (!resolvedArtist) {
-            // 데이터가 아직 로딩 중일 수 있음
-            return (
-                <div className="flex justify-center items-center py-20">
-                    <Spinner size="md" />
-                    <span className="ml-3 text-gray-500 text-sm">
-                        {isKo ? '아티스트 정보를 불러오는 중...' : 'Loading artist...'}
-                    </span>
-                </div>
-            );
-        }
-        return <ArtistDetailView artist={resolvedArtist} />;
-    }
-
-    // 기존 목 데이터 아티스트
     const [activeTab, setActiveTab] = useState<TabType>('performances');
     const [cheerInput, setCheerInput] = useState('');
 
-    const artist = artists.find(a => a.id === id);
+    // Resolve artist based on ID pattern
+    const isComposer = id?.startsWith('composer-');
+    const isConductor = id?.startsWith('conductor-');
+    const isPerformer = id?.startsWith('performer-');
+    const isWeekly = id?.startsWith('weekly-');
+    const isSpecialArtist = isConductor || isPerformer || isWeekly;
+
+    const resolvedArtist: Artist | undefined = (() => {
+        if (!id) return undefined;
+        if (isConductor) return conductors.find(a => a.id === id);
+        if (isPerformer) return performers.find(a => a.id === id);
+        if (isWeekly) return weeklyArtists.find(a => a.id === id);
+        return artists.find(a => a.id === id);
+    })();
+
+    const artist = isComposer || isSpecialArtist ? undefined : artists.find(a => a.id === id);
     const isFollowed = followedArtistIds.includes(id || '');
 
     useEffect(() => {
@@ -125,6 +101,27 @@ const ArtistDetail = () => {
             setCheerCurrentPage(1);
         }
     }, [activeTab, setCheerCurrentPage]);
+
+    // Open Opus 작곡가 라우팅 (composer-{id} 패턴)
+    if (isComposer && id) {
+        const composerId = id.replace('composer-', '');
+        return <ComposerDetail composerId={composerId} />;
+    }
+
+    // conductor/performer/weekly → ArtistDetailView 컴포넌트 사용
+    if (isSpecialArtist) {
+        if (!resolvedArtist) {
+            return (
+                <div className="flex justify-center items-center py-20">
+                    <Spinner size="md" />
+                    <span className="ml-3 text-gray-500 text-sm">
+                        {isKo ? '아티스트 정보를 불러오는 중...' : 'Loading artist...'}
+                    </span>
+                </div>
+            );
+        }
+        return <ArtistDetailView artist={resolvedArtist} />;
+    }
 
     if (!artist) {
         return (
@@ -175,20 +172,6 @@ const ArtistDetail = () => {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}.${month}.${day}`;
-    };
-
-    const decodeHtml = (html: string) => {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value.replace(/<[^>]*>?/gm, '');
-    };
-
     const handleNewsClick = (news: NewsItem) => {
         setSelectedNews(news);
         router.push('/news/detail');
@@ -220,11 +203,17 @@ const ArtistDetail = () => {
                 {/* 이미지 (좌측) */}
                 <div className="w-full md:w-[280px] lg:w-[320px] flex-shrink-0">
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
-                        <img
-                            src={artist.profileImage}
-                            alt={artist.name}
-                            className="w-full h-full object-cover"
-                        />
+                        {artist.profileImage ? (
+                            <img
+                                src={artist.profileImage}
+                                alt={artist.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                <Music className="h-12 w-12 text-gray-400" />
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -441,7 +430,7 @@ const ArtistDetail = () => {
                                                 <div className="flex items-center gap-3 mb-1.5">
                                                     <span className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider">News</span>
                                                     <span className="text-[10px] sm:text-xs text-gray-400 border-l pl-3 border-gray-300">
-                                                        {formatDate(news.pubDate)}
+                                                        {formatDateYMD(news.pubDate)}
                                                     </span>
                                                 </div>
                                                 <h4 className="font-bold text-sm sm:text-base text-black group-hover:text-blue-700 transition-colors leading-tight">
@@ -474,11 +463,9 @@ const ArtistDetail = () => {
                     <div>
                         {/* 응원 메시지 입력 */}
                         <div className="flex gap-3 mb-6 p-4 bg-gray-50 border border-gray-200">
-                            <img
-                                src={currentUser.profileImage || '/placeholder-avatar.jpg'}
-                                alt={currentUser.name}
-                                className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
-                            />
+                            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-500 flex-shrink-0 border border-gray-200">
+                                {currentUser.name[0]}
+                            </div>
                             <div className="flex-1 flex gap-2">
                                 <Input
                                     type="text"
@@ -507,16 +494,14 @@ const ArtistDetail = () => {
                                         key={cheer.id}
                                         className="flex gap-3 p-4 border border-gray-200 hover:border-gray-300 transition-colors"
                                     >
-                                        <img
-                                            src={cheer.userProfileImage || 'https://docs.material-tailwind.com/img/face-2.jpg'}
-                                            alt={cheer.userName}
-                                            className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
-                                        />
+                                        <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-500 flex-shrink-0 border border-gray-200">
+                                            {cheer.userName[0]}
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-sm font-bold text-black">{cheer.userName}</span>
                                                 <span className="text-[10px] text-gray-400">
-                                                    {formatDate(cheer.createdAt)}
+                                                    {formatDateYMD(cheer.createdAt)}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-gray-700 leading-relaxed">{cheer.message}</p>

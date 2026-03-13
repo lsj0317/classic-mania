@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { Search, Map, Image, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Map, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePerformanceStore } from "@/stores/performanceStore";
 
@@ -74,7 +74,7 @@ const PerformanceMain = () => {
                 />
             ) : (
                 <div className="flex flex-col items-center gap-1">
-                    <Image className="h-6 w-6 text-gray-200" />
+                    <ImageIcon className="h-6 w-6 text-gray-200" />
                     <span className="text-[8px] text-gray-300 font-bold uppercase tracking-widest leading-none">No Poster</span>
                 </div>
             )}
