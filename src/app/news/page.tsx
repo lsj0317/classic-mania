@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Search, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useNewsStore } from '@/stores/newsStore';
 import type { NewsItem } from '@/api/newsApi';
+import { formatDateYMD, decodeHtml } from '@/lib/utils';
 
 const NewsPage = () => {
     const router = useRouter();
@@ -78,22 +79,6 @@ const NewsPage = () => {
     const handleNewsClick = (news: NewsItem) => {
         setSelectedNews(news);
         router.push('/news/detail');
-    };
-
-    // 날짜 포맷팅 (YYYY.MM.DD)
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}.${month}.${day}`;
-    };
-
-    // HTML 엔티티 디코딩 (제목/내용에 포함된 <b> 태그 등 제거)
-    const decodeHtml = (html: string) => {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value.replace(/<[^>]*>?/gm, '');
     };
 
     // 페이지네이션 계산
@@ -171,7 +156,7 @@ const NewsPage = () => {
                                     <div className="flex items-center gap-3 mb-1.5 sm:mb-2">
                                         <span className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider">News</span>
                                         <span className="text-[10px] sm:text-xs text-gray-400 border-l pl-3 border-gray-300">
-                                            {formatDate(news.pubDate)}
+                                            {formatDateYMD(news.pubDate)}
                                         </span>
                                     </div>
                                     <h5 className="font-bold text-black mb-2 sm:mb-3 group-hover:text-blue-700 transition-colors leading-tight text-sm sm:text-lg">

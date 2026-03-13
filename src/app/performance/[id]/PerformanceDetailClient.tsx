@@ -14,7 +14,7 @@ import {
     Users,
     Ticket,
     Link as LinkIcon,
-    Image,
+    ImageIcon,
     Search,
     Loader2,
     ExternalLink,
@@ -24,6 +24,7 @@ import {
 import { usePerformanceStore } from "@/stores/performanceStore";
 import { fetchNews, type NewsItem } from "@/api/newsApi";
 import { fetchKopisPerformances } from "@/api/kopisApi";
+import { decodeHtml } from "@/lib/utils";
 import type { Performance } from "@/types";
 import ReviewSection from "@/components/review/ReviewSection";
 import ShareButtons from "@/components/share/ShareButtons";
@@ -105,14 +106,12 @@ const CastProfileCard = ({ name, searchQuery }: { name: string; searchQuery: str
                                 rel="noopener noreferrer"
                                 className="block p-3 rounded-lg border border-transparent hover:border-border hover:bg-accent/50 transition-colors group"
                             >
-                                <p
-                                    className="text-sm font-medium text-foreground group-hover:text-primary line-clamp-1"
-                                    dangerouslySetInnerHTML={{ __html: item.title }}
-                                />
-                                <p
-                                    className="text-xs text-muted-foreground mt-1 line-clamp-2"
-                                    dangerouslySetInnerHTML={{ __html: item.description }}
-                                />
+                                <p className="text-sm font-medium text-foreground group-hover:text-primary line-clamp-1">
+                                    {decodeHtml(item.title)}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {decodeHtml(item.description)}
+                                </p>
                             </a>
                         ))
                     ) : (
@@ -417,7 +416,7 @@ const PerformanceDetail = () => {
                     {performance.introImages && performance.introImages.length > 0 && (
                         <Card className="p-5">
                             <div className="flex items-center gap-2 mb-4">
-                                <Image className="h-4 w-4 text-muted-foreground" />
+                                <ImageIcon className="h-4 w-4 text-muted-foreground" />
                                 <h3 className="text-sm font-bold uppercase tracking-widest">Gallery</h3>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -54,83 +54,32 @@ const extractArea = (raw: string): string => {
 };
 
 export const fetchKopisPerformances = async (page = 1, rows = 100): Promise<Performance[]> => {
-    try {
-        const today = new Date();
-        const sixMonthsAgo = new Date(today);
-        sixMonthsAgo.setMonth(today.getMonth() - 6);
-        const sixMonthsLater = new Date(today);
-        sixMonthsLater.setMonth(today.getMonth() + 6);
+    const today = new Date();
+    const sixMonthsAgo = new Date(today);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    const sixMonthsLater = new Date(today);
+    sixMonthsLater.setMonth(today.getMonth() + 6);
 
-        const url = buildKopisUrl('/openApi/restful/pblprfr', {
-            stdate: toYMD(sixMonthsAgo),
-            eddate: toYMD(sixMonthsLater),
-            cpage: page,
-            rows: rows,
-            shcate: 'CCCA',
-        });
+    const url = buildKopisUrl('/openApi/restful/pblprfr', {
+        stdate: toYMD(sixMonthsAgo),
+        eddate: toYMD(sixMonthsLater),
+        cpage: page,
+        rows: rows,
+        shcate: 'CCCA',
+    });
 
-        const response = await axios.get(url, { timeout: API_TIMEOUT });
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
-        const items = xml.getElementsByTagName('db');
+    const response = await axios.get(url, { timeout: API_TIMEOUT });
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(response.data, 'text/xml');
+    const items = xml.getElementsByTagName('db');
 
-        if (items.length === 0) return [];
+    if (items.length === 0) return [];
 
-        return Array.from(items).map((item) => {
-            const startDate = formatDate(getTagText(item, 'prfpdfrom'));
-            const endDate = formatDate(getTagText(item, 'prfpdto'));
-            return {
-                id: getTagText(item, 'mt20id'),
-                title: getTagText(item, 'prfnm') || '제목 없음',
-                place: getTagText(item, 'fcltynm') || '장소 미정',
-                period: `${startDate} ~ ${endDate}`,
-                startDate,
-                endDate,
-                area: extractArea(getTagText(item, 'area')),
-                genre: getTagText(item, 'genrenm') || undefined,
-                poster: getTagText(item, 'poster') || undefined,
-                status: getTagText(item, 'prfstate') || '공연예정',
-            };
-        });
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Performance | null> => {
-    try {
-        const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {});
-
-        const response = await axios.get(url, { timeout: API_TIMEOUT });
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
-        const items = xml.getElementsByTagName('db');
-
-        if (items.length === 0) return null;
-
-        const item = items[0];
+    return Array.from(items).map((item) => {
         const startDate = formatDate(getTagText(item, 'prfpdfrom'));
         const endDate = formatDate(getTagText(item, 'prfpdto'));
-
-        const relatedLinks: RelatedLink[] = [];
-        const relateNodes = item.getElementsByTagName('relate');
-
-        const bookingKeywords = ['인터파크', '티켓링크', '예스24', '멜론티켓', '옥션티켓', '예매', '티켓'];
-        let foundBookingUrl: string | undefined = undefined;
-
-        Array.from(relateNodes).forEach((node) => {
-            const name = getTagText(node, 'relatenm');
-            const linkUrl = getTagText(node, 'relateurl');
-            if (name && linkUrl) {
-                relatedLinks.push({ name, url: linkUrl });
-                if (!foundBookingUrl && bookingKeywords.some(keyword => name.includes(keyword))) {
-                    foundBookingUrl = linkUrl;
-                }
-            }
-        });
-
         return {
-            id: getTagText(item, 'mt20id') || mt20id,
+            id: getTagText(item, 'mt20id'),
             title: getTagText(item, 'prfnm') || '제목 없음',
             place: getTagText(item, 'fcltynm') || '장소 미정',
             period: `${startDate} ~ ${endDate}`,
@@ -140,56 +89,95 @@ export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Perfo
             genre: getTagText(item, 'genrenm') || undefined,
             poster: getTagText(item, 'poster') || undefined,
             status: getTagText(item, 'prfstate') || '공연예정',
-            price: getTagText(item, 'pcseguidance') || undefined,
-            cast: getTagText(item, 'prfcast') || undefined,
-            crew: getTagText(item, 'prfcrew') || undefined,
-            runtime: getTagText(item, 'prfruntime') || undefined,
-            age: getTagText(item, 'prfage') || undefined,
-            synopsis: getTagText(item, 'sty') || undefined,
-            schedule: getTagText(item, 'dtguidance') || undefined,
-            facilityId: getTagText(item, 'mt10id') || undefined,
-            introImages: getAllTagTexts(item, 'steimg') || undefined,
-            relatedLinks: relatedLinks.length > 0 ? relatedLinks : undefined,
-            bookingUrl: foundBookingUrl,
         };
-    } catch (error) {
-        throw error;
-    }
+    });
+};
+
+export const fetchKopisPerformanceDetail = async (mt20id: string): Promise<Performance | null> => {
+    const url = buildKopisUrl(`/openApi/restful/pblprfr/${mt20id}`, {});
+
+    const response = await axios.get(url, { timeout: API_TIMEOUT });
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(response.data, 'text/xml');
+    const items = xml.getElementsByTagName('db');
+
+    if (items.length === 0) return null;
+
+    const item = items[0];
+    const startDate = formatDate(getTagText(item, 'prfpdfrom'));
+    const endDate = formatDate(getTagText(item, 'prfpdto'));
+
+    const relatedLinks: RelatedLink[] = [];
+    const relateNodes = item.getElementsByTagName('relate');
+
+    const bookingKeywords = ['인터파크', '티켓링크', '예스24', '멜론티켓', '옥션티켓', '예매', '티켓'];
+    let foundBookingUrl: string | undefined = undefined;
+
+    Array.from(relateNodes).forEach((node) => {
+        const name = getTagText(node, 'relatenm');
+        const linkUrl = getTagText(node, 'relateurl');
+        if (name && linkUrl) {
+            relatedLinks.push({ name, url: linkUrl });
+            if (!foundBookingUrl && bookingKeywords.some(keyword => name.includes(keyword))) {
+                foundBookingUrl = linkUrl;
+            }
+        }
+    });
+
+    return {
+        id: getTagText(item, 'mt20id') || mt20id,
+        title: getTagText(item, 'prfnm') || '제목 없음',
+        place: getTagText(item, 'fcltynm') || '장소 미정',
+        period: `${startDate} ~ ${endDate}`,
+        startDate,
+        endDate,
+        area: extractArea(getTagText(item, 'area')),
+        genre: getTagText(item, 'genrenm') || undefined,
+        poster: getTagText(item, 'poster') || undefined,
+        status: getTagText(item, 'prfstate') || '공연예정',
+        price: getTagText(item, 'pcseguidance') || undefined,
+        cast: getTagText(item, 'prfcast') || undefined,
+        crew: getTagText(item, 'prfcrew') || undefined,
+        runtime: getTagText(item, 'prfruntime') || undefined,
+        age: getTagText(item, 'prfage') || undefined,
+        synopsis: getTagText(item, 'sty') || undefined,
+        schedule: getTagText(item, 'dtguidance') || undefined,
+        facilityId: getTagText(item, 'mt10id') || undefined,
+        introImages: getAllTagTexts(item, 'steimg') || undefined,
+        relatedLinks: relatedLinks.length > 0 ? relatedLinks : undefined,
+        bookingUrl: foundBookingUrl,
+    };
 };
 
 /** KOPIS 박스오피스 (예매율 순위) */
 export const fetchKopisBoxOffice = async (): Promise<Performance[]> => {
-    try {
-        const today = new Date();
+    const today = new Date();
 
-        const url = buildKopisUrl('/openApi/restful/boxoffice', {
-            ststype: 'week',
-            date: toYMD(today),
-            catecode: 'CCCA',
-            rows: 10,
-        });
+    const url = buildKopisUrl('/openApi/restful/boxoffice', {
+        ststype: 'week',
+        date: toYMD(today),
+        catecode: 'CCCA',
+        rows: 10,
+    });
 
-        const response = await axios.get(url, { timeout: API_TIMEOUT });
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
-        const items = xml.getElementsByTagName('boxof');
+    const response = await axios.get(url, { timeout: API_TIMEOUT });
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(response.data, 'text/xml');
+    const items = xml.getElementsByTagName('boxof');
 
-        if (items.length === 0) return [];
+    if (items.length === 0) return [];
 
-        return Array.from(items).map((item) => ({
-            id: getTagText(item, 'mt20id'),
-            title: getTagText(item, 'prfnm') || '제목 없음',
-            place: getTagText(item, 'prfplcnm') || '장소 미정',
-            period: `${formatDate(getTagText(item, 'prfpdfrom'))} ~ ${formatDate(getTagText(item, 'prfpdto'))}`,
-            startDate: formatDate(getTagText(item, 'prfpdfrom')),
-            endDate: formatDate(getTagText(item, 'prfpdto')),
-            area: extractArea(getTagText(item, 'area')),
-            poster: getTagText(item, 'poster') || undefined,
-            status: '공연중',
-        }));
-    } catch (error) {
-        throw error;
-    }
+    return Array.from(items).map((item) => ({
+        id: getTagText(item, 'mt20id'),
+        title: getTagText(item, 'prfnm') || '제목 없음',
+        place: getTagText(item, 'prfplcnm') || '장소 미정',
+        period: `${formatDate(getTagText(item, 'prfpdfrom'))} ~ ${formatDate(getTagText(item, 'prfpdto'))}`,
+        startDate: formatDate(getTagText(item, 'prfpdfrom')),
+        endDate: formatDate(getTagText(item, 'prfpdto')),
+        area: extractArea(getTagText(item, 'area')),
+        poster: getTagText(item, 'poster') || undefined,
+        status: '공연중',
+    }));
 };
 
 export const fetchKopisFacilityDetail = async (mt10id: string): Promise<{ lat: number; lng: number } | null> => {
