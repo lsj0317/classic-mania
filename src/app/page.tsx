@@ -9,7 +9,7 @@ import { useMonthlyMusicians } from "@/hooks/useMonthlyMusicians";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, ImageIcon, Calendar, Music } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Calendar, Music, User } from "lucide-react";
 import Image from "next/image";
 import type { Performance } from "@/types";
 import RecommendationSection from "@/components/recommendations/RecommendationSection";
@@ -407,14 +407,21 @@ const Home = () => {
                                     >
                                         <CardContent className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <Image
-                                                    src={musician.portrait}
-                                                    alt={musician.completeName}
-                                                    width={56}
-                                                    height={56}
-                                                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                                                    unoptimized
-                                                />
+                                                {musician.portrait ? (
+                                                    <img
+                                                        src={musician.portrait}
+                                                        alt={musician.completeName}
+                                                        className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                                                        onError={(e) => {
+                                                            const target = e.currentTarget;
+                                                            target.style.display = 'none';
+                                                            target.nextElementSibling?.classList.remove('hidden');
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <div className={`w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 ${musician.portrait ? 'hidden' : ''}`}>
+                                                    <User className="h-7 w-7 text-gray-400" />
+                                                </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
                                                         {musician.completeName}
@@ -752,14 +759,21 @@ const Home = () => {
                             >
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-4">
-                                        <Image
-                                            src={musician.portrait}
-                                            alt={musician.completeName}
-                                            width={64}
-                                            height={64}
-                                            className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
-                                            unoptimized
-                                        />
+                                        {musician.portrait ? (
+                                            <img
+                                                src={musician.portrait}
+                                                alt={musician.completeName}
+                                                className="w-16 h-16 rounded-full object-cover flex-shrink-0 group-hover:ring-2 ring-primary transition-all"
+                                                onError={(e) => {
+                                                    const target = e.currentTarget;
+                                                    target.style.display = 'none';
+                                                    target.nextElementSibling?.classList.remove('hidden');
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div className={`w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 group-hover:ring-2 ring-primary transition-all ${musician.portrait ? 'hidden' : ''}`}>
+                                            <User className="h-8 w-8 text-gray-400" />
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <h6 className="font-bold text-sm group-hover:text-primary transition-colors truncate">
                                                 {musician.completeName}

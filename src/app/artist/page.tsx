@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, Heart, ChevronLeft, ChevronRight, Loader2, Music2, Mic2, Piano } from "lucide-react";
+import { Search, Heart, ChevronLeft, ChevronRight, Loader2, Music2, Mic2, Piano, User } from "lucide-react";
 import { useArtistStore } from '@/stores/artistStore';
 import { useLanguageStore } from '@/stores/languageStore';
 import {
@@ -140,12 +140,22 @@ const ArtistList = () => {
                             src={artist.profileImage}
                             alt={artist.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                const fallback = target.parentElement?.querySelector('[data-fallback]');
+                                if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                            }}
                         />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <Music2 className="h-12 w-12 text-gray-400" />
-                        </div>
-                    )}
+                    ) : null}
+                    <div
+                        data-fallback
+                        className="w-full h-full flex flex-col items-center justify-center bg-gray-200"
+                        style={{ display: artist.profileImage ? 'none' : 'flex' }}
+                    >
+                        <User className="h-12 w-12 text-gray-400" />
+                        <span className="text-xs text-gray-400 mt-1">no img</span>
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3">
                         <h3 className="text-white font-bold text-sm sm:text-base leading-tight">
@@ -307,11 +317,27 @@ const ArtistList = () => {
                                             className="relative aspect-square overflow-hidden bg-gray-100"
                                             onClick={() => router.push(`/artist/composer-${composer.id}`)}
                                         >
-                                            <img
-                                                src={composer.portrait}
-                                                alt={composer.complete_name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
+                                            {composer.portrait ? (
+                                                <img
+                                                    src={composer.portrait}
+                                                    alt={composer.complete_name}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    onError={(e) => {
+                                                        const target = e.currentTarget;
+                                                        target.style.display = 'none';
+                                                        const fallback = target.parentElement?.querySelector('[data-fallback]');
+                                                        if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div
+                                                data-fallback
+                                                className="w-full h-full flex flex-col items-center justify-center bg-gray-200"
+                                                style={{ display: composer.portrait ? 'none' : 'flex' }}
+                                            >
+                                                <User className="h-12 w-12 text-gray-400" />
+                                                <span className="text-xs text-gray-400 mt-1">no img</span>
+                                            </div>
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                                             <div className="absolute bottom-3 left-3 right-3">
                                                 <h3 className="text-white font-bold text-sm sm:text-base leading-tight">

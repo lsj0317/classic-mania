@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { ArrowLeft, Music, BookOpen, Video, Loader2 } from "lucide-react";
+import { ArrowLeft, Music, BookOpen, Video, Loader2, User } from "lucide-react";
 import { useComposersByIds, useComposerWorks, useComposerGenres } from '../../hooks/useOpenOpusQueries';
 import { useYoutubeSearch } from '../../hooks/useYoutubeSearch';
 import { useLanguageStore } from '../../stores/languageStore';
@@ -98,11 +98,27 @@ const ComposerDetail = ({ composerId }: ComposerDetailProps) => {
             <div className="flex flex-col md:flex-row gap-6 lg:gap-10 mb-8 lg:mb-12 px-4 sm:px-0">
                 <div className="w-full md:w-[280px] lg:w-[320px] flex-shrink-0">
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
-                        <img
-                            src={composer.portrait}
-                            alt={composer.complete_name}
-                            className="w-full h-full object-cover"
-                        />
+                        {composer.portrait ? (
+                            <img
+                                src={composer.portrait}
+                                alt={composer.complete_name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    const target = e.currentTarget;
+                                    target.style.display = 'none';
+                                    const fallback = target.parentElement?.querySelector('[data-fallback]');
+                                    if (fallback) (fallback as HTMLElement).style.display = 'flex';
+                                }}
+                            />
+                        ) : null}
+                        <div
+                            data-fallback
+                            className="w-full h-full flex flex-col items-center justify-center bg-gray-200"
+                            style={{ display: composer.portrait ? 'none' : 'flex' }}
+                        >
+                            <User className="h-16 w-16 text-gray-400" />
+                            <span className="text-sm text-gray-400 mt-2">no img</span>
+                        </div>
                     </div>
                 </div>
 
