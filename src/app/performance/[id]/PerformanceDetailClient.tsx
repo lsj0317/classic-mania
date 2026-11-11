@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { usePerformanceStore } from "@/stores/performanceStore";
 import { fetchNews, type NewsItem } from "@/api/newsApi";
+import AffiliateLink from "@/components/monetization/AffiliateLink";
+import AffiliateDisclosure from "@/components/monetization/AffiliateDisclosure";
+import AdSlot from "@/components/monetization/AdSlot";
 import { fetchKopisPerformances } from "@/api/kopisApi";
 import { decodeHtml } from "@/lib/utils";
 import type { Performance } from "@/types";
@@ -311,11 +314,11 @@ const PerformanceDetail = () => {
                         </div>
 
                         {performance.bookingUrl ? (
-                            <a href={performance.bookingUrl} target="_blank" rel="noopener noreferrer">
+                            <AffiliateLink href={performance.bookingUrl}>
                                 <Button className="w-full mt-6 py-5 font-bold tracking-widest hover:scale-[1.02] transition-transform">
                                     예매하러 가기
                                 </Button>
-                            </a>
+                            </AffiliateLink>
                         ) : (
                             <a
                                 href={`https://search.naver.com/search.naver?query=${encodeURIComponent(performance.title + ' 예매')}`}
@@ -545,16 +548,14 @@ const PerformanceDetail = () => {
                         {performance.relatedLinks && performance.relatedLinks.length > 0 ? (
                             <div className="space-y-2">
                                 {performance.relatedLinks.map((link, idx) => (
-                                    <a
+                                    <AffiliateLink
                                         key={idx}
                                         href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
                                         className="flex items-center justify-between p-4 rounded-lg border hover:border-primary hover:bg-accent/50 transition-all group"
                                     >
                                         <span className="font-medium text-sm group-hover:text-primary">{link.name}</span>
                                         <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                    </a>
+                                    </AffiliateLink>
                                 ))}
                             </div>
                         ) : (
@@ -563,11 +564,11 @@ const PerformanceDetail = () => {
                                     등록된 예매처 링크가 없습니다.
                                 </p>
                                 {performance.bookingUrl ? (
-                                    <a href={performance.bookingUrl} target="_blank" rel="noopener noreferrer"
+                                    <AffiliateLink href={performance.bookingUrl}
                                        className="flex items-center justify-between p-4 rounded-lg border hover:border-primary hover:bg-accent/50 transition-all group">
                                         <span className="font-medium text-sm group-hover:text-primary">공식 예매처</span>
                                         <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                    </a>
+                                    </AffiliateLink>
                                 ) : (
                                     <a href={`https://search.naver.com/search.naver?query=${encodeURIComponent(performance.title + ' 예매')}`}
                                        target="_blank" rel="noopener noreferrer"
@@ -583,6 +584,7 @@ const PerformanceDetail = () => {
                     <p className="text-[10px] text-muted-foreground text-center italic">
                         * 예매처 정보는 공연 주최측의 사정에 따라 변경될 수 있습니다.
                     </p>
+                    <AffiliateDisclosure className="justify-center text-center" />
                 </TabsContent>
 
                 {/* ── 공연장소 탭 ── */}
@@ -625,6 +627,8 @@ const PerformanceDetail = () => {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            <AdSlot placement="performanceDetail" className="my-8" />
 
             {/* 공연 실황 라이브 채팅 */}
             {id && (

@@ -7,6 +7,7 @@ import { useLanguageStore } from '@/stores/languageStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, Heart, Clock, Tag } from 'lucide-react';
+import AdSlot from '@/components/monetization/AdSlot';
 
 const CATEGORY_COLOR: Record<string, string> = {
     '인터뷰': 'bg-purple-100 text-purple-700',
@@ -117,6 +118,8 @@ export default function ColumnDetailPage() {
                     {column.likes}
                 </Button>
             </div>
+
+            <AdSlot placement="columnDetail" className="mt-10" />
         </div>
     );
 }

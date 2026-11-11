@@ -43,6 +43,26 @@ const PrivacyPage = () => {
                             </p>
                         </section>
 
+                        <section>
+                            <h6 className="font-bold text-foreground mb-4">제 4 조 (광고 및 쿠키)</h6>
+                            <p>
+                                1. 당사는 서비스 운영을 위해 Google AdSense 등 제3자 광고 서비스를 이용할 수 있으며, 광고 사업자는 쿠키를 사용하여 이용자의 이전 방문 기록을 바탕으로 맞춤형 광고를 제공할 수 있습니다.<br />
+                                2. 이용자는{' '}
+                                <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Google 광고 설정</a>
+                                에서 맞춤형 광고를 해제하거나, 브라우저 설정을 통해 쿠키 저장을 거부할 수 있습니다.<br />
+                                3. Google의 데이터 사용 방식은{' '}
+                                <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Google 파트너 사이트 정책</a>
+                                에서 확인할 수 있습니다.
+                            </p>
+                        </section>
+
+                        <section>
+                            <h6 className="font-bold text-foreground mb-4">제 5 조 (제휴 링크)</h6>
+                            <p>
+                                서비스 내 일부 예매처·구매처 링크는 제휴 링크로, 이용자가 해당 링크를 통해 예매·구매하는 경우 당사가 일정 수수료를 받을 수 있습니다. 이 경우 이용자의 결제 금액에는 영향이 없으며, 제휴 링크 이동 시 해당 사업자의 개인정보처리방침이 적용됩니다.
+                            </p>
+                        </section>
+
                         <div className="pt-10 border-t text-muted-foreground/60 text-xs">
                             공고일자: 2026년 1월 1일<br />
                             시행일자: 2026년 1월 1일

@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Search, Map, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePerformanceStore } from "@/stores/performanceStore";
+import AdSlot from "@/components/monetization/AdSlot";
 
 const TABLE_HEAD = ["포스터", "공연명", "공연장", "공연기간", "지역", "상태"];
 const PERFORMANCE_TABS = ["전체", "공연중", "공연예정", "공연완료", "지역별"];
@@ -321,6 +322,8 @@ const PerformanceMain = () => {
                             </Button>
                         </div>
                     </div>
+
+                    <AdSlot placement="performanceList" className="mt-8 px-4 sm:px-0" />
                 </>
             )}
         </div>

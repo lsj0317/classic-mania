@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import Providers from "./providers";
 import LayoutShell from "@/components/layout/LayoutShell";
+import { ADSENSE_CLIENT } from "@/lib/monetization";
 import "./globals.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://classic-mania.vercel.app';
@@ -53,6 +55,15 @@ export default function RootLayout({
                 <Providers>
                     <LayoutShell>{children}</LayoutShell>
                 </Providers>
+                {ADSENSE_CLIENT && (
+                    <Script
+                        id="adsense"
+                        async
+                        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+                        crossOrigin="anonymous"
+                        strategy="afterInteractive"
+                    />
+                )}
             </body>
         </html>
     );

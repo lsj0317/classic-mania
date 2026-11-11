@@ -6,7 +6,11 @@ import { useAlbumStore } from '@/stores/albumStore';
 import { useLanguageStore } from '@/stores/languageStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Star, Disc3, ExternalLink, Heart, Clock, Music } from 'lucide-react';
+import { ArrowLeft, Star, Disc3, ExternalLink, Heart, Clock, Music, ShoppingBag } from 'lucide-react';
+import AffiliateLink from '@/components/monetization/AffiliateLink';
+import AffiliateDisclosure from '@/components/monetization/AffiliateDisclosure';
+import AdSlot from '@/components/monetization/AdSlot';
+import { getAlbumPurchaseLinks } from '@/lib/monetization';
 
 function StarRating({ value }: { value: number }) {
     return (
@@ -138,8 +142,30 @@ export default function AlbumDetailPage() {
                     </Card>
                 </div>
 
-                {/* 리뷰 사이드바 */}
-                <div>
+                {/* 구매처 & 리뷰 사이드바 */}
+                <div className="space-y-6">
+                    <Card>
+                        <CardContent className="p-6">
+                            <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+                                <ShoppingBag className="h-5 w-5 text-primary" />
+                                {isKo ? '음반 구매' : 'Buy this Album'}
+                            </h2>
+                            <div className="space-y-2">
+                                {getAlbumPurchaseLinks(`${album.artist} ${album.title}`).map(link => (
+                                    <AffiliateLink
+                                        key={link.name}
+                                        href={link.url}
+                                        className="flex items-center justify-between p-3 rounded-lg border hover:border-primary hover:bg-accent/50 transition-all group"
+                                    >
+                                        <span className="font-medium text-sm group-hover:text-primary">{link.name}</span>
+                                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                    </AffiliateLink>
+                                ))}
+                            </div>
+                            <AffiliateDisclosure className="mt-3" language={isKo ? 'ko' : 'en'} />
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardContent className="p-6">
                             <h2 className="font-bold text-lg mb-4">{isKo ? '리뷰' : 'Reviews'}</h2>
@@ -171,6 +197,8 @@ export default function AlbumDetailPage() {
                     </Card>
                 </div>
             </div>
+
+            <AdSlot placement="albumDetail" className="mt-8" />
         </div>
     );
 }
