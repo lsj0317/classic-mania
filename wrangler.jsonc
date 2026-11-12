@@ -1,0 +1,25 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "classic-mania",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// 자기 자신을 가리키는 서비스 바인딩 (이름은 위 "name"과 같아야 함)
+			// https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "classic-mania"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+	// 이미지 최적화(next/image)를 쓰려면 Cloudflare Images를 활성화한 뒤 아래 바인딩을 추가한다.
+	// 바인딩이 없으면 원본 이미지를 그대로 내려준다. https://opennext.js.org/cloudflare/howtos/image
+	// "images": { "binding": "IMAGES" }
+}
