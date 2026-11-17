@@ -64,9 +64,13 @@ const ArtistDetail = () => {
     } = useArtistStore();
 
     // ALL hooks must be called unconditionally before any conditional returns
-    const { data: conductors = [] } = useConductors();
-    const { data: performers = [] } = usePerformers();
-    const { data: weeklyArtists = [] } = useWeeklyArtists();
+    const isConductorId = !!id?.startsWith('conductor-');
+    const isPerformerId = !!id?.startsWith('performer-');
+    const isWeeklyId = !!id?.startsWith('weekly-');
+    // 해당 종류의 아티스트일 때만 외부 API를 호출한다
+    const { data: conductors = [], isFetched: conductorsFetched } = useConductors(isConductorId);
+    const { data: performers = [], isFetched: performersFetched } = usePerformers(isPerformerId);
+    const { data: weeklyArtists = [], isFetched: weeklyFetched } = useWeeklyArtists(isWeeklyId);
 
     const [activeTab, setActiveTab] = useState<TabType>('performances');
     const [cheerInput, setCheerInput] = useState('');
@@ -110,6 +114,17 @@ const ArtistDetail = () => {
 
     // conductor/performer/weekly → ArtistDetailView 컴포넌트 사용
     if (isSpecialArtist) {
+        const fetched = isConductor ? conductorsFetched : isPerformer ? performersFetched : weeklyFetched;
+        if (!resolvedArtist && fetched) {
+            return (
+                <div className="container mx-auto px-4 py-20 text-center">
+                    <p className="text-gray-500">{isKo ? '아티스트를 찾을 수 없습니다.' : 'Artist not found.'}</p>
+                    <Button variant="ghost" className="mt-4" onClick={() => router.push('/artist')}>
+                        {isKo ? '목록으로 돌아가기' : 'Back to list'}
+                    </Button>
+                </div>
+            );
+        }
         if (!resolvedArtist) {
             return (
                 <div className="flex justify-center items-center py-20">

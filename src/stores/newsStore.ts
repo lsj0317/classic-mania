@@ -18,7 +18,11 @@ interface NewsState {
     setCurrentPage: (page: number) => void;
     setSortBy: (sort: string) => void;
     setSelectedNews: (news: NewsItem | null) => void;
+    /** 새로고침 후 sessionStorage에서 선택한 뉴스를 복원 */
+    restoreSelectedNews: () => NewsItem | null;
 }
+
+const SELECTED_NEWS_KEY = 'classic-mania-selected-news';
 
 export const useNewsStore = create<NewsState>((set, get) => ({
     newsList: [],
@@ -58,5 +62,23 @@ export const useNewsStore = create<NewsState>((set, get) => ({
     setKeyword: (keyword) => set({ keyword, currentPage: 1 }), // 검색어 변경 시 1페이지로
     setCurrentPage: (page) => set({ currentPage: page }),
     setSortBy: (sort) => set({ sortBy: sort, currentPage: 1 }),
-    setSelectedNews: (news) => set({ selectedNews: news }),
+    setSelectedNews: (news) => {
+        // 상세 페이지를 새로고침해도 유지되도록 탭 단위 저장소에 보관
+        try {
+            if (news) sessionStorage.setItem(SELECTED_NEWS_KEY, JSON.stringify(news));
+            else sessionStorage.removeItem(SELECTED_NEWS_KEY);
+        } catch { /* ignore */ }
+        set({ selectedNews: news });
+    },
+
+    restoreSelectedNews: () => {
+        try {
+            const saved = sessionStorage.getItem(SELECTED_NEWS_KEY);
+            const news = saved ? (JSON.parse(saved) as NewsItem) : null;
+            if (news) set({ selectedNews: news });
+            return news;
+        } catch {
+            return null;
+        }
+    },
 }));

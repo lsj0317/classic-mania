@@ -14,7 +14,7 @@ async function fetchWeeklyArtists(): Promise<Artist[]> {
     const entries = getWeeklyArtists();
 
     const results = await Promise.allSettled(
-        entries.map(async (entry, idx) => {
+        entries.map(async (entry) => {
             const [audiodb, wiki] = await Promise.all([
                 searchAudioDBArtist(entry.searchName),
                 fetchWikiSummary(entry.wikiTitle),
@@ -32,7 +32,8 @@ async function fetchWeeklyArtists(): Promise<Artist[]> {
             const bioEn = audiodb?.strBiographyEN || wiki?.extract || '';
 
             const artist: Artist = {
-                id: `weekly-${idx}`,
+                // 주마다 순서가 바뀌므로 인덱스가 아니라 이름 기반의 고정 ID를 쓴다 (팔로우 유지).
+                id: `weekly-${entry.searchName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
                 name: entry.nameKo,
                 nameEn: entry.searchName,
                 role: entry.role,
@@ -58,10 +59,11 @@ async function fetchWeeklyArtists(): Promise<Artist[]> {
 }
 
 /** 금주의 아티스트 4명 조회 (AudioDB + Wikipedia 연동) */
-export const useWeeklyArtists = () => {
+export const useWeeklyArtists = (enabled = true) => {
     return useQuery<Artist[]>({
         queryKey: ['weeklyArtists', getWeeklyArtists().map((e) => e.searchName).join(',')],
         queryFn: fetchWeeklyArtists,
+        enabled,
         staleTime: STALE_TIME,
         gcTime: GC_TIME,
         refetchOnWindowFocus: false,

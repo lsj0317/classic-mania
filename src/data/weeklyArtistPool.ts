@@ -10,8 +10,8 @@ export interface WeeklyArtistEntry {
 const ARTIST_POOL: WeeklyArtistEntry[] = [
     // 국내
     { searchName: "Seong-Jin Cho", wikiTitle: "Cho_Seong-jin", nameKo: "조성진", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
-    { searchName: "Yunchan Lim", wikiTitle: "Lim_Yunchan", nameKo: "임윤찬", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
-    { searchName: "Yeol Eum Son", wikiTitle: "Son_Yeol-eum", nameKo: "손열음", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
+    { searchName: "Yunchan Lim", wikiTitle: "Yunchan_Lim", nameKo: "임윤찬", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
+    { searchName: "Yeol Eum Son", wikiTitle: "Yeol_Eum_Son", nameKo: "손열음", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
     { searchName: "Myung-Whun Chung", wikiTitle: "Chung_Myung-whun", nameKo: "정명훈", role: "지휘자", roleEn: "Conductor", nationality: "대한민국" },
     { searchName: "Kyung-Wha Chung", wikiTitle: "Kyung-Wha_Chung", nameKo: "정경화", role: "바이올리니스트", roleEn: "Violinist", nationality: "대한민국" },
     { searchName: "Han-Na Chang", wikiTitle: "Han-Na_Chang", nameKo: "장한나", role: "첼리스트 / 지휘자", roleEn: "Cellist / Conductor", nationality: "대한민국" },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { useComposersByIds, useComposerWorks, useComposerGenres } from '../../ho
 import { useYoutubeSearch } from '../../hooks/useYoutubeSearch';
 import { useLanguageStore } from '../../stores/languageStore';
 import { EPOCH_KO } from '@/lib/constants';
+import { useUserStore } from '@/stores/userStore';
 
 const GENRE_KO: Record<string, string> = {
     Popular: "인기 작품", Recommended: "추천 작품", all: "전체",
@@ -34,6 +35,13 @@ const ComposerDetail = ({ composerId }: ComposerDetailProps) => {
     const { data: worksData, isLoading: worksLoading } = useComposerWorks(composerId, selectedGenre);
 
     const composer = composers[0] || worksData?.composer;
+    const recordEpochInteraction = useUserStore((s) => s.recordEpochInteraction);
+    const composerEpoch = composer?.epoch;
+
+    // 작곡가 상세를 볼 때마다 선호 시대 통계에 반영 (추천 공연에 사용)
+    useEffect(() => {
+        if (composerEpoch) recordEpochInteraction(composerEpoch);
+    }, [composerId, composerEpoch, recordEpochInteraction]);
     const works = worksData?.works || [];
 
     // YouTube 검색 (영상보기 탭이 활성화될 때만)

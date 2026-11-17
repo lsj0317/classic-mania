@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { CompanionPost, CompanionRequest, DirectMessage } from '../types';
+import { todayLocalYMD } from '../lib/constants';
 
 const COMPANION_KEY = 'classic-mania-companion-posts';
 const REQUESTS_KEY = 'classic-mania-companion-requests';
@@ -165,12 +166,18 @@ interface CompanionState {
     getDMRoom: (userId1: string, userId2: string) => DirectMessage[];
     markAsRead: (roomId: string, userId: string) => void;
     getUnreadCount: (userId: string) => number;
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 export const useCompanionStore = create<CompanionState>((set, get) => ({
-    posts: loadPosts(),
-    requests: loadRequests(),
-    dms: loadDMs(),
+    posts: MOCK_POSTS,
+    requests: [],
+    dms: [],
+
+    hydrate: () => {
+        set({ posts: loadPosts(), requests: loadRequests(), dms: loadDMs() });
+    },
 
     addPost: (postData) => {
         const { posts } = get();
@@ -179,7 +186,7 @@ export const useCompanionStore = create<CompanionState>((set, get) => ({
             id: (posts[0]?.id ?? 0) + 1,
             currentCompanions: 0,
             status: '모집중',
-            createdAt: new Date().toISOString().split('T')[0],
+            createdAt: todayLocalYMD(),
             views: 0,
         };
         const updated = [newPost, ...posts];

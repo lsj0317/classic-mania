@@ -524,6 +524,8 @@ const PerformanceDetail = () => {
                         <ReviewSection
                             performanceId={id}
                             performanceTitle={performance.title}
+                            genre={performance.genre}
+                            area={performance.area}
                         />
                     )}
                 </TabsContent>

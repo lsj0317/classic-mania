@@ -13,10 +13,10 @@ import { EPOCH_KO } from '@/lib/constants';
 const CHART_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
 
 export default function StatsDashboard() {
-    const { activity } = useUserStore();
+    const { activity, currentUserId } = useUserStore();
     const { reviews } = useReviewStore();
 
-    const myReviews = reviews.filter((r) => r.userId === 'mujuki');
+    const myReviews = reviews.filter((r) => r.userId === currentUserId);
 
     // 샘플 데이터 (activity에 데이터가 없을 때)
     const genreStats = Object.keys(activity.genreStats || {}).length

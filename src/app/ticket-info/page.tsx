@@ -42,12 +42,11 @@ const TicketListPage = () => {
     const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
     // 현재 페이지 아이템들의 가격 정보 로드
+    // currentItems는 렌더링마다 새 배열이므로 ID 문자열을 의존성으로 써서 중복 호출을 막는다
+    const currentIds = currentItems.map(item => item.id).join(',');
     useEffect(() => {
-        if (currentItems.length > 0) {
-            const ids = currentItems.map(item => item.id);
-            fetchPriceForList(ids);
-        }
-    }, [currentItems, fetchPriceForList]);
+        if (currentIds) fetchPriceForList(currentIds.split(','));
+    }, [currentIds, fetchPriceForList]);
 
     // 검색 시 페이지를 1페이지로 리셋
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

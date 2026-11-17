@@ -14,6 +14,8 @@ interface RecommendationState {
         allPerformances: Performance[]
     ) => void;
     clearRecommendations: () => void;
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 const STORAGE_KEY = 'classic-mania-recommendations';
@@ -100,7 +102,7 @@ function scorePerformance(
 }
 
 export const useRecommendationStore = create<RecommendationState>((set) => ({
-    recommendations: loadRecommendations(),
+    recommendations: [],
     isLoading: false,
     lastUpdated: null,
 
@@ -131,6 +133,10 @@ export const useRecommendationStore = create<RecommendationState>((set) => ({
         } catch { /* ignore */ }
 
         set({ recommendations: scored, isLoading: false, lastUpdated: now });
+    },
+
+    hydrate: () => {
+        set({ recommendations: loadRecommendations() });
     },
 
     clearRecommendations: () => {

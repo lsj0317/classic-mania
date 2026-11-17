@@ -162,7 +162,8 @@ const Home = () => {
         isLoading: musiciansLoading,
     } = useMonthlyMusicians();
     const monthlyMusicians = musiciansResult?.musicians ?? [];
-    const musiciansDisplayMonth = musiciansResult?.displayMonth ?? (new Date().getMonth() + 1);
+    // 데이터를 받기 전에는 빌드 시점 날짜가 HTML에 박히지 않도록 월을 표시하지 않는다 (하이드레이션 불일치 방지)
+    const musiciansDisplayMonth = musiciansResult?.displayMonth ?? null;
     const musiciansIsFallback = musiciansResult?.isFallback ?? false;
 
     // Notice store
@@ -724,8 +725,8 @@ const Home = () => {
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <Music className="h-5 w-5 text-primary" />
                         {isKo
-                            ? `${musiciansDisplayMonth}월의 음악인${musiciansIsFallback ? ' (다음 달 미리보기)' : ''}`
-                            : `Musicians of ${new Date(2000, musiciansDisplayMonth - 1).toLocaleString('en', { month: 'long' })}`
+                            ? (musiciansDisplayMonth ? `${musiciansDisplayMonth}월의 음악인${musiciansIsFallback ? ' (다음 달 미리보기)' : ''}` : '이달의 음악인')
+                            : (musiciansDisplayMonth ? `Musicians of ${new Date(2000, musiciansDisplayMonth - 1).toLocaleString('en', { month: 'long' })}` : 'Musicians of the Month')
                         }
                     </h3>
                     <Button

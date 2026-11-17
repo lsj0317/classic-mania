@@ -78,7 +78,7 @@ export const ALL_BADGES: Badge[] = [
 const ACTIVITY_KEY = 'classic-mania-user-activity';
 const NOTIFICATIONS_KEY = 'classic-mania-notifications';
 
-const defaultActivity = (userId: string): UserActivity => ({
+export const defaultActivity = (userId: string): UserActivity => ({
     userId,
     reviewCount: 0,
     followCount: 0,
@@ -203,13 +203,25 @@ interface UserStoreState {
     clearAllNotifications: () => void;
     getActivityByUserId: (userId: string) => UserActivity;
     getPreferredEpochs: () => string[];
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 export const useUserStore = create<UserStoreState>((set, get) => ({
     currentUserId: 'mujuki',
-    activity: loadActivity('mujuki'),
-    notifications: loadNotifications(),
-    unreadCount: loadNotifications().filter((n) => !n.isRead).length,
+    // 서버 렌더링과 첫 클라이언트 렌더링이 일치하도록 기본값으로 시작하고 hydrate()에서 불러온다.
+    activity: defaultActivity('mujuki'),
+    notifications: [],
+    unreadCount: 0,
+
+    hydrate: () => {
+        const notifications = loadNotifications();
+        set({
+            activity: loadActivity(get().currentUserId),
+            notifications,
+            unreadCount: notifications.filter((n) => !n.isRead).length,
+        });
+    },
 
     initUser: (userId) => {
         const activity = loadActivity(userId);

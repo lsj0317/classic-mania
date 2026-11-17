@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Meetup, MeetupComment } from '../types';
+import { todayLocalYMD } from '../lib/constants';
 
 const MEETUP_KEY = 'classic-mania-meetups';
 const MEETUP_COMMENTS_KEY = 'classic-mania-meetup-comments';
@@ -166,11 +167,17 @@ interface MeetupState {
     addComment: (meetupId: number, userId: string, userName: string, content: string) => void;
     getCommentsByMeetup: (meetupId: number) => MeetupComment[];
     deleteComment: (commentId: string, userId: string) => void;
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 export const useMeetupStore = create<MeetupState>((set, get) => ({
-    meetups: loadMeetups(),
-    comments: loadComments(),
+    meetups: MOCK_MEETUPS,
+    comments: [],
+
+    hydrate: () => {
+        set({ meetups: loadMeetups(), comments: loadComments() });
+    },
 
     addMeetup: (meetupData) => {
         const { meetups } = get();
@@ -180,7 +187,7 @@ export const useMeetupStore = create<MeetupState>((set, get) => ({
             currentMembers: 1,
             memberIds: [meetupData.hostId],
             status: '모집중',
-            createdAt: new Date().toISOString().split('T')[0],
+            createdAt: todayLocalYMD(),
         };
         const updated = [newMeetup, ...meetups];
         saveMeetups(updated);
@@ -213,7 +220,8 @@ export const useMeetupStore = create<MeetupState>((set, get) => ({
                 ...m,
                 memberIds: newMemberIds,
                 currentMembers: newMemberIds.length,
-                status: '모집중' as const,
+                // 종료된 모임은 인원이 빠져도 다시 모집중이 되지 않는다
+                status: m.status === '종료' ? m.status : '모집중' as const,
             };
         });
         saveMeetups(updated);

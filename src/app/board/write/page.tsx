@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { usePerformanceStore } from "@/stores/performanceStore";
+import { useUserStore } from "@/stores/userStore";
+import { todayLocalYMD } from "@/lib/constants";
 
 const PostWrite = () => {
     const router = useRouter();
@@ -30,6 +32,7 @@ const PostWrite = () => {
 
     // Performance store
     const { performances, fetchList } = usePerformanceStore();
+    const recordPost = useUserStore((s) => s.recordPost);
 
     useEffect(() => {
         fetchList();
@@ -151,12 +154,13 @@ const PostWrite = () => {
             authorId: currentUser.userId,
             authorName: currentUser.name,
             images: previewImages,
-            createdAt: new Date().toISOString().split("T")[0],
+            createdAt: todayLocalYMD(),
             views: 0,
             mentionedPerformances: mentionedPerformances.length > 0 ? mentionedPerformances : undefined,
         };
 
         posts.unshift(newPost);
+        recordPost();
         alert("글이 등록되었습니다.");
         router.push("/board");
     };

@@ -8,13 +8,17 @@ import {useState} from "react";
 const PostManage = () => {
     const router = useRouter();
     const [search, setSearch] = useState("");
+    // posts는 아직 DB가 없는 메모리 데이터라, 삭제 후 목록을 다시 그리기 위한 카운터
+    const [, setVersion] = useState(0);
     const myPosts = posts.filter(p => p.authorId === currentUser.userId && p.title.includes(search));
 
     const handleDelete = (id: number) => {
         if (window.confirm("정말 삭제할까요?")) {
             const idx = posts.findIndex(p => p.id === id);
+            if (idx === -1) return;
             posts.splice(idx, 1);
-            window.location.reload();
+            // 새로고침하면 메모리 데이터가 초기화되어 삭제가 되돌려지므로 화면만 다시 그린다
+            setVersion(v => v + 1);
         }
     };
 

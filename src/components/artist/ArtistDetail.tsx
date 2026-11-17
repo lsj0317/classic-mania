@@ -26,6 +26,7 @@ import { useLanguageStore } from '@/stores/languageStore';
 import { useNewsStore } from '@/stores/newsStore';
 import { useYoutubeSearch } from '@/hooks/useYoutubeSearch';
 import { currentUser } from '@/data/mockData';
+import ProfileAvatar from '@/components/user/ProfileAvatar';
 import type { NewsItem } from '@/api/newsApi';
 import type { Artist } from '@/types';
 
@@ -455,10 +456,13 @@ const ArtistDetailView = ({ artist }: ArtistDetailProps) => {
                 {activeTab === 'cheers' && (
                     <div>
                         <div className="flex gap-3 mb-6 p-4 bg-gray-50 border border-gray-200">
-                            <img
-                                src={currentUser.profileImage || '/placeholder-avatar.jpg'}
-                                alt={currentUser.name}
-                                className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
+                            <ProfileAvatar
+                                name={currentUser.name}
+                                nickname={currentUser.nickname}
+                                profileImage={currentUser.profileImage}
+                                profileIconType={currentUser.profileIconType}
+                                size="sm"
+                                className="flex-shrink-0 border border-gray-200"
                             />
                             <div className="flex-1 flex gap-2">
                                 <Input
@@ -487,10 +491,12 @@ const ArtistDetailView = ({ artist }: ArtistDetailProps) => {
                                         key={cheer.id}
                                         className="flex gap-3 p-4 border border-gray-200 hover:border-gray-300 transition-colors"
                                     >
-                                        <img
-                                            src={cheer.userProfileImage || 'https://docs.material-tailwind.com/img/face-2.jpg'}
-                                            alt={cheer.userName}
-                                            className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200"
+                                        <ProfileAvatar
+                                            name={cheer.userName}
+                                            profileImage={cheer.userProfileImage}
+                                            profileIconType={cheer.userProfileImage ? 'image' : 'initial'}
+                                            size="sm"
+                                            className="flex-shrink-0 border border-gray-200"
                                         />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">

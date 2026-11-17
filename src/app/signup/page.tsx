@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import DaumPostcode from 'react-daum-postcode';
+import DaumPostcode, { type Address } from 'react-daum-postcode';
 import { X } from "lucide-react";
 
 const SignUp = () => {
@@ -21,7 +21,7 @@ const SignUp = () => {
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
     // 주소 검색 완료 핸들러
-    const handleComplete = (data: any) => {
+    const handleComplete = (data: Address) => {
         let fullAddress = data.address;
         let extraAddress = '';
 

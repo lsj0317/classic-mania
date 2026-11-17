@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useUserStore, ALL_BADGES } from '@/stores/userStore';
+import { useUserStore, ALL_BADGES, defaultActivity } from '@/stores/userStore';
+import type { UserActivity } from '@/types';
 import { useArtistStore } from '@/stores/artistStore';
 import { useReviewStore } from '@/stores/reviewStore';
 import { posts, currentUser } from '@/data/mockData';
@@ -21,12 +23,17 @@ export default function ProfilePage() {
     const router = useRouter();
     const userId = params?.userId as string;
 
-    const { getActivityByUserId, isFollowingUser, followUser, unfollowUser, currentUserId } = useUserStore();
+    const { activity: myActivity, getActivityByUserId, isFollowingUser, followUser, unfollowUser, currentUserId } = useUserStore();
     const { artists } = useArtistStore();
     const { reviews } = useReviewStore();
 
     const isMe = userId === currentUserId;
-    const activity = getActivityByUserId(userId);
+    // 다른 사용자의 활동은 localStorage에서 읽으므로 렌더링 중이 아니라 마운트 후에 불러온다 (하이드레이션 불일치 방지).
+    const [otherActivity, setOtherActivity] = useState<UserActivity | null>(null);
+    useEffect(() => {
+        if (!isMe) setOtherActivity(getActivityByUserId(userId));
+    }, [isMe, userId, getActivityByUserId, myActivity]);
+    const activity = isMe ? myActivity : otherActivity ?? defaultActivity(userId);
 
     // 프로필 기본 정보 (mock)
     const profileInfo = userId === currentUser.userId

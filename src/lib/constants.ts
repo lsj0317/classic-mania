@@ -15,3 +15,7 @@ export const EPOCH_KO: Record<string, string> = {
 /** 날짜를 YYYYMMDD 형식 문자열로 변환 */
 export const toYMD = (d: Date): string =>
     `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+
+/** 오늘 날짜를 사용자 로컬 시간 기준 YYYY-MM-DD로 반환 (toISOString은 UTC라 한국 오전 9시 이전엔 전날이 됨) */
+export const todayLocalYMD = (d: Date = new Date()): string =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

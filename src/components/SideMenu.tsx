@@ -59,7 +59,6 @@ const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
                 { name: t.nav.learn, path: "/learn" },
                 { name: t.nav.column, path: "/column" },
                 { name: t.nav.venue, path: "/venue" },
-                { name: t.nav.ticketInfo, path: "/ticket-info" },
             ],
         },
     ];

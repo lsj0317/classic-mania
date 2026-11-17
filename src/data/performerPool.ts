@@ -12,10 +12,10 @@ const PERFORMER_POOL: PerformerEntry[] = [
     { searchName: "Lang Lang", wikiTitle: "Lang_Lang", nameKo: "랑랑", role: "피아니스트", roleEn: "Pianist", nationality: "중국" },
     { searchName: "Yuja Wang", wikiTitle: "Yuja_Wang", nameKo: "유자 왕", role: "피아니스트", roleEn: "Pianist", nationality: "중국" },
     { searchName: "Seong-Jin Cho", wikiTitle: "Cho_Seong-jin", nameKo: "조성진", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
-    { searchName: "Yunchan Lim", wikiTitle: "Lim_Yunchan", nameKo: "임윤찬", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
+    { searchName: "Yunchan Lim", wikiTitle: "Yunchan_Lim", nameKo: "임윤찬", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
     { searchName: "Daniil Trifonov", wikiTitle: "Daniil_Trifonov", nameKo: "다닐 트리포노프", role: "피아니스트", roleEn: "Pianist", nationality: "러시아" },
     { searchName: "Martha Argerich", wikiTitle: "Martha_Argerich", nameKo: "마르타 아르헤리치", role: "피아니스트", roleEn: "Pianist", nationality: "아르헨티나" },
-    { searchName: "Yeol Eum Son", wikiTitle: "Son_Yeol-eum", nameKo: "손열음", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
+    { searchName: "Yeol Eum Son", wikiTitle: "Yeol_Eum_Son", nameKo: "손열음", role: "피아니스트", roleEn: "Pianist", nationality: "대한민국" },
     // 바이올리니스트
     { searchName: "Hilary Hahn", wikiTitle: "Hilary_Hahn", nameKo: "힐러리 한", role: "바이올리니스트", roleEn: "Violinist", nationality: "미국" },
     { searchName: "Anne-Sophie Mutter", wikiTitle: "Anne-Sophie_Mutter", nameKo: "안네소피 무터", role: "바이올리니스트", roleEn: "Violinist", nationality: "독일" },

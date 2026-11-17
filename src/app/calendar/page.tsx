@@ -10,6 +10,7 @@ import { useMonthlyPerformances } from '@/hooks/usePerformanceQueries';
 import { generateMultiICS, downloadICS, getGoogleCalendarUrl, generateICS } from '@/lib/icsExport';
 import type { Performance } from '@/types';
 import { cn } from '@/lib/utils';
+import { useMounted } from '@/hooks/useMounted';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const MONTHS_KO = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
@@ -52,7 +53,19 @@ const STATUS_COLOR: Record<string, string> = {
     '공연완료': 'bg-gray-400',
 };
 
+/**
+ * 캘린더는 "오늘" 기준으로 그려지므로, 빌드 시점에 미리 렌더링된 HTML과 방문 시점의 날짜가 달라
+ * 하이드레이션 오류가 나지 않도록 브라우저에 마운트된 뒤에 그린다.
+ */
 export default function CalendarPage() {
+    const mounted = useMounted();
+    if (!mounted) {
+        return <div className="container mx-auto max-w-screen-xl px-4 py-8 min-h-[60vh]" aria-busy="true" />;
+    }
+    return <CalendarView />;
+}
+
+function CalendarView() {
     const router = useRouter();
     const { data: performances = [], isLoading } = useMonthlyPerformances();
 
@@ -473,7 +486,7 @@ export default function CalendarPage() {
                             </div>
                             {savedPerfList.length === 0 ? (
                                 <p className="text-sm text-muted-foreground">
-                                    공연 날짜를 클릭하고 "+ 저장"으로 관심 공연을 추가하세요
+                                    공연 날짜를 클릭하고 “+ 저장”으로 관심 공연을 추가하세요
                                 </p>
                             ) : (
                                 <div className="space-y-2">

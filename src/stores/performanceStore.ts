@@ -41,6 +41,9 @@ interface PerformanceState {
     setTicketCurrentPage: (page: number) => void;
 }
 
+/** 가격 조회 중인 공연 ID (중복 요청 방지) */
+const priceRequestsInFlight = new Set<string>();
+
 export const usePerformanceStore = create<PerformanceState>((set, get) => ({
     // 초기 상태
     performances: [],
@@ -124,11 +127,13 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
         const { detailCache, performances } = get();
         
         // 이미 가격 정보가 있는 아이템은 제외 (detailCache에 있거나 performances에 price가 있는 경우)
+        // 이미 상세를 조회했거나(가격이 없는 공연 포함) 조회 중인 공연은 다시 부르지 않는다
         const targetIds = ids.filter(id => {
-            const inCache = detailCache[id]?.price;
+            const inCache = !!detailCache[id];
             const inList = performances.find(p => p.id === id)?.price;
-            return !inCache && !inList;
+            return !inCache && !inList && !priceRequestsInFlight.has(id);
         });
+        targetIds.forEach(id => priceRequestsInFlight.add(id));
 
         if (targetIds.length === 0) return;
 
@@ -139,6 +144,9 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
             await Promise.all(chunk.map(async (id) => {
                 try {
                     const detail = await fetchKopisPerformanceDetail(id);
+                    if (detail && !detail.price) {
+                        set((state) => ({ detailCache: { ...state.detailCache, [id]: detail } }));
+                    }
                     if (detail && detail.price) {
                         set((state) => {
                             // 캐시 업데이트
@@ -154,6 +162,8 @@ export const usePerformanceStore = create<PerformanceState>((set, get) => ({
                     }
                 } catch {
                     // price fetch 실패 무시
+                } finally {
+                    priceRequestsInFlight.delete(id);
                 }
             }));
         }

@@ -72,8 +72,9 @@ const ArtistList = () => {
     );
 
     // 지휘자/연주자 API
-    const { data: conductors = [], isLoading: conductorsLoading } = useConductors();
-    const { data: performers = [], isLoading: performersLoading } = usePerformers();
+    // 선택한 탭의 목록만 불러온다 (두 목록을 한꺼번에 부르면 위키백과 요청 제한에 걸림)
+    const { data: conductors = [], isLoading: conductorsLoading } = useConductors(activeTopTab === 'conductors');
+    const { data: performers = [], isLoading: performersLoading } = usePerformers(activeTopTab === 'performers');
 
     const displayComposers = useMemo(() => {
         if (isSearching) return searchedComposers;

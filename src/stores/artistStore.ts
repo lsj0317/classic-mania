@@ -3,6 +3,7 @@ import type { Artist, CheerMessage, Performance } from '../types';
 import { artistData, cheerMessages as initialCheerMessages } from '../data/artistData';
 import { fetchNews, type NewsItem } from '../api/newsApi';
 import { fetchKopisPerformances } from '../api/kopisApi';
+import { useUserStore } from './userStore';
 
 interface ArtistState {
     // 아티스트 목록
@@ -45,6 +46,8 @@ interface ArtistState {
     fetchArtistNews: (artistName: string) => Promise<void>;
     getFilteredArtists: () => Artist[];
     getFollowedArtists: () => Artist[];
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 // localStorage에서 팔로우 데이터 로드
@@ -99,8 +102,12 @@ const matchSearch = (artist: Artist, term: string): boolean => {
 
 export const useArtistStore = create<ArtistState>((set, get) => ({
     artists: artistData,
-    followedArtistIds: loadFollowedArtists(),
-    cheerMessages: loadCheerMessages(),
+    followedArtistIds: [],
+    cheerMessages: initialCheerMessages,
+
+    hydrate: () => {
+        set({ followedArtistIds: loadFollowedArtists(), cheerMessages: loadCheerMessages() });
+    },
 
     sortBy: 'name',
     searchTerm: '',
@@ -138,6 +145,13 @@ export const useArtistStore = create<ArtistState>((set, get) => ({
 
         localStorage.setItem('followedArtists', JSON.stringify(newFollowed));
         set({ followedArtistIds: newFollowed, artists: newArtists });
+
+        // 활동 통계 / 배지 반영
+        if (followedArtistIds.includes(artistId)) {
+            useUserStore.getState().recordUnfollow(artistId);
+        } else {
+            useUserStore.getState().recordFollow(artistId);
+        }
     },
 
     isFollowed: (artistId: string) => {

@@ -16,7 +16,7 @@ const TABLE_HEAD = ["번호", "정보", "제목", "작성자", "작성일", "조
 const NOTICE_TABLE_HEAD = ["번호", "분류", "제목", "작성자", "작성일", "조회수"];
 const ITEMS_PER_PAGE = 5;
 
-const CATEGORIES = ["전체", "공연후기", "질문", "정보", "자유"];
+const CATEGORIES = ["전체", "공연후기", "질문", "정보", "자유", "악기"];
 
 const BADGE_COLORS: Record<NoticeBadge, string> = {
     "신규기능": "bg-blue-100 text-blue-700 border-blue-200",

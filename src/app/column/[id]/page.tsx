@@ -22,7 +22,8 @@ export default function ColumnDetailPage() {
     const params = useParams();
     const id = params.id as string;
     const { language } = useLanguageStore();
-    const { columns, fetchData, incrementViews, toggleLike, getColumnById } = useColumnStore();
+    const { columns, likedIds, fetchData, incrementViews, toggleLike, getColumnById } = useColumnStore();
+    const isLiked = likedIds.includes(id);
     const isKo = language === 'ko';
 
     useEffect(() => {
@@ -109,12 +110,13 @@ export default function ColumnDetailPage() {
                     ))}
                 </div>
                 <Button
-                    variant="outline"
+                    variant={isLiked ? "default" : "outline"}
                     size="sm"
                     className="gap-2"
+                    aria-pressed={isLiked}
                     onClick={() => toggleLike(id)}
                 >
-                    <Heart className="h-4 w-4" />
+                    <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
                     {column.likes}
                 </Button>
             </div>

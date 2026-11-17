@@ -125,11 +125,17 @@ interface CommunityState {
     loadChat: (performanceId: string) => void;
     sendChatMessage: (performanceId: string, userId: string, userName: string, userProfileImage: string | undefined, message: string) => void;
     refreshViewerCount: (performanceId: string) => void;
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 export const useCommunityStore = create<CommunityState>((set, get) => ({
-    reactions: loadReactions(),
-    userReactions: loadUserReactions(),
+    reactions: {},
+    userReactions: {},
+
+    hydrate: () => {
+        set({ reactions: loadReactions(), userReactions: loadUserReactions() });
+    },
     chatMessages: [],
     activeChatPerformanceId: null,
     viewerCount: 0,

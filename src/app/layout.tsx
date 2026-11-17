@@ -14,9 +14,6 @@ export const metadata: Metadata = {
     },
     description: "클래식 음악 커뮤니티 - 공연 정보, 아티스트, 리뷰, 뉴스를 한 곳에서. 클래식 공연 검색, 아티스트 팔로우, 공연 리뷰를 만나보세요.",
     keywords: ["클래식", "클래식 음악", "공연", "콘서트", "오케스트라", "리사이틀", "오페라", "아티스트", "클래식 커뮤니티"],
-    icons: {
-        icon: "/favicon.ico",
-    },
     metadataBase: new URL(BASE_URL),
     openGraph: {
         type: "website",

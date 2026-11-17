@@ -208,13 +208,13 @@ const TicketTradeWritePage = () => {
 
                 {/* 티켓 인증 안내 (양도 시) */}
                 {form.type === "양도" && (
-                    <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded">
-                        <ShieldCheck className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded">
+                        <ShieldCheck className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-sm font-bold text-green-700 mb-1">티켓 인증으로 신뢰도를 높이세요</p>
-                            <p className="text-xs text-green-600">
-                                예매 내역 캡처본을 함께 등록하면 <strong>인증 마크</strong>가 부여되어 구매자에게 신뢰를 줄 수 있습니다.
-                                인증 게시글은 더 빠르게 거래가 이루어집니다.
+                            <p className="text-sm font-bold text-gray-700 mb-1">티켓 인증 기능 준비 중</p>
+                            <p className="text-xs text-gray-500">
+                                예매 내역을 운영자가 확인해 인증 마크를 붙여주는 기능을 준비하고 있습니다.
+                                지금은 모든 글이 &lsquo;미인증&rsquo;으로 등록되니, 거래 전 예매 내역을 꼭 직접 확인하세요.
                             </p>
                         </div>
                     </div>

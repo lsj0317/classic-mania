@@ -10,6 +10,8 @@ export interface Review {
     content: string;
     createdAt: string;       // ISO date string
     likes: number;
+    /** 좋아요를 누른 사용자 ID (사용자당 한 번) */
+    likedBy?: string[];
 }
 
 interface ReviewState {
@@ -18,10 +20,12 @@ interface ReviewState {
     // 액션
     addReview: (review: Omit<Review, 'id' | 'createdAt' | 'likes'>) => void;
     deleteReview: (reviewId: string) => void;
-    toggleLike: (reviewId: string) => void;
+    toggleLike: (reviewId: string, userId: string) => void;
     getReviewsByPerformance: (performanceId: string) => Review[];
     getAverageRating: (performanceId: string) => number;
     getBestReview: (performanceId: string) => Review | null;
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 // localStorage 키
@@ -83,7 +87,11 @@ function getInitialReviews(): Review[] {
 }
 
 export const useReviewStore = create<ReviewState>((set, get) => ({
-    reviews: loadReviews(),
+    reviews: getInitialReviews(),
+
+    hydrate: () => {
+        set({ reviews: loadReviews() });
+    },
 
     addReview: (reviewData) => {
         const newReview: Review = {
@@ -107,11 +115,15 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
         });
     },
 
-    toggleLike: (reviewId) => {
+    toggleLike: (reviewId, userId) => {
         set((state) => {
-            const updated = state.reviews.map((r) =>
-                r.id === reviewId ? { ...r, likes: r.likes + 1 } : r
-            );
+            const updated = state.reviews.map((r) => {
+                if (r.id !== reviewId) return r;
+                const likedBy = r.likedBy ?? [];
+                return likedBy.includes(userId)
+                    ? { ...r, likes: Math.max(0, r.likes - 1), likedBy: likedBy.filter((id) => id !== userId) }
+                    : { ...r, likes: r.likes + 1, likedBy: [...likedBy, userId] };
+            });
             saveReviews(updated);
             return { reviews: updated };
         });

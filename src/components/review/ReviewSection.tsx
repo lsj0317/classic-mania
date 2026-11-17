@@ -5,12 +5,16 @@ import { Star, ThumbsUp, Award, Send, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useReviewStore } from '@/stores/reviewStore';
+import { useUserStore } from '@/stores/userStore';
 import { currentUser } from '@/data/mockData';
 import { useRouter } from 'next/navigation';
 
 interface ReviewSectionProps {
     performanceId: string;
     performanceTitle: string;
+    /** 관람 통계용 장르 / 지역 */
+    genre?: string;
+    area?: string;
 }
 
 /* ───── 별점 입력 컴포넌트 ───── */
@@ -58,7 +62,7 @@ const StarRating = ({
 };
 
 /* ───── 메인 리뷰 섹션 ───── */
-export default function ReviewSection({ performanceId, performanceTitle }: ReviewSectionProps) {
+export default function ReviewSection({ performanceId, performanceTitle, genre, area }: ReviewSectionProps) {
     const router = useRouter();
     const {
         addReview,
@@ -68,6 +72,7 @@ export default function ReviewSection({ performanceId, performanceTitle }: Revie
         getAverageRating,
         getBestReview,
     } = useReviewStore();
+    const recordReview = useUserStore((s) => s.recordReview);
 
     const [newRating, setNewRating] = useState(0);
     const [newContent, setNewContent] = useState('');
@@ -93,6 +98,9 @@ export default function ReviewSection({ performanceId, performanceTitle }: Revie
             rating: newRating,
             content: newContent.trim(),
         });
+        const now = new Date();
+        const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        recordReview(performanceId, genre ?? '', area ?? '', month);
         setNewRating(0);
         setNewContent('');
     };
@@ -242,10 +250,19 @@ export default function ReviewSection({ performanceId, performanceTitle }: Revie
                                             {formatDate(review.createdAt)}
                                         </span>
                                         <button
-                                            onClick={() => toggleLike(review.id)}
-                                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                            onClick={() => {
+                                                if (!currentUser.userId || currentUser.userId === 'guest') {
+                                                    router.push('/login');
+                                                    return;
+                                                }
+                                                toggleLike(review.id, currentUser.userId);
+                                            }}
+                                            aria-pressed={review.likedBy?.includes(currentUser.userId) ?? false}
+                                            className={`flex items-center gap-1 text-xs transition-colors hover:text-primary ${
+                                                review.likedBy?.includes(currentUser.userId) ? 'text-primary font-semibold' : 'text-muted-foreground'
+                                            }`}
                                         >
-                                            <ThumbsUp className="h-3 w-3" />
+                                            <ThumbsUp className="h-3 w-3" fill={review.likedBy?.includes(currentUser.userId) ? 'currentColor' : 'none'} />
                                             {review.likes > 0 && review.likes}
                                         </button>
                                     </div>

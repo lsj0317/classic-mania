@@ -10,14 +10,14 @@ import { formatDateYMD, decodeHtml } from '@/lib/utils';
 
 const NewsDetail = () => {
     const router = useRouter();
-    const { selectedNews: news, setSelectedNews } = useNewsStore();
+    const { selectedNews: news, restoreSelectedNews } = useNewsStore();
 
-    // 데이터 없이 접근 시 목록으로 리다이렉트
+    // 새로고침 시 세션에 저장된 기사를 복원하고, 그래도 없으면 목록으로 리다이렉트
     useEffect(() => {
-        if (!news) {
+        if (!news && !restoreSelectedNews()) {
             router.replace('/news');
         }
-    }, [news, router]);
+    }, [news, router, restoreSelectedNews]);
 
     if (!news) return null;
 

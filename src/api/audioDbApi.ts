@@ -29,11 +29,14 @@ export const searchAudioDBArtist = async (name: string): Promise<AudioDBArtist |
  */
 export const fetchWikiSummary = async (title: string): Promise<WikiSummary | null> => {
     if (!title) return null;
+    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
     try {
-        const response = await axios.get<WikiSummary>(
-            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-            { validateStatus: (status) => status < 500, timeout: API_TIMEOUT }
-        );
+        let response = await axios.get<WikiSummary>(url, { validateStatus: (status) => status < 500, timeout: API_TIMEOUT });
+        // 요청 제한(429)에 걸리면 잠시 기다렸다가 한 번만 다시 시도
+        if (response.status === 429) {
+            await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
+            response = await axios.get<WikiSummary>(url, { validateStatus: (status) => status < 500, timeout: API_TIMEOUT });
+        }
         if (response.status === 200) {
             return response.data;
         }

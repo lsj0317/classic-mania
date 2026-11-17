@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { TicketTrade, TicketTradeRequest } from '../types';
+import { todayLocalYMD } from '../lib/constants';
 
 const TICKET_TRADE_KEY = 'classic-mania-ticket-trades';
 const TICKET_REQUEST_KEY = 'classic-mania-ticket-requests';
@@ -222,11 +223,17 @@ interface TicketTradeState {
     getTradeById: (id: number) => TicketTrade | undefined;
     getRequestsByTrade: (tradeId: number) => TicketTradeRequest[];
     getUserTrades: (userId: string) => TicketTrade[];
+    /** 브라우저 저장소(localStorage)에서 상태를 불러온다. 하이드레이션 이후 StoreHydrator가 한 번 호출한다. */
+    hydrate: () => void;
 }
 
 export const useTicketTradeStore = create<TicketTradeState>((set, get) => ({
-    trades: loadTrades(),
-    requests: loadRequests(),
+    trades: MOCK_TRADES,
+    requests: [],
+
+    hydrate: () => {
+        set({ trades: loadTrades(), requests: loadRequests() });
+    },
 
     addTrade: (tradeData) => {
         const { trades } = get();
@@ -234,7 +241,7 @@ export const useTicketTradeStore = create<TicketTradeState>((set, get) => ({
             ...tradeData,
             id: (trades[0]?.id ?? 0) + 1,
             status: '거래가능',
-            createdAt: new Date().toISOString().split('T')[0],
+            createdAt: todayLocalYMD(),
             views: 0,
         };
         const updated = [newTrade, ...trades];

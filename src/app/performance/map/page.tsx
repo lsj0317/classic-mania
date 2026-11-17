@@ -1,5 +1,6 @@
 'use client';
 
+import type { Performance } from '@/types';
 import { useEffect, useRef, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Calendar } from "lucide-react";
 
 // 네이버 지도 타입 정의 (간략화)
+/* 네이버 지도 SDK는 공식 타입 정의가 없어 any로 다룬다 */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
     interface Window {
         naver: any;
@@ -22,7 +25,7 @@ const PerformanceMap = () => {
     const router = useRouter();
 
     const { performances, listLoading, fetchList, fetchLocationsForList } = usePerformanceStore();
-    const [selectedPerformance, setSelectedPerformance] = useState<any | null>(null);
+    const [selectedPerformance, setSelectedPerformance] = useState<Performance | null>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
     const [mapError, setMapError] = useState<string | null>(null);
 
