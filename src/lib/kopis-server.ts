@@ -21,6 +21,8 @@ interface KopisPerformanceMeta {
 }
 
 export async function fetchPerformanceMeta(mt20id: string): Promise<KopisPerformanceMeta | null> {
+    if (!/^[A-Za-z0-9]+$/.test(mt20id)) return null;
+
     try {
         const apiKey = process.env.KOPIS_API_KEY || '';
         const url = `http://www.kopis.or.kr/openApi/restful/pblprfr/${mt20id}?service=${apiKey}`;

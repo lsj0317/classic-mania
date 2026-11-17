@@ -25,6 +25,7 @@ import { usePerformanceStore } from '@/stores/performanceStore';
 import { fetchNews, type NewsItem } from '@/api/newsApi';
 import { fetchKopisPerformances } from '@/api/kopisApi';
 import type { Performance } from '@/types';
+import { decodeHtml } from '@/lib/utils';
 
 /* ───── 출연진 파싱 헬퍼 ───── */
 const parseCastMembers = (cast: string, genre?: string): { name: string; searchQuery: string }[] => {
@@ -83,10 +84,13 @@ const CastProfileCard = ({ name, searchQuery }: { name: string; searchQuery: str
                     {news.length > 0 ? news.map((item, idx) => (
                         <a key={idx} href={item.originallink || item.link} target="_blank" rel="noopener noreferrer"
                            className="block p-3 rounded-lg border border-transparent hover:border-border hover:bg-accent/50 transition-colors group">
-                            <p className="text-sm font-medium text-foreground group-hover:text-primary line-clamp-1"
-                               dangerouslySetInnerHTML={{ __html: item.title }} />
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2"
-                               dangerouslySetInnerHTML={{ __html: item.description }} />
+                            {/* 외부 뉴스 텍스트는 HTML로 넣지 않고 태그를 제거한 텍스트로 표시 (XSS 방지) */}
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary line-clamp-1">
+                                {decodeHtml(item.title)}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {decodeHtml(item.description)}
+                            </p>
                         </a>
                     )) : (
                         <p className="text-xs text-muted-foreground py-2 text-center">검색 결과가 없습니다.</p>
